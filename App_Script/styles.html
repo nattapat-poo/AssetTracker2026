@@ -1,0 +1,170 @@
+<style>
+  /* Base typography and smooth transitions */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  /* Dark Theme Palette (Default Ecosystem Theme) */
+  :root {
+    --bg-primary: #090d16;
+    --bg-surface: #0f172a;
+    --bg-card: rgba(15, 23, 42, 0.85);
+    --border-color: rgba(51, 65, 85, 0.6);
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --brand-emerald: #10b981;
+    --brand-emerald-light: #34d399;
+  }
+
+  /* WCAG AAA High-Contrast Light Theme */
+  body.theme-light {
+    --bg-primary: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --border-color: rgba(203, 213, 225, 0.9);
+    --text-primary: #0f172a;
+    --text-muted: #475569;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light .bg-slate-950 {
+    background-color: #f8fafc !important;
+  }
+
+  body.theme-light .bg-slate-900 {
+    background-color: #ffffff !important;
+  }
+
+  body.theme-light .bg-slate-900\/80,
+  body.theme-light .bg-slate-900\/90 {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  body.theme-light .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+  }
+
+  body.theme-light .border-slate-800,
+  body.theme-light .border-slate-700 {
+    border-color: #cbd5e1 !important;
+  }
+
+  body.theme-light .text-white {
+    color: #0f172a !important;
+  }
+
+  body.theme-light .text-slate-300,
+  body.theme-light .text-slate-400 {
+    color: #334155 !important;
+  }
+
+  body.theme-light .text-slate-500 {
+    color: #64748b !important;
+  }
+
+  /* Mobile Touch Hit Target Standard (>=44x44px) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .thumb-btn {
+    min-height: 56px;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  .thumb-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Viewfinder & QR Scanner styles */
+  #qr-reader {
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  #qr-reader__scan_region {
+    background: transparent !important;
+  }
+
+  #qr-reader video {
+    width: 100% !important;
+    border-radius: 0.75rem !important;
+    object-fit: cover !important;
+  }
+
+  /* Scanner Frame Overlay */
+  .scanner-overlay-box {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .scan-laser-line {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #10b981, #34d399, transparent);
+    box-shadow: 0 0 12px #10b981;
+    animation: scanLine 2.2s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes scanLine {
+    0% { top: 10%; opacity: 0.8; }
+    100% { top: 88%; opacity: 0.8; }
+  }
+
+  /* Viewfinder corner brackets */
+  .corner-bracket {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #10b981;
+    z-index: 11;
+    pointer-events: none;
+  }
+  .corner-tl { top: 16px; left: 16px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 6px; }
+  .corner-tr { top: 16px; right: 16px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 6px; }
+  .corner-bl { bottom: 16px; left: 16px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 6px; }
+  .corner-br { bottom: 16px; right: 16px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 6px; }
+
+  /* Custom kinetic scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.5);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.8);
+  }
+
+  /* Pulse animation for unverified counter */
+  @keyframes pulseBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-badge-pulse {
+    animation: pulseBadge 2s infinite ease-in-out;
+  }
+</style>

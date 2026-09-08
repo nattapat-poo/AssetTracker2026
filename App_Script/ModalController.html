@@ -1,0 +1,317 @@
+<script>
+/**
+ * ModalController.html — Toast Feedback & Modal Gateway
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ */
+
+window.ModalController = (function() {
+
+  function showToast(message, type, duration) {
+    if (!type) type = "info";
+    if (!duration) duration = 3000;
+
+    var container = document.getElementById("toast-container");
+    if (!container) return;
+
+    var toast = document.createElement("div");
+    var borderClass = "border-slate-700";
+    var iconHtml = '<i class="fa-solid fa-circle-info text-sky-400"></i>';
+
+    if (type === "success") {
+      borderClass = "border-emerald-500/50 bg-emerald-950/80 text-emerald-200";
+      iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+    } else if (type === "error") {
+      borderClass = "border-rose-500/50 bg-rose-950/80 text-rose-200";
+      iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+    } else if (type === "warning") {
+      borderClass = "border-amber-500/50 bg-amber-950/80 text-amber-200";
+      iconHtml = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>';
+    } else {
+      borderClass = "border-sky-500/50 bg-slate-900/90 text-slate-200";
+    }
+
+    toast.className = "flex items-center gap-3 px-4 py-3 rounded-xl border " + borderClass + " shadow-xl backdrop-blur text-xs font-medium transition-all transform translate-y-2 opacity-0 max-w-sm pointer-events-auto";
+    toast.innerHTML = iconHtml + '<span class="flex-1">' + message + '</span>';
+
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(function() {
+      toast.classList.remove("translate-y-2", "opacity-0");
+    });
+
+    // Auto dismiss
+    setTimeout(function() {
+      toast.classList.add("opacity-0", "translate-y-2");
+      setTimeout(function() {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, duration);
+  }
+
+  function openManualLookupModal() {
+    var modal = document.getElementById("manual-lookup-modal");
+    var input = document.getElementById("manual-lookup-input");
+    if (modal) modal.classList.remove("hidden");
+    if (input) {
+      input.value = "";
+      setTimeout(function() { input.focus(); }, 150);
+    }
+  }
+
+  function closeManualLookupModal() {
+    var modal = document.getElementById("manual-lookup-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function submitManualLookup() {
+    var input = document.getElementById("manual-lookup-input");
+    if (!input) return;
+    var code = input.value.trim();
+    if (!code) {
+      showToast("Please enter an Asset ID or Barcode", "warning");
+      return;
+    }
+
+    closeManualLookupModal();
+    showToast("Searching for " + code + "...", "info");
+
+    ApiClient.lookupAsset(code)
+      .then(function(res) {
+        if (res.found && res.asset) {
+          AuditController.displayScannedAsset(res.asset);
+        } else {
+          AuditController.displayUnrecognizedAsset(code);
+        }
+      })
+      .catch(function(err) {
+        showToast("Lookup failed: " + err.toString(), "error");
+      });
+  }
+
+  function openUnrecognizedModal(rawCode) {
+    var modal = document.getElementById("unrecognized-asset-modal");
+    var codeDisplay = document.getElementById("unrecognized-code-display");
+    if (codeDisplay) codeDisplay.innerText = rawCode;
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  function closeUnrecognizedModal() {
+    var modal = document.getElementById("unrecognized-asset-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  /**
+   * Matched Asset Details Modal (Pop-up after successful QR scan)
+   */
+  function openAssetDetailsModal(asset) {
+    if (!asset) return;
+    var modal = document.getElementById("asset-details-modal");
+    if (!modal) return;
+
+    // Matched Inventory Number & Status
+    var idElem = document.getElementById("modal-asset-id");
+    if (idElem) idElem.innerText = asset.assetId || "Unknown ID";
+
+    var statusBadge = document.getElementById("modal-asset-prev-status");
+    if (statusBadge && window.AuditController && AuditController.renderStatusBadge) {
+      AuditController.renderStatusBadge(statusBadge, asset.status);
+    }
+
+    // Asset Name & Specification
+    var nameElem = document.getElementById("modal-asset-name");
+    if (nameElem) nameElem.innerText = asset.itemName || "Unnamed Asset";
+
+    var specElem = document.getElementById("modal-asset-spec");
+    if (specElem) specElem.innerText = asset.brandModel || "Standard Specification";
+
+    // Rooms & Discrepancy Alert
+    var regRoom = asset.registeredLocation || asset.sheetName || "Unassigned";
+    var currentRoom = AppState.get("currentRoom") || "ALL";
+
+    var roomElem = document.getElementById("modal-asset-room");
+    if (roomElem) roomElem.innerText = regRoom;
+
+    var currRoomElem = document.getElementById("modal-current-audit-room");
+    if (currRoomElem) currRoomElem.innerText = (currentRoom === "ALL" ? "All Laboratories (Overview)" : currentRoom);
+
+    var discrepancyBanner = document.getElementById("modal-location-discrepancy-banner");
+    var discrepancyText = document.getElementById("modal-location-discrepancy-text");
+    if (discrepancyBanner && discrepancyText) {
+      if (currentRoom && currentRoom !== "ALL" && regRoom !== "Unassigned" && regRoom !== currentRoom) {
+        discrepancyBanner.classList.remove("hidden");
+        discrepancyText.innerText = "Registered to [" + regRoom + "], but scanned in [" + currentRoom + "]. Found location will be recorded!";
+      } else {
+        discrepancyBanner.classList.add("hidden");
+      }
+    }
+
+    // Procurement Metadata & Historical Results
+    var condVal = document.getElementById("modal-asset-cond-val");
+    if (condVal) condVal.innerText = asset.procurementCondition || "ปกติ";
+
+    var prevBox = document.getElementById("modal-asset-prev-audit-box");
+    var prevVal = document.getElementById("modal-asset-prev-audit-val");
+    if (prevBox && prevVal) {
+      var hist68 = (asset.historicalResults && asset.historicalResults["68"]) ? asset.historicalResults["68"] : "";
+      if (hist68) {
+        prevBox.classList.remove("hidden");
+        prevVal.innerText = hist68;
+      } else {
+        prevBox.classList.add("hidden");
+      }
+    }
+
+    var stickerVal = document.getElementById("modal-asset-sticker-val");
+    if (stickerVal) stickerVal.innerText = asset.sticker || "Yes";
+
+    var yearBox = document.getElementById("modal-asset-year-box");
+    var yearVal = document.getElementById("modal-asset-year-val");
+    if (yearBox && yearVal) {
+      if (asset.budgetYear) {
+        yearBox.classList.remove("hidden");
+        yearVal.innerText = asset.budgetYear;
+      } else {
+        yearBox.classList.add("hidden");
+      }
+    }
+
+    // Condition Notes
+    var noteInput = document.getElementById("modal-condition-note-input");
+    if (noteInput) {
+      noteInput.value = asset.notes || "";
+    }
+
+    modal.classList.remove("hidden");
+  }
+
+  function closeAssetDetailsModal() {
+    var modal = document.getElementById("asset-details-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  // Stealth Developer Gateway (Ctrl + Shift + Q & Signature Click)
+  function handleDeveloperTrigger() {
+    var pin = prompt("🔐 Enter Developer Security PIN:");
+    if (pin === "2026") {
+      openDeveloperModal();
+    } else if (pin !== null) {
+      showToast("⛔ Invalid security PIN.", "error");
+    }
+  }
+
+  function openDeveloperModal() {
+    var modal = document.getElementById("dev-gateway-modal");
+    var jsonView = document.getElementById("dev-json-state");
+    if (jsonView) {
+      jsonView.innerText = JSON.stringify(AppState.get(), null, 2);
+    }
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  function closeDeveloperModal() {
+    var modal = document.getElementById("dev-gateway-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function triggerFlushCache() {
+    showToast("Purging multi-tier caches...", "info");
+    ApiClient.flushCache()
+      .then(function(res) {
+        showToast("✅ Multi-tier caches flushed and pre-warmed.", "success");
+        closeDeveloperModal();
+      })
+      .catch(function(err) {
+        showToast("Cache flush failed: " + err.toString(), "error");
+      });
+  }
+
+  function triggerSyncConfigSheet() {
+    showToast("Synchronizing Config sheet tab (v1.1.0e)...", "info");
+    ApiClient.syncConfigSheet()
+      .then(function(res) {
+        showToast("✅ " + (res.message || "Config synchronized."), "success", 4000);
+        var jsonView = document.getElementById("dev-json-state");
+        if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
+      })
+      .catch(function(err) {
+        showToast("❌ Config sync failed: " + err.toString(), "error", 5000);
+      });
+  }
+
+  function triggerSetupRow5Headers() {
+    showToast("Configuring Row 5 audit columns (Column M) across all room sheets...", "info");
+    ApiClient.setupRow5Headers()
+      .then(function(res) {
+        showToast("✅ " + (res.message || "Row 5 headers configured successfully."), "success", 4000);
+        var jsonView = document.getElementById("dev-json-state");
+        if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
+      })
+      .catch(function(err) {
+        showToast("❌ Setup failed: " + err.toString(), "error", 5000);
+      });
+  }
+
+  function triggerBuildMasterTable() {
+    showToast("Aggregating all room sheets into Master Table...", "info");
+    ApiClient.buildMasterTable()
+      .then(function(res) {
+        showToast("✅ " + (res.message || "Master Table built successfully."), "success", 4000);
+        var jsonView = document.getElementById("dev-json-state");
+        if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
+        ApiClient.getInitialPayload().then(function(p) {
+          if (p && p.summary) AppState.set("summary", p.summary);
+        });
+      })
+      .catch(function(err) {
+        showToast("❌ Build failed: " + err.toString(), "error", 5000);
+      });
+  }
+
+  function triggerMigrateMasterToRooms() {
+    showToast("Migrating Master Table audit rows to individual room sheets...", "info");
+    ApiClient.migrateMasterToRooms()
+      .then(function(res) {
+        showToast("✅ " + (res.message || "Migration to room sheets complete."), "success", 4000);
+        var jsonView = document.getElementById("dev-json-state");
+        if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
+        ApiClient.getInitialPayload().then(function(p) {
+          if (p && p.summary) AppState.set("summary", p.summary);
+        });
+      })
+      .catch(function(err) {
+        showToast("❌ Migration failed: " + err.toString(), "error", 5000);
+      });
+  }
+
+  // Keyboard shortcut listener for Ctrl + Shift + Q
+  window.addEventListener("keydown", function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Q" || e.key === "q")) {
+      e.preventDefault();
+      handleDeveloperTrigger();
+    }
+  });
+
+  return {
+    showToast: showToast,
+    openManualLookupModal: openManualLookupModal,
+    closeManualLookupModal: closeManualLookupModal,
+    submitManualLookup: submitManualLookup,
+    openUnrecognizedModal: openUnrecognizedModal,
+    closeUnrecognizedModal: closeUnrecognizedModal,
+    openAssetDetailsModal: openAssetDetailsModal,
+    closeAssetDetailsModal: closeAssetDetailsModal,
+    handleDeveloperTrigger: handleDeveloperTrigger,
+    openDeveloperModal: openDeveloperModal,
+    closeDeveloperModal: closeDeveloperModal,
+    triggerFlushCache: triggerFlushCache,
+    triggerSyncConfigSheet: triggerSyncConfigSheet,
+    triggerSetupRow5Headers: triggerSetupRow5Headers,
+    triggerBuildMasterTable: triggerBuildMasterTable,
+    triggerMigrateMasterToRooms: triggerMigrateMasterToRooms
+  };
+})();
+</script>

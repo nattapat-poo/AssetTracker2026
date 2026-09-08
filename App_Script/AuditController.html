@@ -1,0 +1,458 @@
+<script>
+/**
+ * AuditController.html — Survey Workflow & 1-Tap Mutation UI
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ */
+
+window.AuditController = (function() {
+  var activeAsset = null;
+  var isSubmitting = false;
+
+  function init() {
+    // Subscribe to state updates
+    AppState.subscribe("change:summary", function(data) {
+      renderRoomMetrics(data.value);
+      renderAssetList();
+    });
+
+    AppState.subscribe("change:statusFilter", function() {
+      updateFilterChipsUI();
+      renderAssetList();
+    });
+
+    AppState.subscribe("change:roomTypeFilter", function() {
+      updateRoomTypeChipsUI();
+      renderAssetList();
+    });
+
+    AppState.subscribe("change:searchQuery", function() {
+      renderAssetList();
+    });
+
+    AppState.subscribe("change:currentRoom", function(data) {
+      loadRoomData(data.value);
+    });
+
+    // Quick tag chips click handler (inline card)
+    document.querySelectorAll(".quick-note-chip").forEach(function(chip) {
+      chip.addEventListener("click", function() {
+        var input = document.getElementById("condition-note-input");
+        if (!input) return;
+        var tag = this.dataset.note || this.innerText.trim();
+        if (input.value) {
+          input.value += " | " + tag;
+        } else {
+          input.value = tag;
+        }
+      });
+    });
+
+    // Quick tag chips click handler (modal)
+    document.querySelectorAll(".modal-quick-chip").forEach(function(chip) {
+      chip.addEventListener("click", function() {
+        var input = document.getElementById("modal-condition-note-input");
+        if (!input) return;
+        var tag = this.dataset.note || this.innerText.trim();
+        if (input.value) {
+          input.value += " | " + tag;
+        } else {
+          input.value = tag;
+        }
+      });
+    });
+  }
+
+  function updateRoomTypeChipsUI() {
+    var activeType = AppState.get("roomTypeFilter") || "ALL";
+    document.querySelectorAll(".room-type-chip").forEach(function(chip) {
+      var isSelected = (chip.dataset.roomType === activeType);
+      chip.classList.toggle("bg-teal-500", isSelected);
+      chip.classList.toggle("text-white", isSelected);
+      chip.classList.toggle("bg-slate-800/80", !isSelected);
+      chip.classList.toggle("text-slate-300", !isSelected);
+    });
+  }
+
+  function loadRoomData(roomName) {
+    ModalController.showToast("Loading " + (roomName === "ALL" ? "All Labs" : roomName) + "...", "info", 1000);
+    ApiClient.getRoomAuditSummary(roomName)
+      .then(function(summary) {
+        AppState.set("summary", summary);
+      })
+      .catch(function(err) {
+        ModalController.showToast("Failed to load room summary: " + err.toString(), "error");
+      });
+  }
+
+  function displayScannedAsset(asset) {
+    activeAsset = asset;
+    AppState.set("selectedAsset", asset);
+
+    var card = document.getElementById("active-asset-card");
+    if (!card) return;
+
+    // Fill in asset fields
+    document.getElementById("asset-card-id").innerText = asset.assetId || "Unknown ID";
+    document.getElementById("asset-card-name").innerText = asset.itemName || "Unnamed Asset";
+    document.getElementById("asset-card-spec").innerText = asset.brandModel || "Standard Specification";
+    document.getElementById("asset-card-registered-room").innerText = asset.registeredLocation || asset.sheetName || "Unassigned";
+    
+    // Status badge
+    var statusBadge = document.getElementById("asset-card-prev-status");
+    renderStatusBadge(statusBadge, asset.status);
+
+    // Procurement Condition (สภาพของสินทรัพย์)
+    var condVal = document.getElementById("asset-card-cond-val");
+    if (condVal) condVal.innerText = asset.procurementCondition || "ปกติ";
+
+    // Historical Result (ผลปี 68)
+    var prevAuditBox = document.getElementById("asset-card-prev-audit-box");
+    var prevAuditVal = document.getElementById("asset-card-prev-audit-val");
+    if (prevAuditBox && prevAuditVal) {
+      var hist68 = (asset.historicalResults && asset.historicalResults["68"]) ? asset.historicalResults["68"] : "";
+      if (hist68) {
+        prevAuditBox.classList.remove("hidden");
+        prevAuditVal.innerText = hist68;
+      } else {
+        prevAuditBox.classList.add("hidden");
+      }
+    }
+
+    // Sticker Status
+    var stickerVal = document.getElementById("asset-card-sticker-val");
+    if (stickerVal) stickerVal.innerText = asset.sticker || "Yes";
+
+    // Check location discrepancy
+    var currentRoom = AppState.get("currentRoom");
+    var discrepancyBanner = document.getElementById("location-discrepancy-banner");
+    var discrepancyText = document.getElementById("location-discrepancy-text");
+
+    if (currentRoom && currentRoom !== "ALL" && asset.registeredLocation && asset.registeredLocation !== currentRoom) {
+      discrepancyBanner.classList.remove("hidden");
+      discrepancyText.innerText = "Registered to [" + asset.registeredLocation + "], but scanned in [" + currentRoom + "]. Found location will be recorded!";
+    } else {
+      discrepancyBanner.classList.add("hidden");
+    }
+
+    // Reset notes input
+    var noteInput = document.getElementById("condition-note-input");
+    if (noteInput) {
+      noteInput.value = asset.notes || "";
+    }
+
+    // Unhide card with smooth slide animation
+    card.classList.remove("hidden");
+    card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    // Auto switch to scanner tab if on another tab
+    if (AppState.get("activeTab") !== "scanner") {
+      switchTab("scanner");
+    }
+
+    // Immediately pop up the Matched Asset Details Modal!
+    ModalController.openAssetDetailsModal(asset);
+  }
+
+  function displayUnrecognizedAsset(rawCode) {
+    activeAsset = null;
+    var card = document.getElementById("active-asset-card");
+    if (card) card.classList.add("hidden");
+
+    ModalController.openUnrecognizedModal(rawCode);
+  }
+
+  function submitStatus(newStatus) {
+    if (isSubmitting || !activeAsset) return;
+    isSubmitting = true;
+    setThumbButtonsLoading(true, newStatus);
+
+    var noteInput = document.getElementById("condition-note-input");
+    var notes = noteInput ? noteInput.value.trim() : "";
+    var currentRoom = AppState.get("currentRoom");
+
+    var payload = {
+      assetId: activeAsset.assetId,
+      sheetName: activeAsset.sheetName || activeAsset.registeredLocation,
+      rowIndex: activeAsset.rowIndex,
+      status: newStatus,
+      notes: notes,
+      currentRoom: (currentRoom === "ALL" ? activeAsset.registeredLocation : currentRoom)
+    };
+
+    ApiClient.updateAssetStatus(payload)
+      .then(function(res) {
+        isSubmitting = false;
+        setThumbButtonsLoading(false);
+
+        // Haptic feedback & Toast
+        ScannerController.triggerHaptic();
+        var icon = (newStatus === "Good") ? "✅" : (newStatus === "Damaged" ? "⚠️" : "❌");
+        ModalController.showToast(icon + " " + activeAsset.assetId + " marked as " + newStatus, "success", 2000);
+
+        // Record recent scan
+        AppState.addRecentScan({
+          assetId: activeAsset.assetId,
+          itemName: activeAsset.itemName,
+          status: newStatus,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        });
+
+        // Update active asset in state
+        activeAsset.status = newStatus;
+        activeAsset.notes = notes;
+        activeAsset.auditedBy = res.auditedBy || "Me";
+        activeAsset.auditDate = res.auditDate;
+
+        // If backend returned refreshed room summary, update AppState
+        if (res.roomSummary) {
+          AppState.set("summary", res.roomSummary);
+        } else {
+          // Re-fetch current room summary
+          loadRoomData(AppState.get("currentRoom"));
+        }
+
+        // Auto-rearm or dismiss card & modal
+        var card = document.getElementById("active-asset-card");
+        ModalController.closeAssetDetailsModal();
+
+        if (AppState.get("autoResumeScanner")) {
+          setTimeout(function() {
+            if (card) card.classList.add("hidden");
+            activeAsset = null;
+          }, 1200);
+        }
+      })
+      .catch(function(err) {
+        isSubmitting = false;
+        setThumbButtonsLoading(false);
+        ModalController.showToast("Failed to save: " + err.toString(), "error");
+      });
+  }
+
+  function submitStatusFromModal(newStatus) {
+    if (isSubmitting || !activeAsset) return;
+
+    var modalNoteInput = document.getElementById("modal-condition-note-input");
+    var cardNoteInput = document.getElementById("condition-note-input");
+    if (modalNoteInput && cardNoteInput) {
+      cardNoteInput.value = modalNoteInput.value;
+    }
+
+    submitStatus(newStatus);
+  }
+
+  function toggleModalSticker() {
+    if (!activeAsset) return;
+    var current = activeAsset.sticker || "Yes";
+    var next = (current === "Yes") ? "No" : "Yes";
+    activeAsset.sticker = next;
+
+    var stickerVal = document.getElementById("modal-asset-sticker-val");
+    if (stickerVal) stickerVal.innerText = next;
+
+    var cardStickerVal = document.getElementById("asset-card-sticker-val");
+    if (cardStickerVal) cardStickerVal.innerText = next;
+  }
+
+  function setThumbButtonsLoading(loading, activeStatus) {
+    var buttons = document.querySelectorAll(".thumb-btn");
+    buttons.forEach(function(btn) {
+      var status = btn.dataset.status || btn.dataset.modalStatus;
+      if (loading) {
+        btn.disabled = true;
+        btn.classList.add("opacity-60");
+        if (status === activeStatus) {
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...';
+        }
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("opacity-60");
+        // Restore default labels
+        if (status === "Good") {
+          btn.innerHTML = '<i class="fa-solid fa-circle-check text-lg mr-1.5"></i> GOOD';
+        } else if (status === "Damaged") {
+          btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-lg mr-1.5"></i> DAMAGED';
+        } else if (status === "Missing") {
+          btn.innerHTML = '<i class="fa-solid fa-circle-xmark text-lg mr-1.5"></i> MISSING';
+        }
+      }
+    });
+  }
+
+  function renderRoomMetrics(summary) {
+    if (!summary) return;
+
+    var totalEl = document.getElementById("metric-total");
+    var verifiedEl = document.getElementById("metric-verified");
+    var unverifiedEl = document.getElementById("metric-unverified");
+    var percentEl = document.getElementById("metric-percent");
+    var progressBar = document.getElementById("metric-progress-bar");
+    var roomBadge = document.getElementById("metric-room-badge");
+
+    if (totalEl) totalEl.innerText = summary.total;
+    if (verifiedEl) verifiedEl.innerText = summary.verified;
+    if (unverifiedEl) unverifiedEl.innerText = summary.unverified;
+    if (percentEl) percentEl.innerText = summary.percentComplete + "%";
+    if (progressBar) progressBar.style.width = summary.percentComplete + "%";
+
+    if (roomBadge) {
+      roomBadge.innerText = (summary.roomName === "ALL" ? "All Laboratories" : summary.roomName);
+    }
+  }
+
+  function renderAssetList() {
+    var container = document.getElementById("asset-list-container");
+    if (!container) return;
+
+    var items = AppState.getFilteredItems();
+    var filter = AppState.get("statusFilter");
+    var query = AppState.get("searchQuery");
+
+    if (items.length === 0) {
+      if (filter === "UNVERIFIED" && !query) {
+        container.innerHTML = 
+          '<div class="py-12 px-4 text-center rounded-2xl bg-slate-900/60 border border-slate-800">' +
+            '<div class="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl">' +
+              '<i class="fa-solid fa-circle-check"></i>' +
+            '</div>' +
+            '<h3 class="text-base font-bold text-white mb-1">Room Fully Verified! 🎉</h3>' +
+            '<p class="text-xs text-slate-400 max-w-xs mx-auto">All assets in this laboratory have been audited and updated.</p>' +
+          '</div>';
+      } else {
+        container.innerHTML = 
+          '<div class="py-12 px-4 text-center rounded-2xl bg-slate-900/60 border border-slate-800">' +
+            '<i class="fa-solid fa-search text-slate-600 text-3xl mb-3"></i>' +
+            '<h3 class="text-sm font-semibold text-slate-300 mb-1">No matching assets found</h3>' +
+            '<p class="text-xs text-slate-500">Try adjusting your search query or status filter.</p>' +
+          '</div>';
+      }
+      return;
+    }
+
+    var html = '';
+    items.forEach(function(item) {
+      var isUnverified = (item.status !== "Good" && item.status !== "Damaged" && item.status !== "Missing");
+      var borderAccent = isUnverified ? "border-amber-500/40 hover:border-amber-400" : "border-slate-800 hover:border-slate-700";
+      
+      html += 
+        '<div class="p-3.5 rounded-xl bg-slate-900/80 border ' + borderAccent + ' transition cursor-pointer active:scale-[0.99] flex items-center justify-between gap-3 asset-row-card" data-asset-id="' + escapeHtml(item.assetId) + '">' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center gap-2 mb-1 flex-wrap">' +
+              (item.no ? '<span class="text-[10px] font-mono text-slate-500">#' + escapeHtml(item.no) + '</span>' : '') +
+              '<span class="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">' + escapeHtml(item.assetId) + '</span>' +
+              '<span class="text-[11px] font-medium text-slate-400">' + escapeHtml(item.registeredLocation) + '</span>' +
+              (item.roomType ? '<span class="text-[10px] text-teal-300 bg-teal-500/10 border border-teal-500/30 px-1.5 py-0.5 rounded">' + escapeHtml(item.roomType) + '</span>' : '') +
+              (item.procurementCondition ? '<span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">' + escapeHtml(item.procurementCondition) + '</span>' : '') +
+            '</div>' +
+            '<h4 class="text-sm font-semibold text-white truncate">' + escapeHtml(item.itemName) + '</h4>' +
+            '<p class="text-xs text-slate-400 truncate mt-0.5">' + escapeHtml(item.brandModel || "No specification") + '</p>' +
+            (item.auditResult69 ? '<p class="text-[11px] text-emerald-400/90 truncate mt-1"><i class="fa-solid fa-clipboard-check mr-1"></i>ปี 69: ' + escapeHtml(item.auditResult69) + '</p>' : '') +
+            (item.notes && !item.auditResult69 ? '<p class="text-[11px] text-amber-400/90 truncate mt-1"><i class="fa-regular fa-comment-dots mr-1"></i>' + escapeHtml(item.notes) + '</p>' : '') +
+          '</div>' +
+          '<div class="flex flex-col items-end shrink-0 gap-1.5">' +
+            renderStatusBadgeHtml(item.status) +
+            '<button class="touch-target text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800/80 border border-slate-700">' +
+              '<i class="fa-solid fa-pen-to-square mr-1"></i> Audit' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+    });
+
+    container.innerHTML = html;
+
+    // Attach click listeners to rows
+    container.querySelectorAll(".asset-row-card").forEach(function(card) {
+      card.addEventListener("click", function() {
+        var id = this.dataset.assetId;
+        var matched = items.find(function(i) { return i.assetId === id; });
+        if (matched) {
+          displayScannedAsset(matched);
+        }
+      });
+    });
+  }
+
+  function renderStatusBadgeHtml(status) {
+    if (status === "Good") {
+      return '<span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1"></i>Good</span>';
+    } else if (status === "Damaged") {
+      return '<span class="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Damaged</span>';
+    } else if (status === "Missing") {
+      return '<span class="text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-xmark mr-1"></i>Missing</span>';
+    }
+    return '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full animate-pulse"><i class="fa-regular fa-clock mr-1"></i>Unverified</span>';
+  }
+
+  function renderStatusBadge(element, status) {
+    if (!element) return;
+    element.innerHTML = renderStatusBadgeHtml(status);
+  }
+
+  function updateFilterChipsUI() {
+    var activeFilter = AppState.get("statusFilter");
+    document.querySelectorAll(".filter-chip").forEach(function(btn) {
+      var filter = btn.dataset.filter;
+      var isActive = (filter === activeFilter);
+      btn.classList.toggle("bg-emerald-500", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("bg-slate-800/80", !isActive);
+      btn.classList.toggle("text-slate-300", !isActive);
+    });
+  }
+
+  function switchTab(tabName) {
+    AppState.set("activeTab", tabName);
+    var scannerView = document.getElementById("view-scanner");
+    var rosterView = document.getElementById("view-roster");
+    var summaryView = document.getElementById("view-summary");
+
+    var tabScannerBtn = document.getElementById("nav-tab-scanner");
+    var tabRosterBtn = document.getElementById("nav-tab-roster");
+    var tabSummaryBtn = document.getElementById("nav-tab-summary");
+
+    if (scannerView) scannerView.classList.toggle("hidden", tabName !== "scanner");
+    if (rosterView) rosterView.classList.toggle("hidden", tabName !== "roster");
+    if (summaryView) summaryView.classList.toggle("hidden", tabName !== "summary");
+
+    [tabScannerBtn, tabRosterBtn, tabSummaryBtn].forEach(function(btn) {
+      if (btn) {
+        var isThis = (btn.dataset.tab === tabName);
+        btn.classList.toggle("border-emerald-400", isThis);
+        btn.classList.toggle("text-emerald-400", isThis);
+        btn.classList.toggle("border-transparent", !isThis);
+        btn.classList.toggle("text-slate-400", !isThis);
+      }
+    });
+
+    // Auto camera management on tab switch
+    if (tabName === "scanner") {
+      ScannerController.startScanner();
+    } else {
+      ScannerController.stopScanner();
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  return {
+    init: init,
+    displayScannedAsset: displayScannedAsset,
+    displayUnrecognizedAsset: displayUnrecognizedAsset,
+    submitStatus: submitStatus,
+    submitStatusFromModal: submitStatusFromModal,
+    toggleModalSticker: toggleModalSticker,
+    renderStatusBadge: renderStatusBadge,
+    loadRoomData: loadRoomData,
+    switchTab: switchTab
+  };
+})();
+</script>

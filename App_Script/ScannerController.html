@@ -1,0 +1,445 @@
+<script>
+/**
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.0e)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ *
+ * Supports:
+ * 1. Mode 1: Instant Native Camera Snap (<input type="file" capture="environment">)
+ *    Bypasses GAS sandboxed iframe permission policy restrictions 100% on iOS/Android.
+ * 2. Mode 2: Smart Laptop Webcam Fallback via Html5Qrcode.getCameras()
+ *    Picks device camera ID or user-facing webcam on laptops to prevent OverconstrainedError.
+ * 3. Mode 3: Accelerated Dual-Stage QR Decoder
+ *    Uses hardware-accelerated BarcodeDetector (5ms) with off-screen canvas downscaling
+ *    for 12MP-48MP mobile photos before ZXing fallback.
+ */
+
+window.ScannerController = (function() {
+  var html5QrCode = null;
+  var isScanning = false;
+  var currentFacingMode = "environment"; // "environment" (rear) or "user" (front)
+  var lastScannedCode = null;
+  var lastScanTimestamp = 0;
+  var DEBOUNCE_MS = 1500;
+  var audioCtx = null;
+  var torchActive = false;
+  var isProcessingFile = false;
+
+  function initAudioContext() {
+    if (!audioCtx) {
+      var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  }
+
+  // Pleasant double-tone success chime
+  function playSuccessChime() {
+    if (!AppState.get("soundEnabled")) return;
+    try {
+      initAudioContext();
+      if (!audioCtx) return;
+
+      var now = audioCtx.currentTime;
+      var osc1 = audioCtx.createOscillator();
+      var gain1 = audioCtx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(880, now); // A5
+      gain1.gain.setValueAtTime(0.15, now);
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.08);
+
+      var osc2 = audioCtx.createOscillator();
+      var gain2 = audioCtx.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(1318.5, now + 0.07); // E6
+      gain2.gain.setValueAtTime(0.2, now + 0.07);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(now + 0.07);
+      osc2.stop(now + 0.22);
+    } catch (e) {
+      console.warn("Audio chime error:", e);
+    }
+  }
+
+  // Haptic feedback for mobile phones
+  function triggerHaptic() {
+    if (!AppState.get("hapticEnabled")) return;
+    if ("vibrate" in navigator) {
+      try {
+        navigator.vibrate([40, 30, 40]);
+      } catch (e) {}
+    }
+  }
+
+  /**
+   * Mode 1: Instant Native Camera Snap
+   * Launches phone's native camera directly. 100% bypass of GAS iframe permission policy.
+   */
+  function openNativeCameraSnap() {
+    initAudioContext();
+    var input = document.getElementById("native-camera-input");
+    if (input) {
+      input.value = ""; // Reset to allow re-capturing same QR
+      input.click();
+    } else {
+      ModalController.showToast("Camera snap input not found.", "warning");
+    }
+  }
+
+  /**
+   * Gallery Picker for uploaded QR pictures
+   */
+  function openGalleryPicker() {
+    initAudioContext();
+    var input = document.getElementById("gallery-file-input");
+    if (input) {
+      input.value = "";
+      input.click();
+    }
+  }
+
+  /**
+   * Mode 2: Live Video Stream Scanner (Laptop Webcam & Direct Browser)
+   */
+  function startScanner() {
+    if (isScanning) return;
+    initAudioContext();
+
+    var readerElement = document.getElementById("qr-reader");
+    if (!readerElement) return;
+
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    var qrConfig = {
+      fps: 15,
+      qrbox: function(viewfinderWidth, viewfinderHeight) {
+        var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        var qrboxSize = Math.floor(minEdge * 0.75);
+        return { width: qrboxSize, height: qrboxSize };
+      },
+      aspectRatio: 1.0,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true
+      }
+    };
+
+    ModalController.showToast("Initializing camera stream...", "info", 1500);
+
+    // Enumerate cameras first to prevent OverconstrainedError on laptops
+    Html5Qrcode.getCameras().then(function(cameras) {
+      var cameraSelection;
+      if (cameras && cameras.length > 0) {
+        if (currentFacingMode === "environment") {
+          // Look for rear camera
+          var backCam = cameras.find(function(c) {
+            var label = (c.label || "").toLowerCase();
+            return label.indexOf("back") !== -1 || label.indexOf("rear") !== -1 || label.indexOf("environment") !== -1;
+          });
+          cameraSelection = backCam ? backCam.id : cameras[0].id;
+        } else {
+          // Front camera or laptop webcam
+          var frontCam = cameras.find(function(c) {
+            var label = (c.label || "").toLowerCase();
+            return label.indexOf("front") !== -1 || label.indexOf("user") !== -1;
+          });
+          cameraSelection = frontCam ? frontCam.id : cameras[0].id;
+        }
+      } else {
+        cameraSelection = { facingMode: currentFacingMode };
+      }
+
+      return html5QrCode.start(
+        cameraSelection,
+        qrConfig,
+        onScanSuccess,
+        onScanProgress
+      );
+    }).then(function() {
+      isScanning = true;
+      AppState.set("isScannerRunning", true);
+      updateScannerControlsUI();
+      showScanLaser(true);
+      ModalController.showToast("Camera active. Align QR in frame.", "success", 2000);
+    }).catch(function(err) {
+      console.warn("Live stream start failed:", err);
+      isScanning = false;
+      AppState.set("isScannerRunning", false);
+      updateScannerControlsUI();
+      showScanLaser(false);
+
+      var errStr = String(err || "").toLowerCase();
+      var isPermIssue = errStr.indexOf("notallowed") !== -1 ||
+                        errStr.indexOf("permission") !== -1 ||
+                        errStr.indexOf("securityerror") !== -1 ||
+                        errStr.indexOf("policy") !== -1;
+
+      if (isPermIssue) {
+        ModalController.showToast("⚠️ Live video stream blocked by browser iframe policy. Please tap '📸 SNAP WITH CAMERA' to scan directly!", "warning", 5000);
+      } else {
+        // Fallback retry with generic facingMode constraint
+        html5QrCode.start(
+          { facingMode: "user" },
+          qrConfig,
+          onScanSuccess,
+          onScanProgress
+        ).then(function() {
+          isScanning = true;
+          AppState.set("isScannerRunning", true);
+          updateScannerControlsUI();
+          showScanLaser(true);
+        }).catch(function(retryErr) {
+          ModalController.showToast("Live video unavailable. Tap '📸 SNAP WITH CAMERA' to scan.", "warning", 5000);
+        });
+      }
+    });
+  }
+
+  function stopScanner() {
+    if (!isScanning || !html5QrCode) return Promise.resolve();
+
+    return html5QrCode.stop().then(function() {
+      isScanning = false;
+      torchActive = false;
+      AppState.set("isScannerRunning", false);
+      updateScannerControlsUI();
+      showScanLaser(false);
+    }).catch(function(err) {
+      console.error("Failed to stop camera:", err);
+    });
+  }
+
+  function toggleCameraFacing() {
+    currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+    if (isScanning) {
+      stopScanner().then(function() {
+        startScanner();
+      });
+    }
+  }
+
+  function toggleTorch() {
+    if (!isScanning || !html5QrCode) {
+      ModalController.showToast("Torch is only available during live video streaming.", "info");
+      return;
+    }
+    try {
+      torchActive = !torchActive;
+      html5QrCode.applyVideoConstraints({
+        advanced: [{ torch: torchActive }]
+      }).catch(function(err) {
+        torchActive = false;
+        ModalController.showToast("Torch / Flashlight not supported on this device.", "info");
+      });
+      updateScannerControlsUI();
+    } catch (e) {
+      console.warn("Torch error:", e);
+    }
+  }
+
+  /**
+   * Helper: Downscales large mobile photo (<canvas>) before decoding
+   * Prevents ZXing memory exhaustion and accelerates decode to <50ms.
+   */
+  function downscaleImageBlob(file, maxDimension) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function() {
+        URL.revokeObjectURL(url);
+        var width = img.width;
+        var height = img.height;
+
+        if (width <= maxDimension && height <= maxDimension) {
+          resolve(file);
+          return;
+        }
+
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(function(blob) {
+          if (blob) {
+            resolve(blob);
+          } else {
+            resolve(file);
+          }
+        }, "image/jpeg", 0.92);
+      };
+      img.onerror = function(err) {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      img.src = url;
+    });
+  }
+
+  /**
+   * Accelerated Dual-Stage QR Decoder
+   */
+  function scanUploadedFile(file) {
+    if (!file || isProcessingFile) return;
+    isProcessingFile = true;
+    initAudioContext();
+
+    ModalController.showToast("⚡ Scanning QR code...", "info", 2000);
+
+    // Stage 1: Check native browser BarcodeDetector API (5ms GPU hardware acceleration)
+    if ("BarcodeDetector" in window) {
+      try {
+        var detector = new BarcodeDetector({ formats: ["qr_code"] });
+        createImageBitmap(file).then(function(bitmap) {
+          return detector.detect(bitmap);
+        }).then(function(barcodes) {
+          if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+            isProcessingFile = false;
+            onScanSuccess(barcodes[0].rawValue, null);
+            return;
+          }
+          runFallbackScan(file);
+        }).catch(function(e) {
+          runFallbackScan(file);
+        });
+        return;
+      } catch (errBD) {
+        runFallbackScan(file);
+        return;
+      }
+    }
+
+    runFallbackScan(file);
+  }
+
+  function runFallbackScan(file) {
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    // Downscale photo to max 1280px for high-speed JS decoding
+    downscaleImageBlob(file, 1280).then(function(processedBlob) {
+      return html5QrCode.scanFile(processedBlob, false);
+    }).then(function(decodedText) {
+      isProcessingFile = false;
+      onScanSuccess(decodedText, null);
+    }).catch(function(downscaleErr) {
+      // Last-chance attempt: scan original raw file with showImage=true
+      html5QrCode.scanFile(file, true).then(function(decodedText) {
+        isProcessingFile = false;
+        onScanSuccess(decodedText, null);
+      }).catch(function(finalErr) {
+        isProcessingFile = false;
+        ModalController.showToast("No clear QR code detected. Please ensure good lighting and tap '📸 SNAP WITH CAMERA' again.", "error", 4500);
+      });
+    });
+  }
+
+  function onScanSuccess(decodedText, decodedResult) {
+    var now = Date.now();
+    var cleanCode = String(decodedText || "").trim();
+
+    // Debounce to prevent multiple trigger cascades
+    if (cleanCode === lastScannedCode && (now - lastScanTimestamp) < DEBOUNCE_MS) {
+      return;
+    }
+
+    lastScannedCode = cleanCode;
+    lastScanTimestamp = now;
+
+    playSuccessChime();
+    triggerHaptic();
+
+    // Visual pulse feedback on viewfinder
+    flashViewfinder();
+
+    // Look up asset via dynamic multi-sheet router
+    ModalController.showToast("Resolving Asset: " + cleanCode, "info", 1500);
+
+    ApiClient.lookupAsset(cleanCode)
+      .then(function(res) {
+        if (res.found && res.asset) {
+          AuditController.displayScannedAsset(res.asset);
+        } else {
+          AuditController.displayUnrecognizedAsset(cleanCode);
+        }
+      })
+      .catch(function(err) {
+        ModalController.showToast("Lookup error: " + err.toString(), "error");
+      });
+  }
+
+  function onScanProgress(errorMessage) {
+    // Normal frame-by-frame scanning status
+  }
+
+  function flashViewfinder() {
+    var frame = document.querySelector(".scanner-overlay-box");
+    if (frame) {
+      frame.classList.add("ring-4", "ring-emerald-400");
+      setTimeout(function() {
+        frame.classList.remove("ring-4", "ring-emerald-400");
+      }, 350);
+    }
+  }
+
+  function showScanLaser(visible) {
+    var laser = document.getElementById("scan-laser");
+    if (laser) {
+      laser.style.display = visible ? "block" : "none";
+    }
+  }
+
+  function updateScannerControlsUI() {
+    var startBtn = document.getElementById("btn-start-scanner");
+    var stopBtn = document.getElementById("btn-stop-scanner");
+    var torchBtn = document.getElementById("btn-toggle-torch");
+    var placeholder = document.getElementById("scanner-placeholder");
+
+    if (startBtn) startBtn.classList.toggle("hidden", isScanning);
+    if (stopBtn) stopBtn.classList.toggle("hidden", !isScanning);
+    if (torchBtn) {
+      torchBtn.classList.toggle("text-amber-400", torchActive);
+      torchBtn.classList.toggle("bg-amber-500/20", torchActive);
+    }
+    if (placeholder) placeholder.classList.toggle("hidden", isScanning);
+  }
+
+  return {
+    startScanner: startScanner,
+    stopScanner: stopScanner,
+    openNativeCameraSnap: openNativeCameraSnap,
+    openGalleryPicker: openGalleryPicker,
+    toggleCameraFacing: toggleCameraFacing,
+    toggleTorch: toggleTorch,
+    scanUploadedFile: scanUploadedFile,
+    playSuccessChime: playSuccessChime,
+    triggerHaptic: triggerHaptic,
+    initAudioContext: initAudioContext
+  };
+})();
+</script>

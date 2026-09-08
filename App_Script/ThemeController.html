@@ -1,0 +1,58 @@
+<script>
+/**
+ * ThemeController.html — WCAG AAA Light & Dark Mode Controller
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ */
+
+window.ThemeController = (function() {
+  var currentTheme = "dark";
+
+  function init() {
+    try {
+      var saved = localStorage.getItem("lab_oops_theme");
+      if (saved === "light" || saved === "dark") {
+        currentTheme = saved;
+      }
+    } catch (e) {}
+
+    applyTheme(currentTheme);
+
+    var toggleBtn = document.getElementById("btn-theme-toggle");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function() {
+        toggleTheme();
+      });
+    }
+  }
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    var isLight = (theme === "light");
+    document.body.classList.toggle("theme-light", isLight);
+
+    var icon = document.getElementById("theme-toggle-icon");
+    if (icon) {
+      icon.className = isLight ? "fa-solid fa-moon text-indigo-500" : "fa-solid fa-sun text-amber-400";
+    }
+
+    try {
+      localStorage.setItem("lab_oops_theme", theme);
+    } catch (e) {}
+
+    AppState.set("theme", theme);
+  }
+
+  function toggleTheme() {
+    var next = (currentTheme === "dark") ? "light" : "dark";
+    applyTheme(next);
+  }
+
+  return {
+    init: init,
+    toggleTheme: toggleTheme,
+    applyTheme: applyTheme,
+    getTheme: function() { return currentTheme; }
+  };
+})();
+</script>

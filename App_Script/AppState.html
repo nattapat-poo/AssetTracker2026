@@ -1,0 +1,141 @@
+<script>
+/**
+ * AppState.html — Central Reactive State Manager & PubSub Event Bus
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ */
+
+window.AppState = (function() {
+  var state = {
+    user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true },
+    config: {},
+    rooms: [],
+    currentRoom: "ALL",
+    roomTypeFilter: "ALL", // ALL, Lab, ChemicalLab, BioSafetyLab, Classroom, PrepRoom
+    statusFilter: "ALL", // ALL, UNVERIFIED, Good, Damaged, Missing
+    searchQuery: "",
+    selectedAsset: null,
+    summary: {
+      roomName: "ALL",
+      total: 0,
+      verified: 0,
+      unverified: 0,
+      good: 0,
+      damaged: 0,
+      missing: 0,
+      percentComplete: 0,
+      items: []
+    },
+    isScannerRunning: false,
+    autoResumeScanner: true,
+    soundEnabled: true,
+    hapticEnabled: true,
+    theme: "dark",
+    recentScans: [],
+    pendingSync: false,
+    activeTab: "scanner" // "scanner", "roster", "summary"
+  };
+
+  var listeners = {};
+
+  function subscribe(eventName, callback) {
+    if (!listeners[eventName]) {
+      listeners[eventName] = [];
+    }
+    listeners[eventName].push(callback);
+    return function unsubscribe() {
+      listeners[eventName] = listeners[eventName].filter(function(cb) { return cb !== callback; });
+    };
+  }
+
+  function notify(eventName, payload) {
+    if (listeners[eventName]) {
+      listeners[eventName].forEach(function(callback) {
+        try {
+          callback(payload, state);
+        } catch (err) {
+          console.error("[AppState] Listener error for " + eventName + ":", err);
+        }
+      });
+    }
+  }
+
+  function get(key) {
+    if (!key) return Object.assign({}, state);
+    return state[key];
+  }
+
+  function set(key, value) {
+    var prev = state[key];
+    state[key] = value;
+    notify("change:" + key, { key: key, value: value, prev: prev });
+    notify("change", { key: key, value: value, prev: prev });
+  }
+
+  function update(patch) {
+    if (typeof patch === "object" && patch !== null) {
+      Object.keys(patch).forEach(function(k) {
+        state[k] = patch[k];
+      });
+      notify("update", patch);
+    }
+  }
+
+  function getFilteredItems() {
+    var items = (state.summary && state.summary.items) ? state.summary.items : [];
+    var statusFilter = state.statusFilter;
+    var roomTypeFilter = state.roomTypeFilter;
+    var query = (state.searchQuery || "").trim().toLowerCase();
+    
+    return items.filter(function(item) {
+      // 1. Room Type Filter (Hybrid Master Table)
+      if (roomTypeFilter && roomTypeFilter !== "ALL") {
+        var itemType = item.roomType || "";
+        if (itemType.toLowerCase() !== roomTypeFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // 2. Status Filter
+      if (statusFilter === "UNVERIFIED") {
+        var isVer = (item.status === "Good" || item.status === "Damaged" || item.status === "Missing");
+        if (isVer) return false;
+      } else if (statusFilter === "Good" || statusFilter === "Damaged" || statusFilter === "Missing") {
+        if (item.status !== statusFilter) return false;
+      }
+      
+      // 3. Search Query Filter
+      if (query) {
+        var idMatch = String(item.assetId || "").toLowerCase().indexOf(query) !== -1;
+        var nameMatch = String(item.itemName || "").toLowerCase().indexOf(query) !== -1;
+        var modelMatch = String(item.brandModel || "").toLowerCase().indexOf(query) !== -1;
+        var locMatch = String(item.registeredLocation || "").toLowerCase().indexOf(query) !== -1;
+        var notesMatch = String(item.notes || "").toLowerCase().indexOf(query) !== -1;
+        if (!idMatch && !nameMatch && !modelMatch && !locMatch && !notesMatch) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }
+
+  function addRecentScan(scanRecord) {
+    state.recentScans.unshift(scanRecord);
+    if (state.recentScans.length > 20) {
+      state.recentScans.pop();
+    }
+    notify("change:recentScans", state.recentScans);
+  }
+
+  return {
+    get: get,
+    set: set,
+    update: update,
+    subscribe: subscribe,
+    notify: notify,
+    getFilteredItems: getFilteredItems,
+    addRecentScan: addRecentScan
+  };
+})();
+</script>

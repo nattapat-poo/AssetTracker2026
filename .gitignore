@@ -1,0 +1,16 @@
+﻿# OS Metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Clasp Auth Tokens & Local Credentials
+.clasprc.json
+
+# Node & Python caches
+node_modules/
+__pycache__/
+*.pyc
+
+# Local preview & scratch files
+*.log
+scratch/

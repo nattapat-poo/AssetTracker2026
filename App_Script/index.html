@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🔍 QR Asset Survey v1.1.0e — Lab Oops OS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- HTML5-QRCode Library CDN -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Component Stylesheet -->
+  <?!= HtmlService.createHtmlOutputFromFile('styles').getContent(); ?>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ==================== HEADER (Lab Oops OS Standard) ==================== -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-4 py-3 sm:px-6">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+      
+      <div class="flex flex-col">
+        <!-- Mandatory Ecosystem Supertitle / Subtitle with highlighted acronym -->
+        <div class="flex items-center space-x-1.5 text-[10px] sm:text-xs font-mono tracking-wider mb-0.5">
+          <span class="text-emerald-400 font-bold">LAB OOPS OS</span>
+          <span class="text-slate-600">•</span>
+          <span class="hidden sm:inline text-slate-400 font-medium">
+            Science <span class="text-emerald-400 font-extrabold">Lab</span>oratory 
+            <span class="text-emerald-400 font-extrabold">O</span>perations &amp; 
+            <span class="text-emerald-400 font-extrabold">O</span>ppositely-Organized 
+            <span class="text-emerald-400 font-extrabold">P</span>roblems 
+            <span class="text-emerald-400 font-extrabold">S</span>olved 
+            <span class="text-emerald-400 font-extrabold">O</span>perating 
+            <span class="text-emerald-400 font-extrabold">S</span>ystem
+          </span>
+          <span class="sm:hidden text-slate-400 font-medium">MUIDS — Science Department</span>
+        </div>
+        
+        <!-- Application Title with Canonical Version Badge -->
+        <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+          <span>🔍 QR Asset Survey</span>
+          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.0e</span>
+        </h1>
+      </div>
+
+      <!-- Header Right Utilities -->
+      <div class="flex items-center gap-2">
+        <!-- Manual Asset ID Lookup Button -->
+        <button onclick="ModalController.openManualLookupModal()" class="touch-target px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5" title="Type Asset ID Manually">
+          <i class="fa-solid fa-keyboard text-emerald-400"></i>
+          <span class="hidden sm:inline">Type ID</span>
+        </button>
+
+        <!-- Light/Dark Mode Toggle -->
+        <button id="btn-theme-toggle" class="touch-target w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" title="Toggle Theme">
+          <i id="theme-toggle-icon" class="fa-solid fa-sun text-amber-400"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== ROOM SELECTOR & METRIC BAR ==================== -->
+  <section class="bg-slate-900/60 border-b border-slate-800/80 px-4 py-3 sm:px-6">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      
+      <!-- Room Dropdown Selector -->
+      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+        <span class="text-xs font-medium text-slate-400 shrink-0"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Lab Room:</span>
+        <select id="room-selector" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-emerald-400">
+          <option value="ALL">All Laboratories (Overview)</option>
+        </select>
+      </div>
+
+      <!-- Remaining Items Tracker Metric Chips -->
+      <div class="flex items-center gap-2 shrink-0 flex-wrap justify-between sm:justify-end">
+        <div class="flex items-center gap-1.5 text-xs bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
+          <span class="text-slate-400">Verified:</span>
+          <span id="metric-verified" class="font-mono font-bold text-emerald-400">0</span>
+          <span class="text-slate-600">/</span>
+          <span id="metric-total" class="font-mono font-semibold text-slate-300">0</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-xs bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 animate-badge-pulse">
+          <span class="text-amber-400 font-semibold"><i class="fa-regular fa-clock mr-1"></i>Unverified:</span>
+          <span id="metric-unverified" class="font-mono font-extrabold text-amber-400">0</span>
+        </div>
+
+        <div class="flex items-center gap-1 text-xs font-mono font-bold text-slate-300 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-800">
+          <span id="metric-percent">0%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="max-w-4xl mx-auto mt-2">
+      <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="metric-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== NAVIGATION TABS ==================== -->
+  <nav class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6">
+    <div class="max-w-4xl mx-auto flex items-center justify-around gap-2 text-xs font-bold font-mono">
+      
+      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-3 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-camera"></i>
+        <span>QR SCANNER</span>
+      </button>
+
+      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-list-check"></i>
+        <span>ROOM ROSTER</span>
+      </button>
+
+      <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>AUDIT STATS</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-4 sm:px-6">
+
+    <!-- ==================== TAB 1: SCANNER VIEW ==================== -->
+    <div id="view-scanner" class="space-y-4">
+      
+      <!-- Camera Card -->
+      <div class="relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl p-3">
+        
+        <!-- Viewfinder Box -->
+        <div class="scanner-overlay-box relative bg-slate-950 aspect-square max-w-[340px] mx-auto flex items-center justify-center rounded-xl overflow-hidden border border-slate-800">
+          
+          <!-- Animated Laser Line -->
+          <div id="scan-laser" class="scan-laser-line" style="display: none;"></div>
+
+          <!-- Corner Brackets -->
+          <div class="corner-bracket corner-tl"></div>
+          <div class="corner-bracket corner-tr"></div>
+          <div class="corner-bracket corner-bl"></div>
+          <div class="corner-bracket corner-br"></div>
+
+          <!-- HTML5-QRCode Reader Mount -->
+          <div id="qr-reader" class="w-full h-full flex items-center justify-center"></div>
+
+          <!-- Placeholder when camera is stopped -->
+          <div id="scanner-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-5 bg-slate-950/95 z-20">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-2.5 shadow-inner">
+              <i class="fa-solid fa-camera"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white mb-1">QR Camera Scanner Standby</h3>
+            <p class="text-[11px] text-slate-400 mb-3 max-w-[260px] leading-relaxed">Point your device camera at school PVC asset QR codes to verify.</p>
+            
+            <!-- Multi-Modal Action Buttons -->
+            <div class="w-full max-w-[260px] space-y-2">
+              <!-- Primary: Instant Native Camera Snap (100% bypass of GAS iframe permission block) -->
+              <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target w-full px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all">
+                <i class="fa-solid fa-camera text-sm"></i>
+                <span>📸 SNAP WITH CAMERA</span>
+              </button>
+              
+              <!-- Secondary: Live Webcam Stream -->
+              <button onclick="ScannerController.startScanner()" class="touch-target w-full px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 active:scale-[0.98] transition-all">
+                <i class="fa-solid fa-video text-xs text-emerald-400"></i>
+                <span>📹 Live Video Stream</span>
+              </button>
+            </div>
+
+            <p class="text-[10px] text-slate-500 mt-2.5">
+              <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>Mobile tip: "Snap with Camera" works instantly on any phone!
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Camera Control Toolbar -->
+        <div class="mt-3 flex items-center justify-between gap-1.5 max-w-[340px] mx-auto">
+          
+          <!-- Native Camera Snap Button -->
+          <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1" title="Snap Photo with Device Camera">
+            <i class="fa-solid fa-camera"></i>
+            <span>Snap</span>
+          </button>
+
+          <!-- Live Stream Start/Pause Buttons -->
+          <button id="btn-start-scanner" onclick="ScannerController.startScanner()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1" title="Start Live Video Stream">
+            <i class="fa-solid fa-play text-emerald-400 text-[10px]"></i>
+            <span>Live</span>
+          </button>
+
+          <button id="btn-stop-scanner" onclick="ScannerController.stopScanner()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1 hidden" title="Pause Live Video Stream">
+            <i class="fa-solid fa-pause text-[10px]"></i>
+            <span>Pause</span>
+          </button>
+
+          <!-- Flip Camera (Front/Rear) -->
+          <button onclick="ScannerController.toggleCameraFacing()" class="touch-target p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs shrink-0" title="Switch Camera (Front/Rear)">
+            <i class="fa-solid fa-camera-rotate"></i>
+          </button>
+
+          <!-- Torch / Flashlight -->
+          <button id="btn-toggle-torch" onclick="ScannerController.toggleTorch()" class="touch-target p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs shrink-0" title="Toggle Flashlight / Torch">
+            <i class="fa-solid fa-bolt"></i>
+          </button>
+
+          <!-- Gallery Image Upload Button -->
+          <button onclick="ScannerController.openGalleryPicker()" class="touch-target p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs shrink-0" title="Upload QR Image from Gallery">
+            <i class="fa-solid fa-image"></i>
+          </button>
+
+          <!-- Hidden Native Camera & Gallery File Inputs -->
+          <input type="file" id="native-camera-input" accept="image/*" capture="environment" class="hidden" onchange="ScannerController.scanUploadedFile(this.files[0])">
+          <input type="file" id="gallery-file-input" accept="image/*" class="hidden" onchange="ScannerController.scanUploadedFile(this.files[0])">
+          <input type="file" id="file-qr-input" accept="image/*" class="hidden" onchange="ScannerController.scanUploadedFile(this.files[0])">
+
+        </div>
+
+      </div>
+
+      <!-- ==================== 1-TAP STATUS CONFIRMATION CARD ==================== -->
+      <div id="active-asset-card" class="hidden rounded-2xl bg-slate-900 border-2 border-emerald-500/60 p-4 shadow-2xl space-y-3 transition-all">
+        
+        <!-- Header Info -->
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span id="asset-card-id" class="font-mono text-sm font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded">MUIDS-EQ-000</span>
+              <span id="asset-card-prev-status"></span>
+            </div>
+            <h3 id="asset-card-name" class="text-base font-bold text-white">Asset Name</h3>
+            <p id="asset-card-spec" class="text-xs text-slate-400 mt-0.5">Brand / Specification</p>
+          </div>
+          
+          <div class="text-right shrink-0">
+            <span class="text-[10px] uppercase tracking-wider font-mono text-slate-500 block">Registered To</span>
+            <span id="asset-card-registered-room" class="text-xs font-bold text-slate-300">Lab Room</span>
+          </div>
+        </div>
+
+        <!-- Procurement Metadata & Historical Survey Context -->
+        <div class="flex items-center gap-2 flex-wrap text-[11px] pt-1">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+            <i class="fa-solid fa-clipboard-check text-sky-400 mr-1"></i>สภาพพัสดุ: <span id="asset-card-cond-val" class="font-semibold text-white">-</span>
+          </span>
+          <span id="asset-card-prev-audit-box" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 hidden">
+            <i class="fa-solid fa-clock-rotate-left text-amber-400 mr-1"></i>ผลปี 68: <span id="asset-card-prev-audit-val" class="font-semibold text-amber-300">-</span>
+          </span>
+          <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <i class="fa-solid fa-tag mr-1"></i>Sticker: <span id="asset-card-sticker-val" class="font-bold">Yes</span>
+          </span>
+        </div>
+
+        <!-- Location Discrepancy Alert Banner (Hidden by default) -->
+        <div id="location-discrepancy-banner" class="hidden p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base shrink-0"></i>
+          <span id="location-discrepancy-text">Registered room differs from current auditing location.</span>
+        </div>
+
+        <!-- Condition Notes & Quick Chips -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>Condition Remark (Optional):</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-1.5">
+            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Clear Optics</button>
+            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Missing Cable</button>
+            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Needs Calibration</button>
+            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Chipped Housing</button>
+            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Peeled QR</button>
+          </div>
+          <input type="text" id="condition-note-input" placeholder="Add custom condition notes..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+        </div>
+
+        <!-- 3 LARGE THUMB BUTTONS (1-Tap Confirmation) -->
+        <div class="pt-1 grid grid-cols-3 gap-2 sm:gap-3">
+          
+          <button onclick="AuditController.submitStatus('Good')" data-status="Good" class="thumb-btn bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-900/30">
+            <i class="fa-solid fa-circle-check text-xl mr-1.5"></i> GOOD
+          </button>
+
+          <button onclick="AuditController.submitStatus('Damaged')" data-status="Damaged" class="thumb-btn bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-900/30">
+            <i class="fa-solid fa-triangle-exclamation text-xl mr-1.5"></i> DAMAGED
+          </button>
+
+          <button onclick="AuditController.submitStatus('Missing')" data-status="Missing" class="thumb-btn bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-900/30">
+            <i class="fa-solid fa-circle-xmark text-xl mr-1.5"></i> MISSING
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 2: ROSTER & CHECKLIST ==================== -->
+    <div id="view-roster" class="space-y-4 hidden">
+      
+      <!-- Dynamic Room Type Filter Bar (Hybrid Master Table) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <span class="text-slate-400 font-semibold text-[11px] shrink-0"><i class="fa-solid fa-tags text-teal-400 mr-1"></i>Type:</span>
+        <div id="room-type-filter-chips" class="flex items-center gap-1.5 shrink-0">
+          <button data-room-type="ALL" class="room-type-chip touch-target px-2.5 py-1 rounded-xl bg-teal-500 text-white text-[11px] font-bold whitespace-nowrap">
+            All Types
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Bar & Search Box -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+          <input type="text" id="roster-search-input" placeholder="Search by Asset ID, Name, Model, or Spec..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <button data-filter="ALL" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold whitespace-nowrap">
+            All Items
+          </button>
+          <button data-filter="UNVERIFIED" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap border border-amber-500/30">
+            <i class="fa-regular fa-clock text-amber-400 mr-1"></i>Unverified Only
+          </button>
+          <button data-filter="Good" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+            Good
+          </button>
+          <button data-filter="Damaged" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+            Damaged
+          </button>
+          <button data-filter="Missing" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+            Missing
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Asset List Container -->
+      <div id="asset-list-container" class="space-y-2">
+        <!-- Rendered by AuditController -->
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 3: AUDIT SUMMARY ==================== -->
+    <div id="view-summary" class="space-y-4 hidden">
+      
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-chart-column text-emerald-400"></i>
+          <span>Laboratory Survey Status Overview</span>
+        </h3>
+        <p class="text-xs text-slate-400">Dynamic multi-sheet status aggregate across all science laboratory rooms.</p>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <span class="text-[10px] font-mono uppercase text-slate-500">Total Registered</span>
+            <div id="summary-stat-total" class="text-xl font-extrabold text-white mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
+            <span class="text-[10px] font-mono uppercase text-emerald-400">Verified Good</span>
+            <div id="summary-stat-good" class="text-xl font-extrabold text-emerald-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30">
+            <span class="text-[10px] font-mono uppercase text-amber-400">Damaged / Issue</span>
+            <div id="summary-stat-damaged" class="text-xl font-extrabold text-amber-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/30">
+            <span class="text-[10px] font-mono uppercase text-rose-400">Missing Assets</span>
+            <div id="summary-stat-missing" class="text-xl font-extrabold text-rose-400 mt-0.5">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono">System &amp; Sync Utilities</h4>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button onclick="ModalController.triggerFlushCache()" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2">
+            <i class="fa-solid fa-arrows-rotate text-emerald-400"></i> Refresh Sheet Index &amp; Cache
+          </button>
+          <button onclick="ModalController.openDeveloperModal()" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2">
+            <i class="fa-solid fa-terminal text-sky-400"></i> Open Diagnostics Console
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== 2-COLUMN SPLIT FOOTER (Lab Oops OS Standard) ==================== -->
+  <footer class="py-6 px-4 sm:px-6 text-xs text-slate-500 font-mono border-t border-slate-800/80 bg-slate-950 mt-12">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 leading-relaxed">
+      
+      <!-- Left Column: App Title + Version Badge + Ecosystem & Org Credit -->
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+          <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.0e</span>
+        </div>
+        <p class="text-slate-400 text-[11px]">
+          <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
+          <span class="text-slate-500">MUIDS — Science Department</span>
+        </p>
+      </div>
+
+      <!-- Right Column: Official Developer Signature & Acronym Legend -->
+      <div class="text-center md:text-right">
+        <p class="text-slate-300">
+          <span>Vibe Coded by <strong id="footer-dev-signature" onclick="ModalController.handleDeveloperTrigger()" class="text-emerald-400 font-semibold cursor-default select-none">Nattapat Poolyam</strong>, 2026</span>
+        </p>
+        <p class="text-slate-500 text-[10px] mt-0.5">
+          Science <strong class="text-emerald-400">Lab</strong>oratory <strong class="text-emerald-400">O</strong>perations &amp; <strong class="text-emerald-400">O</strong>ppositely-Organized <strong class="text-emerald-400">P</strong>roblems <strong class="text-emerald-400">S</strong>olved <strong class="text-emerald-400">O</strong>perating <strong class="text-emerald-400">S</strong>ystem
+        </p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==================== MODALS & DRAWERS ==================== -->
+
+  <!-- 1. MANUAL ASSET ID LOOKUP MODAL -->
+  <div id="manual-lookup-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-keyboard text-emerald-400"></i>
+          <span>Manual Asset ID Lookup</span>
+        </h3>
+        <button onclick="ModalController.closeManualLookupModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Type the barcode number or sticker asset ID printed on the durable equipment.</p>
+      <input type="text" id="manual-lookup-input" placeholder="e.g. MUIDS-SCI-204-001" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-400 uppercase">
+      <div class="flex gap-2">
+        <button onclick="ModalController.closeManualLookupModal()" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+          Cancel
+        </button>
+        <button onclick="ModalController.submitManualLookup()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold">
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. UNRECOGNIZED ASSET MODAL -->
+  <div id="unrecognized-asset-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="text-center space-y-1">
+        <h3 class="text-sm font-bold text-white">Unrecognized Asset Tag</h3>
+        <p class="text-xs text-slate-400">The scanned QR code is not registered in the science inventory database:</p>
+        <div id="unrecognized-code-display" class="font-mono text-xs font-bold text-amber-300 bg-slate-950 border border-slate-800 p-2 rounded-xl break-all">
+          CODE
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="ModalController.closeUnrecognizedModal()" class="touch-target w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+          Dismiss &amp; Resume
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. STEALTH DEVELOPER GATEWAY MODAL (Ctrl + Shift + Q / PIN: 2026) -->
+  <div id="dev-gateway-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between shrink-0">
+        <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+          <i class="fa-solid fa-terminal text-emerald-400"></i>
+          <span>Stealth Developer Gateway — Lab Oops OS</span>
+        </h3>
+        <button onclick="ModalController.closeDeveloperModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
+        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.0e</div>
+          <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
+          <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
+          <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
+        </div>
+
+        <!-- Master Table & Migration Control Center (v1.1.0e) -->
+        <div class="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+          <div class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-arrows-rotate text-emerald-400"></i>
+            <span>HYBRID MASTER TABLE &amp; CONFIG ENGINE</span>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-normal">
+            Synchronize Config tab, configure row 5 audit columns on room sheets, aggregate data into Master Table, or migrate audit records to room sheets.
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <button onclick="ModalController.triggerSyncConfigSheet()" class="touch-target px-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-purple-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition">
+              <i class="fa-solid fa-gear text-purple-400"></i>
+              <span>Sync Config</span>
+            </button>
+            <button onclick="ModalController.triggerSetupRow5Headers()" class="touch-target px-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-sky-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition">
+              <i class="fa-solid fa-table-columns text-sky-400"></i>
+              <span>Setup Row 5 (M)</span>
+            </button>
+            <button onclick="ModalController.triggerBuildMasterTable()" class="touch-target px-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-amber-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition">
+              <i class="fa-solid fa-file-import text-amber-400"></i>
+              <span>Build Master</span>
+            </button>
+            <button onclick="ModalController.triggerMigrateMasterToRooms()" class="touch-target px-2 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition shadow-lg shadow-emerald-950/50">
+              <i class="fa-solid fa-share-from-square text-emerald-400"></i>
+              <span>Migrate to Rooms</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 mb-1">LIVE STATE / RESULT INSPECTION</div>
+          <pre id="dev-json-state" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-[10px] text-emerald-300 overflow-x-auto max-h-40"></pre>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex gap-2 shrink-0">
+        <button onclick="ModalController.triggerFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+          Flush Caches
+        </button>
+        <button onclick="ModalController.closeDeveloperModal()" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MATCHED ASSET DETAILS MODAL (Pop-up on QR Scan) -->
+  <div id="asset-details-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-all duration-300">
+    <div class="bg-slate-900 border border-slate-700 w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-3.5 shadow-2xl max-h-[92vh] flex flex-col transform transition-transform duration-300">
+      
+      <!-- Mobile Pull-down Bar -->
+      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto sm:hidden -mt-1 mb-1"></div>
+
+      <!-- Modal Header: Inventory Number & Status Badge & Close Button -->
+      <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[10px] uppercase tracking-wider font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
+              <i class="fa-solid fa-qrcode mr-1"></i>Matched Asset
+            </span>
+            <span id="modal-asset-prev-status"></span>
+          </div>
+          <!-- Matched Inventory Number -->
+          <h2 id="modal-asset-id" class="text-lg sm:text-xl font-mono font-extrabold text-white tracking-tight break-all">
+            MUIDS-SCI-000
+          </h2>
+        </div>
+
+        <button onclick="ModalController.closeAssetDetailsModal()" class="touch-target text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 shrink-0" title="Close Modal">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="overflow-y-auto flex-1 space-y-3 pr-1 text-xs">
+        
+        <!-- Asset Description Card -->
+        <div class="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl space-y-1">
+          <h3 id="modal-asset-name" class="text-sm font-bold text-white leading-snug">Asset Name</h3>
+          <p id="modal-asset-spec" class="text-slate-400 text-xs">Specification / Brand Model</p>
+        </div>
+
+        <!-- Location Context -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl">
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Registered Room</span>
+            <span id="modal-asset-room" class="font-bold text-slate-200 text-xs mt-0.5 block truncate">Lab Room</span>
+          </div>
+          <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl">
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Current Audit Room</span>
+            <span id="modal-current-audit-room" class="font-bold text-emerald-400 text-xs mt-0.5 block truncate">Auditing Lab</span>
+          </div>
+        </div>
+
+        <!-- Location Discrepancy Alert Banner (Hidden by default) -->
+        <div id="modal-location-discrepancy-banner" class="hidden p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base shrink-0"></i>
+          <span id="modal-location-discrepancy-text">Registered room differs from current auditing location.</span>
+        </div>
+
+        <!-- Procurement Metadata & Historical Results -->
+        <div class="flex items-center gap-2 flex-wrap text-[11px]">
+          <span class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700">
+            <i class="fa-solid fa-clipboard-check text-sky-400 mr-1"></i>สภาพพัสดุ: <span id="modal-asset-cond-val" class="font-semibold text-white">-</span>
+          </span>
+          <span id="modal-asset-prev-audit-box" class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hidden">
+            <i class="fa-solid fa-clock-rotate-left text-amber-400 mr-1"></i>ผลปี 68: <span id="modal-asset-prev-audit-val" class="font-semibold text-amber-300">-</span>
+          </span>
+          <button id="modal-btn-toggle-sticker" onclick="AuditController.toggleModalSticker()" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-bold transition flex items-center gap-1.5" title="Click to toggle sticker verification">
+            <i class="fa-solid fa-tag"></i>
+            <span>Sticker: <strong id="modal-asset-sticker-val">Yes</strong></span>
+          </button>
+          <span id="modal-asset-year-box" class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hidden">
+            <i class="fa-solid fa-calendar text-slate-400 mr-1"></i>ปีงบฯ: <span id="modal-asset-year-val" class="font-semibold text-white">-</span>
+          </span>
+        </div>
+
+        <!-- Condition Remark & Quick Chips -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>Condition Remark (Optional):</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Clear Optics</button>
+            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Missing Cable</button>
+            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Needs Calibration</button>
+            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Chipped Housing</button>
+            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Peeled QR</button>
+          </div>
+          <input type="text" id="modal-condition-note-input" placeholder="Add custom condition notes..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+        </div>
+
+      </div>
+
+      <!-- 1-Tap Status Confirmation Action Bar (3 Large Thumb Buttons) -->
+      <div class="pt-2 border-t border-slate-800">
+        <div class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center justify-between">
+          <span>Tap 1 Button to Confirm Status (AY 2569):</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3">
+          <button onclick="AuditController.submitStatusFromModal('Good')" data-modal-status="Good" class="thumb-btn bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
+            <i class="fa-solid fa-circle-check text-lg mr-1.5"></i> GOOD
+          </button>
+          <button onclick="AuditController.submitStatusFromModal('Damaged')" data-modal-status="Damaged" class="thumb-btn bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
+            <i class="fa-solid fa-triangle-exclamation text-lg mr-1.5"></i> DAMAGED
+          </button>
+          <button onclick="AuditController.submitStatusFromModal('Missing')" data-modal-status="Missing" class="thumb-btn bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
+            <i class="fa-solid fa-circle-xmark text-lg mr-1.5"></i> MISSING
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>
+
+  <!-- ==================== CLIENT COMPONENT MODULES ==================== -->
+  <?!= HtmlService.createHtmlOutputFromFile('AppState').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('ApiClient').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('ThemeController').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('ModalController').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('ScannerController').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('AuditController').getContent(); ?>
+
+  <!-- APPLICATION BOOTSTRAPPER -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // 1. Initialize Theme
+      ThemeController.init();
+
+      // 2. Initialize Audit Controller
+      AuditController.init();
+
+      // 3. Search input handler with debounce
+      var searchInput = document.getElementById("roster-search-input");
+      if (searchInput) {
+        var searchDebounceTimer = null;
+        searchInput.addEventListener("input", function() {
+          clearTimeout(searchDebounceTimer);
+          var val = this.value;
+          searchDebounceTimer = setTimeout(function() {
+            AppState.set("searchQuery", val);
+          }, 250);
+        });
+      }
+
+      // 4. Filter chips click listeners
+      document.querySelectorAll(".filter-chip").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var f = this.dataset.filter;
+          AppState.set("statusFilter", f);
+        });
+      });
+
+      // 5. Room selector change listener
+      var roomSel = document.getElementById("room-selector");
+      if (roomSel) {
+        roomSel.addEventListener("change", function() {
+          AppState.set("currentRoom", this.value);
+        });
+      }
+
+      // 6. Update dev environment status text
+      var devEnvStatus = document.getElementById("dev-env-status");
+      if (devEnvStatus) {
+        devEnvStatus.innerText = ApiClient.isGasEnvironment ? "Google Apps Script V8 Native" : "Local Mock Simulation Mode";
+      }
+
+      // 7. Load Initial Payload
+      ApiClient.getInitialPayload()
+        .then(function(payload) {
+          AppState.set("user", payload.user);
+          AppState.set("config", payload.config);
+          AppState.set("rooms", payload.rooms);
+          AppState.set("currentRoom", payload.currentRoom || "ALL");
+          AppState.set("summary", payload.summary);
+
+          // Populate Room Dropdown
+          if (roomSel && Array.isArray(payload.rooms)) {
+            roomSel.innerHTML = '<option value="ALL">All Laboratories (Overview)</option>';
+            payload.rooms.forEach(function(r) {
+              var opt = document.createElement("option");
+              opt.value = r;
+              opt.innerText = r;
+              if (r === payload.currentRoom) opt.selected = true;
+              roomSel.appendChild(opt);
+            });
+          }
+
+          // Populate Dynamic Room Type Filter Chips (Hybrid Master Table)
+          var typeChipsContainer = document.getElementById("room-type-filter-chips");
+          if (typeChipsContainer && Array.isArray(payload.roomTypes)) {
+            typeChipsContainer.innerHTML = '';
+            payload.roomTypes.forEach(function(t) {
+              var btn = document.createElement("button");
+              btn.dataset.roomType = t;
+              btn.className = "room-type-chip touch-target px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition " +
+                (t === "ALL" ? "bg-teal-500 text-white" : "bg-slate-800/80 text-slate-300 hover:text-white");
+              btn.innerText = (t === "ALL" ? "All Types" : t);
+              btn.addEventListener("click", function() {
+                AppState.set("roomTypeFilter", this.dataset.roomType);
+              });
+              typeChipsContainer.appendChild(btn);
+            });
+          }
+
+          // Update summary view metrics if elements exist
+          updateSummaryViewStats(payload.summary);
+        })
+        .catch(function(err) {
+          console.error("Initial load failed:", err);
+          ModalController.showToast("Failed to load initial data: " + err.toString(), "error");
+        });
+
+      function updateSummaryViewStats(summary) {
+        if (!summary) return;
+        var t = document.getElementById("summary-stat-total");
+        var g = document.getElementById("summary-stat-good");
+        var d = document.getElementById("summary-stat-damaged");
+        var m = document.getElementById("summary-stat-missing");
+        if (t) t.innerText = summary.total || 0;
+        if (g) g.innerText = summary.good || 0;
+        if (d) d.innerText = summary.damaged || 0;
+        if (m) m.innerText = summary.missing || 0;
+      }
+
+      AppState.subscribe("change:summary", function(data) {
+        updateSummaryViewStats(data.value);
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<script>
+/**
+ * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * MUIDS Lab Oops OS — Science Department
+ */
+
+window.ApiClient = (function() {
+  var LIVE_GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyX7q6-CSO0JeueXXg9OcNpnNL21DOLS3klvkPjxTs/exec";
+  var isGasEnvironment = (typeof google !== "undefined" && google.script && google.script.run);
+  var isRemoteLiveMode = !isGasEnvironment && (
+    (typeof window !== "undefined" && window.location && (
+      window.location.search.indexOf("live=1") !== -1 ||
+      (window.location.protocol.indexOf("http") === 0 && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && window.location.search.indexOf("mock=1") === -1)
+    ))
+  );
+
+  // High-fidelity mock database matching Project 00 Kernel Room Directory
+  var MOCK_ROOMS = [
+    "Chem1 (ChemLab1 - Floor 2)",
+    "Chem2 (ChemLab2 - Floor 2)",
+    "Physics1 (Physics Lab 1 - Floor 2)",
+    "Physics2 (Physics Lab 2 - Floor 2)",
+    "Bio1 (BioLab1 - Floor 3)",
+    "Bio2 (BioSafetyLab - Floor 3)",
+    "Lab 204 (General Science)",
+    "Lab 205 (Earth Science)",
+    "Physics Lab 314",
+    "Prep Room 1 (Floor 2)",
+    "Prep Room 2 (Floor 3)",
+    "Chem Store (Secured)"
+  ];
+
+  var MOCK_ASSETS = [
+    { no: 1, assetId: "MUIDS-SCI-204-001", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 2, status: "Good", auditResult69: "Good (Lenses clear)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
+    { no: 2, assetId: "MUIDS-SCI-204-002", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "" },
+    { no: 3, assetId: "MUIDS-SCI-204-003", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 4, status: "Good", auditResult69: "Good (Calibrated)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated" },
+    { no: 4, assetId: "MUIDS-SCI-204-004", itemName: "Corning Hotplate Stirrer", brandModel: "PC-420D Digital", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 5, status: "Damaged", auditResult69: "Damaged (Plate chipped)", sticker: "Yes", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุดเล็กน้อย" }, notes: "Heating plate surface chipped" },
+    { no: 5, assetId: "MUIDS-SCI-204-005", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 6, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 6, assetId: "MUIDS-SCI-204-006", itemName: "Fisherbrand Vortex Mixer", brandModel: "Analog Vortex 120V", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 7, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    
+    { no: 1, assetId: "MUIDS-CHM-301-010", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 2, status: "Good", auditResult69: "Good (Lamp tested OK)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
+    { no: 2, assetId: "MUIDS-CHM-301-011", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 3, assetId: "MUIDS-CHM-301-012", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 4, assetId: "MUIDS-CHM-301-013", itemName: "Labconco Fume Hood Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 5, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
+    { no: 5, assetId: "MUIDS-CHM-301-014", itemName: "Eppendorf Research Plus Pipette Set", brandModel: "3-Pack (10, 100, 1000uL)", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 6, status: "Missing", auditResult69: "Missing (Missing 10uL)", sticker: "No", procurementCondition: "สูญหาย", historicalResults: {}, notes: "Missing 10uL pipette from carousel" },
+
+    { no: 1, assetId: "MUIDS-BIO-308-020", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 2, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
+    { no: 2, assetId: "MUIDS-BIO-308-021", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 3, assetId: "MUIDS-BIO-308-022", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 4, assetId: "MUIDS-BIO-308-023", itemName: "Benchmark Autoclave 16L", brandModel: "BioClave 16 B4000-16", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 5, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Gasket inspected, passed seal test" },
+
+    { no: 1, assetId: "MUIDS-PHY-314-030", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 2, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 2, assetId: "MUIDS-PHY-314-031", itemName: "Rigol Digital Oscilloscope", brandModel: "DS1054Z 50MHz 4CH", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 3, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested with function gen" },
+    { no: 3, assetId: "MUIDS-PHY-314-032", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" }
+  ];
+
+  function invoke(action, payload) {
+    return new Promise(function(resolve, reject) {
+      if (isGasEnvironment) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            resolve(res);
+          })
+          .withFailureHandler(function(err) {
+            console.error("[ApiClient] Server Error:", err);
+            reject(err);
+          })
+          .executeApiAction(action, payload);
+      } else if (isRemoteLiveMode && LIVE_GAS_WEBAPP_URL) {
+        // Direct HTTPS POST Bridge to Live Google Apps Script Endpoint
+        fetch(LIVE_GAS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: action, payload: payload })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error && !data.success && data.found === undefined) {
+            console.warn("[ApiClient] Remote API returned error:", data.error);
+          }
+          resolve(data);
+        })
+        .catch(function(err) {
+          console.warn("[ApiClient] Remote bridge fetch error, falling back to mock:", err);
+          var res = mockExecute(action, payload);
+          resolve(res);
+        });
+      } else {
+        // Mock offline execution
+        setTimeout(function() {
+          try {
+            var res = mockExecute(action, payload);
+            resolve(res);
+          } catch (err) {
+            reject(err);
+          }
+        }, 120);
+      }
+    });
+  }
+
+  function mockExecute(action, payload) {
+    if (!payload) payload = {};
+
+    if (action === "getInitialPayload") {
+      var defaultRoom = MOCK_ROOMS[0];
+      return {
+        user: {
+          email: "nattapat.poo@mahidol.ac.th",
+          name: "Nattapat Poolyam (Mek)",
+          role: "SuperAdmin",
+          isAdmin: true,
+          isSuperAdmin: true,
+          isTALT: true
+        },
+        config: {
+          APP_TITLE: "QR Asset Survey",
+          APP_VERSION: "v1.1.0e",
+          AUDIT_YEAR: 2026,
+          SECRET_DEVELOPER_PIN: "2026",
+          AUTO_RESUME_SCANNER: true,
+          AUDIO_FEEDBACK_ENABLED: true,
+          VIBRATION_FEEDBACK_ENABLED: true
+        },
+        rooms: MOCK_ROOMS,
+        kernelRooms: [
+          { roomId: "room_06", roomName: "Chem1", sourceSystemCode: "ChemLab1", floor: 2, roomType: "Lab" },
+          { roomId: "room_07", roomName: "Chem2", sourceSystemCode: "ChemLab2", floor: 2, roomType: "ChemicalLab" },
+          { roomId: "room_08", roomName: "Physics1", sourceSystemCode: "Physics 1", floor: 2, roomType: "Lab" },
+          { roomId: "room_09", roomName: "Physics2", sourceSystemCode: "Physics 2", floor: 2, roomType: "Lab" },
+          { roomId: "room_13", roomName: "Bio1", sourceSystemCode: "BioLab1", floor: 3, roomType: "ChemicalLab" },
+          { roomId: "room_14", roomName: "Bio2", sourceSystemCode: "BioLab2", floor: 3, roomType: "BioSafetyLab" }
+        ],
+        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"],
+        currentRoom: defaultRoom,
+        summary: mockGetRoomSummary(defaultRoom),
+        spreadsheetId: "18LGXn6JbjFeiVuKlrh0CvJ79M3mpsKTVbc0FJx8LuOk"
+      };
+    }
+
+    if (action === "setupRow5Headers") {
+      return {
+        success: true,
+        message: "Row 5 audit headers hardcoded to Column M across all rooms. Repaired Columns A-L.",
+        sheetsConfigured: MOCK_ROOMS.length,
+        startColumn: "M (Column 13)",
+        columns: ["หมายเหตุปี 69", "สติกเกอร์", "ปี68", "ปี67", "ปี66", "ปี64", "ปี63"]
+      };
+    }
+
+    if (action === "buildMasterTable") {
+      return {
+        success: true,
+        message: "Master Table built with " + MOCK_ASSETS.length + " assets across " + MOCK_ROOMS.length + " rooms.",
+        totalAssets: MOCK_ASSETS.length,
+        roomsProcessed: MOCK_ROOMS.length
+      };
+    }
+
+    if (action === "migrateMasterToRooms") {
+      return {
+        success: true,
+        message: "Successfully migrated " + MOCK_ASSETS.length + " asset records across " + MOCK_ROOMS.length + " room sheets.",
+        rowsMigrated: MOCK_ASSETS.length,
+        sheetsAffected: MOCK_ROOMS.length
+      };
+    }
+
+    if (action === "queryMasterTable") {
+      var filters = payload.filters || {};
+      var items = MOCK_ASSETS.slice();
+      if (filters.room && filters.room !== "ALL") {
+        items = items.filter(function(a) { return a.registeredLocation === filters.room; });
+      }
+      if (filters.status && filters.status !== "ALL") {
+        items = items.filter(function(a) { return a.status === filters.status; });
+      }
+      if (filters.search) {
+        var s = filters.search.toLowerCase();
+        items = items.filter(function(a) {
+          return a.assetId.toLowerCase().indexOf(s) !== -1 ||
+                 a.itemName.toLowerCase().indexOf(s) !== -1 ||
+                 a.brandModel.toLowerCase().indexOf(s) !== -1;
+        });
+      }
+      return {
+        total: items.length,
+        items: items,
+        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"]
+      };
+    }
+
+    if (action === "getDynamicRoomTypes") {
+      return {
+        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"]
+      };
+    }
+
+    if (action === "lookupAsset") {
+      var code = String(payload.assetCode || "").trim().toUpperCase();
+      // Also match URL stripped code
+      if (code.indexOf("ID=") !== -1) {
+        var match = code.match(/ID=([^&]+)/);
+        if (match) code = match[1];
+      }
+      
+      var asset = MOCK_ASSETS.find(function(a) {
+        return a.assetId.toUpperCase() === code;
+      });
+
+      if (asset) {
+        return { found: true, asset: Object.assign({}, asset) };
+      }
+      return { found: false, assetCode: payload.assetCode, error: "Asset ID '" + payload.assetCode + "' not found in registered rooms." };
+    }
+
+    if (action === "updateAssetStatus") {
+      var targetId = String(payload.assetId || "").trim().toUpperCase();
+      var asset = MOCK_ASSETS.find(function(a) { return a.assetId.toUpperCase() === targetId; });
+      
+      if (!asset) {
+        throw new Error("Asset not found in mock store.");
+      }
+
+      var ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      asset.status = payload.status;
+      asset.auditedBy = "nattapat.poo@mahidol.ac.th";
+      asset.auditDate = ts;
+      if (payload.notes) {
+        asset.notes = asset.notes ? (asset.notes + " | " + payload.notes) : payload.notes;
+      }
+      if (payload.currentRoom && payload.currentRoom !== asset.registeredLocation) {
+        asset.foundLocation = payload.currentRoom;
+      }
+
+      var summary = mockGetRoomSummary(asset.registeredLocation);
+      return {
+        success: true,
+        assetId: asset.assetId,
+        sheetName: asset.registeredLocation,
+        rowIndex: asset.rowIndex,
+        status: asset.status,
+        auditedBy: asset.auditedBy,
+        auditDate: asset.auditDate,
+        notes: asset.notes,
+        foundLocation: asset.foundLocation,
+        roomSummary: summary
+      };
+    }
+
+    if (action === "getRoomAuditSummary") {
+      return mockGetRoomSummary(payload.roomName);
+    }
+
+    if (action === "syncConfigSheet") {
+      return {
+        success: true,
+        message: "Config sheet synchronized (v1.1.0e). Local mock simulation mode.",
+        appVersion: "v1.1.0e",
+        timestamp: new Date().toISOString(),
+        keysAdded: 0,
+        keysUpdated: 1
+      };
+    }
+
+
+
+    if (action === "flushCache") {
+      return { success: true, message: "Mock cache purged." };
+    }
+
+    if (action === "logStat" || action === "logEvent") {
+      return { success: true };
+    }
+
+    throw new Error("Mock does not support action: " + action);
+  }
+
+  function mockGetRoomSummary(roomName) {
+    var items = [];
+    if (!roomName || roomName === "ALL") {
+      items = MOCK_ASSETS.slice();
+    } else {
+      items = MOCK_ASSETS.filter(function(a) { return a.registeredLocation === roomName; });
+    }
+
+    var total = items.length;
+    var verified = 0;
+    var good = 0;
+    var damaged = 0;
+    var missing = 0;
+
+    items.forEach(function(a) {
+      if (a.status === "Good" || a.status === "Damaged" || a.status === "Missing") {
+        verified++;
+        if (a.status === "Good") good++;
+        else if (a.status === "Damaged") damaged++;
+        else if (a.status === "Missing") missing++;
+      }
+    });
+
+    return {
+      roomName: roomName || "ALL",
+      total: total,
+      verified: verified,
+      unverified: total - verified,
+      good: good,
+      damaged: damaged,
+      missing: missing,
+      percentComplete: total > 0 ? Math.round((verified / total) * 100) : 0,
+      items: items
+    };
+  }
+
+  return {
+    isGasEnvironment: isGasEnvironment,
+    invoke: invoke,
+    getInitialPayload: function() { return invoke("getInitialPayload", {}); },
+    lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },
+    updateAssetStatus: function(payload) { return invoke("updateAssetStatus", payload); },
+    getRoomAuditSummary: function(roomName) { return invoke("getRoomAuditSummary", { roomName: roomName }); },
+    setupRow5Headers: function() { return invoke("setupRow5Headers", {}); },
+    syncConfigSheet: function() { return invoke("syncConfigSheet", {}); },
+    buildMasterTable: function() { return invoke("buildMasterTable", {}); },
+    migrateMasterToRooms: function() { return invoke("migrateMasterToRooms", {}); },
+    queryMasterTable: function(filters) { return invoke("queryMasterTable", { filters: filters }); },
+    getDynamicRoomTypes: function() { return invoke("getDynamicRoomTypes", {}); },
+    flushCache: function() { return invoke("flushCache", {}); }
+  };
+})();
+</script>
