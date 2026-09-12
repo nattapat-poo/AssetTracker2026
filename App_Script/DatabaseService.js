@@ -1,10 +1,7 @@
 /**
- * DatabaseService.js — Dynamic Multi-Sheet Router & In-Place Mutation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * DatabaseService.js — Multi-Sheet Router, Cell-Level Bi-Sync & Hybrid Aggregator
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
- * 
- * Non-invasive Procurement Parser: Reads merged headers, preserves raw data,
- * and maps survey results into 'หมายเหตุปี 69' and 'Sticker' columns.
  */
 
 /**
@@ -54,17 +51,18 @@ function getNexusRoomDirectory() {
   }
   
   var props = PropertiesService.getScriptProperties();
-  var propVal = props.getProperty(cacheKey);
-  if (propVal) {
+  var propData = props.getProperty(cacheKey);
+  if (propData) {
     try {
-      cache.put(cacheKey, propVal, 21600); // 6 hours
-      return JSON.parse(propVal);
+      var parsed = JSON.parse(propData);
+      cache.put(cacheKey, propData, 21600);
+      return parsed;
     } catch (e) {}
   }
   
   try {
-    var ss = SpreadsheetApp.openById(NEXUS_SPREADSHEET_ID);
-    var sheet = ss.getSheetByName("Room");
+    var nexusSS = SpreadsheetApp.openById(NEXUS_SPREADSHEET_ID);
+    var sheet = nexusSS.getSheetByName("Room") || nexusSS.getSheetByName("Rooms");
     if (!sheet) return getFallbackKernelRooms();
     
     var data = sheet.getDataRange().getValues();
@@ -82,8 +80,7 @@ function getNexusRoomDirectory() {
         roomId: String(obj.RoomID || "").trim(),
         roomName: String(obj.RoomName || "").trim(),
         sourceSystemCode: String(obj.SourceSystemCode || "").trim(),
-        floor: Number(obj.Floor || 2),
-        roomType: String(obj.RoomType || "Lab").trim()
+        floor: Number(obj.Floor || 2)
       };
     }).filter(function(r) { return r.roomName !== ""; });
     
@@ -99,20 +96,20 @@ function getNexusRoomDirectory() {
 
 function getFallbackKernelRooms() {
   return [
-    { roomId: "room_06", roomName: "Chem1", sourceSystemCode: "ChemLab1", floor: 2, roomType: "Lab" },
-    { roomId: "room_07", roomName: "Chem2", sourceSystemCode: "ChemLab2", floor: 2, roomType: "ChemicalLab" },
-    { roomId: "room_08", roomName: "Physics1", sourceSystemCode: "Physics 1", floor: 2, roomType: "Lab" },
-    { roomId: "room_09", roomName: "Physics2", sourceSystemCode: "Physics 2", floor: 2, roomType: "Lab" },
-    { roomId: "room_13", roomName: "Bio1", sourceSystemCode: "BioLab1", floor: 3, roomType: "ChemicalLab" },
-    { roomId: "room_14", roomName: "Bio2", sourceSystemCode: "BioLab2", floor: 3, roomType: "BioSafetyLab" },
-    { roomId: "room_01", roomName: "208", sourceSystemCode: "S208", floor: 2, roomType: "Classroom" },
-    { roomId: "room_02", roomName: "210", sourceSystemCode: "S210", floor: 2, roomType: "Classroom" },
-    { roomId: "room_03", roomName: "215", sourceSystemCode: "S215", floor: 2, roomType: "Classroom" },
-    { roomId: "room_04", roomName: "216", sourceSystemCode: "S216", floor: 2, roomType: "Classroom" },
-    { roomId: "room_05", roomName: "217", sourceSystemCode: "S217", floor: 2, roomType: "Classroom" },
-    { roomId: "room_10", roomName: "308", sourceSystemCode: "S308", floor: 3, roomType: "Classroom" },
-    { roomId: "room_11", roomName: "309", sourceSystemCode: "S309", floor: 3, roomType: "Classroom" },
-    { roomId: "room_12", roomName: "310", sourceSystemCode: "S310", floor: 3, roomType: "Classroom" }
+    { roomId: "room_06", roomName: "Chem1", sourceSystemCode: "ChemLab1", floor: 2 },
+    { roomId: "room_07", roomName: "Chem2", sourceSystemCode: "ChemLab2", floor: 2 },
+    { roomId: "room_08", roomName: "Physics1", sourceSystemCode: "Physics 1", floor: 2 },
+    { roomId: "room_09", roomName: "Physics2", sourceSystemCode: "Physics 2", floor: 2 },
+    { roomId: "room_13", roomName: "Bio1", sourceSystemCode: "BioLab1", floor: 3 },
+    { roomId: "room_14", roomName: "Bio2", sourceSystemCode: "BioLab2", floor: 3 },
+    { roomId: "room_01", roomName: "208", sourceSystemCode: "S208", floor: 2 },
+    { roomId: "room_02", roomName: "210", sourceSystemCode: "S210", floor: 2 },
+    { roomId: "room_03", roomName: "215", sourceSystemCode: "S215", floor: 2 },
+    { roomId: "room_04", roomName: "216", sourceSystemCode: "S216", floor: 2 },
+    { roomId: "room_05", roomName: "217", sourceSystemCode: "S217", floor: 2 },
+    { roomId: "room_10", roomName: "308", sourceSystemCode: "S308", floor: 3 },
+    { roomId: "room_11", roomName: "309", sourceSystemCode: "S309", floor: 3 },
+    { roomId: "room_12", roomName: "310", sourceSystemCode: "S310", floor: 3 }
   ];
 }
 
@@ -153,7 +150,6 @@ function getRoomSheets(ss) {
         sheetId: sheets[i].getSheetId(),
         rowCount: sheets[i].getLastRow(),
         floor: matchedKernel ? matchedKernel.floor : 2,
-        roomType: matchedKernel ? matchedKernel.roomType : "InventoryLab",
         canonicalName: matchedKernel ? matchedKernel.roomName : name
       });
     }
@@ -203,77 +199,18 @@ function getRoomSheetByName(ss, roomIdentifier) {
   return null;
 }
 
-/**
- * Inspects all room sheets and determines dynamic Room Types
- * Cross-references with Project 00 Kernel Room directory
- */
-function inspectDynamicRoomTypes(ss) {
-  if (!ss) ss = getSpreadsheet();
-  if (!ss) return { roomMap: {}, roomTypes: ["ALL"] };
-  
-  var cache = CacheService.getScriptCache();
-  var cached = cache.get("DYNAMIC_ROOM_TYPES_CACHE");
-  if (cached) {
-    try { return JSON.parse(cached); } catch (e) {}
-  }
-  
-  var roomSheets = getRoomSheets(ss);
-  var kernelRooms = getNexusRoomDirectory();
-  var roomMap = {};
-  var typeSet = { "ALL": true };
-  
-  roomSheets.forEach(function(r) {
-    var assignedType = r.roomType || "Lab";
-    
-    // Fine-tune room type by room name keywords if generic
-    var nameLower = r.name.toLowerCase();
-    if (nameLower.indexOf("chem") !== -1) {
-      assignedType = "ChemicalLab";
-    } else if (nameLower.indexOf("bio") !== -1) {
-      assignedType = "BioSafetyLab";
-    } else if (nameLower.indexOf("phys") !== -1) {
-      assignedType = "PhysicsLab";
-    } else if (nameLower.indexOf("prep") !== -1) {
-      assignedType = "PrepRoom";
-    } else if (nameLower.match(/^\d{3}$/)) {
-      var kMatch = kernelRooms.find(function(k) { return k.roomName === r.name; });
-      if (kMatch && kMatch.roomType) {
-        assignedType = kMatch.roomType;
-      } else {
-        assignedType = "Lab";
-      }
-    }
-    
-    roomMap[r.name] = {
-      sheetName: r.name,
-      roomCode: r.canonicalName || r.name,
-      roomType: assignedType,
-      floor: r.floor || 2
-    };
-    typeSet[assignedType] = true;
-  });
-  
-  var result = {
-    roomMap: roomMap,
-    roomTypes: Object.keys(typeSet)
-  };
-  
-  try {
-    cache.put("DYNAMIC_ROOM_TYPES_CACHE", JSON.stringify(result), 21600);
-  } catch (e) {}
-  
-  return result;
-}
 
 const START_COL_M = 13; // Column M is 13 (1-indexed)
 const AUDIT_COLUMNS_ROW5_HARDCODED = [
-  "หมายเหตุปี 69", // Col M (13)
-  "สติกเกอร์",      // Col N (14)
-  "ปี68",           // Col O (15)
-  "ปี67",           // Col P (16)
-  "ปี66",           // Col Q (17)
-  "ปี64",           // Col R (18)
-  "ปี63"            // Col S (19)
+  "Scanned 69",    // Col M (13) — User status input
+  "หมายเหตุปี 69", // Col N (14) — Remarks / rename / moved info
+  "สติกเกอร์",      // Col O (15) — Sticker verification option
+  "Auditor",       // Col P (16) — Auditor display name (Individual Room Sheet only)
+  "ปี68",           // Col Q (17)
+  "ปี67",           // Col R (18)
+  "ปี66",           // Col S (19)
+  "ปี64",           // Col T (20)
+  "ปี63"            // Col U (21)
 ];
 
 const PROCUREMENT_ROW5_CANONICAL = [
@@ -292,22 +229,35 @@ const PROCUREMENT_ROW5_CANONICAL = [
 ];
 
 /**
- * At Row 5, hardcodes the 7 audit & historical columns to start strictly at Column M (Column 13):
- * Col M (13): "หมายเหตุปี 69"
- * Col N (14): "สติกเกอร์"
- * Col O (15): "ปี68"
- * Col P (16): "ปี67"
- * Col Q (17): "ปี66"
- * Col R (18): "ปี64"
- * Col S (19): "ปี63"
+ * At Row 5, hardcodes the 9 audit & historical columns to start strictly at Column M (Column 13):
+ * Col M (13): "Scanned 69" (User status input)
+ * Col N (14): "หมายเหตุปี 69" (Remarks / rename / moved info)
+ * Col O (15): "สติกเกอร์" (Sticker verification: ปกติ, ปริ้นใหม่, ปริ้นใหม่+แก้ข้อมูล)
+ * Col P (16): "Auditor" (Display name of auditor from user database)
+ * Col Q (17): "ปี68"
+ * Col R (18): "ปี67"
+ * Col S (19): "ปี66"
+ * Col T (20): "ปี64"
+ * Col U (21): "ปี63"
  * 
+ * Shift detection: 
+ * 1. If cell M5 is "หมายเหตุปี 69", inserts column before Col 13.
+ * 2. If cell P5 (Col 16) is "ปี68", inserts column before Col 16 to cleanly shift historical cols to Q..U.
  * In addition, repairs and cleans up any accidental audit headers written into Columns 1 to 12 (A to L) on Row 5.
  */
-function setupRow5AuditHeaders(ss) {
+function setupRow5AuditHeaders(ss, selectedSheetNames) {
   if (!ss) ss = getSpreadsheet();
   if (!ss) throw new Error("No active spreadsheet available.");
   
-  var roomSheets = getRoomSheets(ss);
+  var roomSheets = [];
+  if (Array.isArray(selectedSheetNames) && selectedSheetNames.length > 0) {
+    selectedSheetNames.forEach(function(sName) {
+      roomSheets.push({ name: sName });
+    });
+  } else {
+    roomSheets = getRoomSheets(ss);
+  }
+
   var targetColumns = AUDIT_COLUMNS_ROW5_HARDCODED;
   var results = [];
   
@@ -315,14 +265,35 @@ function setupRow5AuditHeaders(ss) {
     var sheet = ss.getSheetByName(roomInfo.name);
     if (!sheet) return;
     
-    // Ensure sheet has at least 19 columns (up to Col S)
-    if (sheet.getMaxColumns() < 19) {
-      sheet.insertColumnsAfter(sheet.getMaxColumns(), 19 - sheet.getMaxColumns());
+    // Ensure sheet has at least 21 columns (up to Col U)
+    if (sheet.getMaxColumns() < 21) {
+      sheet.insertColumnsAfter(sheet.getMaxColumns(), 21 - sheet.getMaxColumns());
     }
     
     var lastRow = sheet.getLastRow();
     if (lastRow < 5) {
       sheet.insertRowsAfter(sheet.getMaxRows(), 5 - sheet.getMaxRows());
+    }
+
+    // Check if cell M5 is currently "หมายเหตุปี 69": insert column before Col 13 to shift cleanly to Col N
+    var currM5Val = String(sheet.getRange(5, START_COL_M).getValue() || "").trim();
+    if (currM5Val === "หมายเหตุปี 69" || currM5Val.indexOf("หมายเหตุ") !== -1) {
+      sheet.insertColumnBefore(START_COL_M);
+      if (sheet.getMaxColumns() < 21) {
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), 21 - sheet.getMaxColumns());
+      }
+    }
+
+    // Check if cell P5 (Col 16) is NOT already "Auditor" / "ผู้สำรวจ":
+    // If it has historical year labels (e.g. "ปี68", "ปี 68", "ผลปี 68", "68", "ปี") or any non-auditor content,
+    // insert column before Col 16 to insert Auditor column cleanly, shifting historical columns to Cols Q..U (17..21)
+    var currP5Val = String(sheet.getRange(5, 16).getValue() || "").trim();
+    var isAuditorCol = currP5Val.toLowerCase().indexOf("auditor") !== -1 || currP5Val.indexOf("ผู้สำรวจ") !== -1 || currP5Val.indexOf("ผู้ตรวจ") !== -1;
+    if (!isAuditorCol && currP5Val !== "") {
+      sheet.insertColumnBefore(16);
+      if (sheet.getMaxColumns() < 21) {
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), 21 - sheet.getMaxColumns());
+      }
     }
     
     // STEP 1: CLEANUP & REPAIR PASS ON ROW 5 COLUMNS 1 TO 12 (A TO L)
@@ -335,7 +306,9 @@ function setupRow5AuditHeaders(ss) {
       var isErroneousAudit = targetColumns.indexOf(cellVal) !== -1 || 
                              cellVal.indexOf("ปี6") !== -1 || 
                              cellVal.indexOf("หมายเหตุ") !== -1 || 
-                             cellVal.indexOf("สติก") !== -1;
+                             cellVal.indexOf("สติก") !== -1 ||
+                             cellVal.indexOf("Scanned") !== -1 ||
+                             cellVal.indexOf("Auditor") !== -1;
                              
       if (isErroneousAudit) {
         var canonicalVal = PROCUREMENT_ROW5_CANONICAL[c - 1];
@@ -348,10 +321,10 @@ function setupRow5AuditHeaders(ss) {
       }
     }
     
-    // STEP 2: HARDCODE ROW 5 AUDIT COLUMNS STARTING AT COLUMN M (COL 13)
+    // STEP 2: HARDCODE ROW 5 AUDIT COLUMNS STARTING AT COLUMN M (COL 13 TO COL 21 / M TO U)
     for (var i = 0; i < targetColumns.length; i++) {
       var colHeader = targetColumns[i];
-      var colIndex = START_COL_M + i; // 13, 14, 15, 16, 17, 18, 19
+      var colIndex = START_COL_M + i; // 13 (M), 14 (N), 15 (O), 16 (P), 17 (Q), 18 (R), 19 (S), 20 (T), 21 (U)
       
       var cellRange = sheet.getRange(5, colIndex);
       cellRange.setValue(colHeader)
@@ -359,10 +332,14 @@ function setupRow5AuditHeaders(ss) {
         .setBackground("#0f172a")
         .setHorizontalAlignment("center");
         
-      if (colHeader === "หมายเหตุปี 69") {
+      if (colHeader === "Scanned 69") {
         cellRange.setFontColor("#34d399"); // Emerald
+      } else if (colHeader === "หมายเหตุปี 69") {
+        cellRange.setFontColor("#10b981"); // Teal
       } else if (colHeader === "สติกเกอร์") {
         cellRange.setFontColor("#38bdf8"); // Cyan
+      } else if (colHeader === "Auditor") {
+        cellRange.setFontColor("#a78bfa"); // Indigo/Purple
       } else {
         cellRange.setFontColor("#94a3b8"); // Slate
       }
@@ -372,7 +349,7 @@ function setupRow5AuditHeaders(ss) {
       sheetName: roomInfo.name,
       startCol: "M (13)",
       columnsAdded: targetColumns.length,
-      columnsRange: "M5:S5",
+      columnsRange: "M5:U5",
       repairedColsCount: repairedCols.length,
       repairedDetails: repairedCols
     });
@@ -393,9 +370,10 @@ function setupRow5AuditHeaders(ss) {
   
   return {
     success: true,
-    message: "Row 5 audit headers successfully hardcoded to Column M across " + results.length + " room sheets. Repaired any misaligned headers on Columns A-L.",
+    message: "Row 5 audit headers (Cols M–U) successfully hardcoded across " + results.length + " room sheets. Configured: Scanned 69 (M), หมายเหตุปี 69 (N), สติกเกอร์ (O), Auditor (P), ปี68..ปี63 (Q..U).",
     sheetsConfigured: results.length,
     startColumn: "M (Column 13)",
+    columnsRange: "M5:U5",
     columns: targetColumns,
     details: results
   };
@@ -465,8 +443,10 @@ function detectSheetHeaderAndColumns(sheet) {
   }
 
   var colMap = Object.assign({}, defaultMap);
+  var scanned69Col = -1;
   var result69Col = -1;
   var stickerCol = -1;
+  var auditorCol = -1;
   var historicalCols = {};
 
   // Inspect headers across rows 1 to detectedHeaderRow to handle vertically merged headers
@@ -502,10 +482,14 @@ function detectSheetHeaderAndColumns(sheet) {
       colMap.capDate = c;
     } else if (combinedHeader.indexOf("ปีงบ") !== -1 || combinedHeader.indexOf("fiscal year") !== -1) {
       colMap.fiscalYear = c;
+    } else if (combinedHeader.indexOf("scanned 69") !== -1 || combinedHeader.indexOf("scanned69") !== -1 || combinedHeader.indexOf("สถานะปี 69") !== -1) {
+      scanned69Col = c;
     } else if (combinedHeader.indexOf("หมายเหตุปี 69") !== -1 || combinedHeader.indexOf("ผลปี 69") !== -1 || combinedHeader.indexOf("ปี 69") !== -1 || combinedHeader.indexOf("ปี69") !== -1) {
       result69Col = c;
     } else if (combinedHeader.indexOf("sticker") !== -1 || combinedHeader.indexOf("สติกเกอร์") !== -1 || combinedHeader.indexOf("สติ๊กเกอร์") !== -1) {
       stickerCol = c;
+    } else if (combinedHeader.indexOf("auditor") !== -1 || combinedHeader.indexOf("ผู้สำรวจ") !== -1 || combinedHeader.indexOf("ผู้ตรวจ") !== -1) {
+      auditorCol = c;
     }
 
     // Historical columns: 'ปี68', 'ปี67', 'ผลปี 68', etc.
@@ -524,13 +508,15 @@ function detectSheetHeaderAndColumns(sheet) {
 
   // Prioritize Row 5 Column M hardcoded survey columns
   if (lastCol >= 13) {
-    if (result69Col === -1) result69Col = 13; // Column M
-    if (stickerCol === -1 && lastCol >= 14) stickerCol = 14; // Column N
-    if (!historicalCols["68"] && lastCol >= 15) historicalCols["68"] = 15; // Column O
-    if (!historicalCols["67"] && lastCol >= 16) historicalCols["67"] = 16; // Column P
-    if (!historicalCols["66"] && lastCol >= 17) historicalCols["66"] = 17; // Column Q
-    if (!historicalCols["64"] && lastCol >= 18) historicalCols["64"] = 18; // Column R
-    if (!historicalCols["63"] && lastCol >= 19) historicalCols["63"] = 19; // Column S
+    if (scanned69Col === -1) scanned69Col = 13; // Column M
+    if (result69Col === -1 && lastCol >= 14) result69Col = 14; // Column N
+    if (stickerCol === -1 && lastCol >= 15) stickerCol = 15; // Column O
+    if (auditorCol === -1 && lastCol >= 16) auditorCol = 16; // Column P
+    if (!historicalCols["68"] && lastCol >= 17) historicalCols["68"] = 17; // Column Q
+    if (!historicalCols["67"] && lastCol >= 18) historicalCols["67"] = 18; // Column R
+    if (!historicalCols["66"] && lastCol >= 19) historicalCols["66"] = 19; // Column S
+    if (!historicalCols["64"] && lastCol >= 20) historicalCols["64"] = 20; // Column T
+    if (!historicalCols["63"] && lastCol >= 21) historicalCols["63"] = 21; // Column U
   }
 
   if (lastRow >= 5 && detectedHeaderRow <= 5) {
@@ -541,8 +527,10 @@ function detectSheetHeaderAndColumns(sheet) {
     headerRow: detectedHeaderRow,
     dataStartRow: detectedHeaderRow + 1,
     colMap: colMap,
+    scanned69Col: scanned69Col,
     result69Col: result69Col,
     stickerCol: stickerCol,
+    auditorCol: auditorCol,
     historicalCols: historicalCols
   };
 }
@@ -623,25 +611,22 @@ function buildAssetIndex(forceRefresh) {
       
       totalCount++;
       
-      // Check current audit result in 'หมายเหตุปี 69'
+      // Check current audit results in 'Scanned 69' and 'หมายเหตุปี 69'
+      var scanned69Val = (schema.scanned69Col !== -1) ? String(row[schema.scanned69Col - 1] || "").trim() : "";
       var result69Val = (schema.result69Col !== -1) ? String(row[schema.result69Col - 1] || "").trim() : "";
       var stickerVal = (schema.stickerCol !== -1) ? String(row[schema.stickerCol - 1] || "").trim() : "";
       
-      // Determine verified status
-      var statusDerived = "Unverified";
-      var isVerified = false;
+      // Determine verified status strictly from Column M ('Scanned 69')
+      var statusDerived = "";
+      var isVerified = (scanned69Val !== "");
       
-      if (result69Val !== "") {
-        isVerified = true;
+      if (isVerified) {
         verifiedCount++;
-        var rLow = result69Val.toLowerCase();
-        if (rLow.indexOf("good") !== -1 || rLow.indexOf("ปกติ") !== -1 || rLow.indexOf("ดี") !== -1) {
-          statusDerived = "Good";
-          goodCount++;
-        } else if (rLow.indexOf("damaged") !== -1 || rLow.indexOf("ชำรุด") !== -1) {
+        var statusKey = scanned69Val.toLowerCase();
+        if (statusKey.indexOf("ชำรุด") !== -1 || statusKey.indexOf("damaged") !== -1) {
           statusDerived = "Damaged";
           damagedCount++;
-        } else if (rLow.indexOf("missing") !== -1 || rLow.indexOf("สูญหาย") !== -1) {
+        } else if (statusKey.indexOf("สูญหาย") !== -1 || statusKey.indexOf("หาไม่เจอ") !== -1 || statusKey.indexOf("missing") !== -1 || statusKey.indexOf("ไม่พบ") !== -1) {
           statusDerived = "Missing";
           missingCount++;
         } else {
@@ -672,8 +657,9 @@ function buildAssetIndex(forceRefresh) {
         sheetName: roomInfo.name,
         rowIndex: startRow + r,
         status: statusDerived,
+        scanned69: scanned69Val,
         auditResult69: result69Val,
-        sticker: stickerVal || (isVerified ? "Yes" : "No"),
+        sticker: stickerVal || (isVerified ? "ปกติ" : "ปกติ"),
         procurementCondition: procurementCondition,
         historicalResults: historicalData
       };
@@ -705,12 +691,92 @@ function buildAssetIndex(forceRefresh) {
 }
 
 /**
- * Dynamic Multi-Sheet Router: Searches across all room worksheets
+ * Fast lookup directly from Master_Asset sheet (v1.1.3i 6-Column Primary Database)
+ */
+function lookupAssetInMaster(masterSheet, code) {
+  if (!masterSheet || masterSheet.getLastRow() <= 1) return { found: false };
+  
+  var lastRow = masterSheet.getLastRow();
+  var numCols = Math.max(5, masterSheet.getLastColumn());
+  var data = masterSheet.getRange(1, 1, lastRow, numCols).getValues();
+  var headers = data[0].map(function(h) { return String(h || "").trim(); });
+  
+  var idIdx = headers.indexOf("Inventory number");
+  if (idIdx === -1) idIdx = 0;
+  var desc1Idx = headers.indexOf("Asset description1");
+  if (desc1Idx === -1) desc1Idx = 1;
+  var roomIdx = headers.indexOf("Room");
+  if (roomIdx === -1) roomIdx = 2;
+  var scannedIdx = headers.indexOf("Scanned 69");
+  if (scannedIdx === -1) scannedIdx = 3;
+  var resultIdx = headers.indexOf("หมายเหตุปี 69");
+  if (resultIdx === -1) resultIdx = 4;
+  var stickerIdx = headers.indexOf("สติกเกอร์");
+  
+  var cleanTarget = code.toUpperCase();
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var currentId = String(row[idIdx] || "").trim().toUpperCase();
+    if (currentId === cleanTarget) {
+      var rName = String(row[roomIdx] || "").trim();
+      var desc1 = String(row[desc1Idx] || "").trim();
+      var scanned69 = String(row[scannedIdx] || "").trim();
+      var result69 = String(row[resultIdx] || "").trim();
+      var sticker = (stickerIdx !== -1 ? String(row[stickerIdx] || "").trim() : "") || "ปกติ";
+      
+      var isVerified = (scanned69 !== "");
+      var statusDerived = "";
+      if (isVerified) {
+        var statusKey = scanned69.toLowerCase();
+        if (statusKey.indexOf("ชำรุด") !== -1 || statusKey.indexOf("damaged") !== -1) {
+          statusDerived = "Damaged";
+        } else if (statusKey.indexOf("สูญหาย") !== -1 || statusKey.indexOf("หาไม่เจอ") !== -1 || statusKey.indexOf("missing") !== -1 || statusKey.indexOf("ไม่พบ") !== -1) {
+          statusDerived = "Missing";
+        } else {
+          statusDerived = "Good";
+        }
+      }
+      
+      var assetRecord = {
+        assetId: String(row[idIdx] || "").trim(),
+        no: i,
+        itemName: desc1 || "Unnamed Asset",
+        registeredLocation: rName,
+        sheetName: rName,
+        rowIndex: i + 1,
+        status: statusDerived,
+        scanned69: scanned69,
+        auditResult69: result69,
+        sticker: sticker,
+        isVerified: isVerified
+      };
+      
+      return { found: true, asset: assetRecord, source: "Master_Asset" };
+    }
+  }
+  return { found: false };
+}
+
+/**
+ * Dynamic Multi-Sheet Router: Searches across Master_Asset first, then all room worksheets
  */
 function lookupAsset(rawCode) {
   var code = cleanAssetCode(rawCode);
   if (!code) return { found: false, error: "Empty asset code provided." };
   
+  // 1. Primary: Search in Master_Asset sheet
+  var ss = getSpreadsheet();
+  if (ss) {
+    var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
+    if (masterSheet && masterSheet.getLastRow() > 1) {
+      var masterRes = lookupAssetInMaster(masterSheet, code);
+      if (masterRes && masterRes.found) {
+        return masterRes;
+      }
+    }
+  }
+  
+  // 2. Secondary fallback: Search cached/indexed room worksheets
   var cachedIndexData = buildAssetIndex(false);
   var index = cachedIndexData.index || {};
   
@@ -731,19 +797,22 @@ function lookupAsset(rawCode) {
   return {
     found: false,
     assetCode: code,
-    error: "Inventory Number '" + code + "' was not found in any registered laboratory room."
+    error: "Inventory Number '" + code + "' was not found in Master Table or any registered laboratory room."
   };
 }
 
 /**
- * 1-Tap Status In-Place Mutation Engine
- * Updates ONLY 'หมายเหตุปี 69' and 'Sticker' in the target room worksheet!
+ * 1-Tap Status In-Place Mutation & Master Bi-Sync Engine (v1.1.1b)
+ * Updates 'Scanned 69', 'หมายเหตุปี 69', and 'สติกเกอร์' in both Master_Asset and target Room Worksheet!
  */
 function updateAssetStatus(payload) {
   return withLock(function() {
     var rawAssetId = cleanAssetCode(payload.assetId);
-    var newStatus = String(payload.status || "").trim();
+    var newStatus = String(payload.status || payload.scanned69 || "").trim();
     var notes = String(payload.notes || "").trim();
+    var destinationRoom = String(payload.destinationRoom || "").trim();
+    var renameText = String(payload.renameText || "").trim();
+    var sticker = String(payload.sticker || "ปกติ").trim();
     var currentRoom = String(payload.currentRoom || "").trim();
     var authUser = authenticateSession();
     
@@ -751,120 +820,435 @@ function updateAssetStatus(payload) {
       throw new Error("Missing asset inventory number.");
     }
     
-    var validStatuses = ["Good", "Damaged", "Missing"];
+    var validStatuses = STATUS_OPTIONS.concat(["Good", "Damaged", "Missing"]);
     if (validStatuses.indexOf(newStatus) === -1) {
-      throw new Error("Invalid status: " + newStatus + ". Permitted values: " + validStatuses.join(", "));
+      throw new Error("Invalid status: " + newStatus + ". Permitted values: " + STATUS_OPTIONS.join(", "));
     }
     
     var ss = getSpreadsheet();
     if (!ss) throw new Error("No active spreadsheet available.");
+
+    var bangkokNow = getBangkokTimestamp();
     
     // Resolve sheet and row
     var targetSheetName = payload.sheetName;
     var targetRowIndex = payload.rowIndex;
     
-    if (!targetSheetName || !targetRowIndex) {
-      var lookup = lookupAsset(rawAssetId);
-      if (!lookup.found) {
+    var lookup = lookupAsset(rawAssetId);
+    if (!targetSheetName) {
+      if (lookup.found) {
+        targetSheetName = lookup.asset.sheetName || lookup.asset.registeredLocation;
+      } else {
         throw new Error("Cannot update: Asset '" + rawAssetId + "' not found.");
       }
-      targetSheetName = lookup.asset.sheetName;
-      targetRowIndex = lookup.asset.rowIndex;
     }
     
-    var sheet = ss.getSheetByName(targetSheetName);
-    if (!sheet) throw new Error("Sheet tab '" + targetSheetName + "' not found.");
-    
-    var schema = detectSheetHeaderAndColumns(sheet);
-    var lastCol = sheet.getLastColumn();
-    
-    // Ensure 'หมายเหตุปี 69' column exists on this sheet
-    var resultCol = schema.result69Col;
-    if (resultCol === -1) {
-      resultCol = lastCol + 1;
-      sheet.getRange(schema.headerRow, resultCol).setValue(PROCUREMENT_COLUMNS.AUDIT_RESULT_69)
-        .setFontWeight("bold")
-        .setBackground("#0f172a")
-        .setFontColor("#34d399");
-      lastCol++;
+    // Construct remarks text for Column N ('หมายเหตุปี 69')
+    var remarksParts = [];
+    if (newStatus === "ใช้งานอยู่+ย้ายไป..." && destinationRoom) {
+      remarksParts.push("ย้ายไป " + destinationRoom);
+    } else if (newStatus === "ใช้งานอยู่+แก้ไขชื่อเป็น..." && renameText) {
+      remarksParts.push("แก้ชื่อเป็น: " + renameText);
     }
+    if (notes) {
+      remarksParts.push(notes);
+    }
+    if (currentRoom && currentRoom !== "ALL" && targetSheetName && currentRoom !== targetSheetName) {
+      remarksParts.push("[Found in " + currentRoom + "]");
+    }
+    var finalRemarks = remarksParts.join(" | ");
 
-    // Ensure 'Sticker' column exists on this sheet
-    var stickerCol = schema.stickerCol;
-    if (stickerCol === -1) {
-      stickerCol = lastCol + 1;
-      sheet.getRange(schema.headerRow, stickerCol).setValue(PROCUREMENT_COLUMNS.STICKER)
-        .setFontWeight("bold")
-        .setBackground("#0f172a")
-        .setFontColor("#38bdf8");
-    }
-
-    // Verify row still points to the asset
-    var assetIdCol = schema.colMap.inventoryNumber || 2;
-    var currentRowAssetId = String(sheet.getRange(targetRowIndex, assetIdCol).getValue() || "").trim();
-    
-    if (currentRowAssetId.toUpperCase() !== rawAssetId.toUpperCase()) {
-      var values = sheet.getRange(schema.dataStartRow, assetIdCol, sheet.getLastRow() - schema.dataStartRow + 1, 1).getValues();
-      var foundRow = -1;
-      for (var i = 0; i < values.length; i++) {
-        if (String(values[i][0] || "").trim().toUpperCase() === rawAssetId.toUpperCase()) {
-          foundRow = schema.dataStartRow + i;
-          break;
+    // 1. BI-SYNC: UPDATE MASTER_ASSET SHEET (IF PRESENT)
+    var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
+    var masterUpdated = false;
+    if (masterSheet && masterSheet.getLastRow() > 1) {
+      var mData = masterSheet.getDataRange().getValues();
+      var mHeaders = mData[0].map(function(h) { return String(h || "").trim(); });
+      var mAssetIdIdx = mHeaders.indexOf("Inventory number");
+      if (mAssetIdIdx === -1) mAssetIdIdx = 0;
+      var mDesc1Idx = mHeaders.indexOf("Asset description1");
+      if (mDesc1Idx === -1) mDesc1Idx = 1;
+      var mRoomIdx = mHeaders.indexOf("Room");
+      if (mRoomIdx === -1) mRoomIdx = 2;
+      var mScanned69Idx = mHeaders.indexOf("Scanned 69");
+      if (mScanned69Idx === -1) mScanned69Idx = 3;
+      var mResult69Idx = mHeaders.indexOf("หมายเหตุปี 69");
+      if (mResult69Idx === -1) mResult69Idx = 4;
+      var mStickerIdx = mHeaders.indexOf("สติกเกอร์");
+      if (mStickerIdx === -1 && mHeaders.length > 5) mStickerIdx = 5;
+      var mLastUpdIdx = mHeaders.indexOf("LastUpdated");
+      
+      if (mAssetIdIdx !== -1) {
+        for (var m = 1; m < mData.length; m++) {
+          if (String(mData[m][mAssetIdIdx] || "").trim().toUpperCase() === rawAssetId.toUpperCase()) {
+            var mRow = m + 1;
+            if (mScanned69Idx !== -1) masterSheet.getRange(mRow, mScanned69Idx + 1).setValue(newStatus);
+            if (mResult69Idx !== -1) masterSheet.getRange(mRow, mResult69Idx + 1).setValue(finalRemarks);
+            if (mStickerIdx !== -1) masterSheet.getRange(mRow, mStickerIdx + 1).setValue(sticker);
+            if (renameText && mDesc1Idx !== -1) masterSheet.getRange(mRow, mDesc1Idx + 1).setValue(renameText);
+            if (destinationRoom && mRoomIdx !== -1) masterSheet.getRange(mRow, mRoomIdx + 1).setValue(destinationRoom);
+            if (mLastUpdIdx !== -1) masterSheet.getRange(mRow, mLastUpdIdx + 1).setValue(bangkokNow);
+            masterUpdated = true;
+            break;
+          }
         }
       }
-      if (foundRow === -1) {
-        throw new Error("Row alignment check failed: could not re-locate " + rawAssetId);
-      }
-      targetRowIndex = foundRow;
-    }
-    
-    // Format audit result string for 'หมายเหตุปี 69'
-    var resultText = newStatus;
-    if (notes) {
-      resultText += " (" + notes + ")";
-    }
-    if (currentRoom && currentRoom !== "ALL" && currentRoom !== targetSheetName) {
-      resultText += " [Found in " + currentRoom + "]";
     }
 
-    // Write in-place to the target row
-    sheet.getRange(targetRowIndex, resultCol).setValue(resultText);
-    sheet.getRange(targetRowIndex, stickerCol).setValue("Yes");
+    // 2. BI-SYNC: UPDATE TARGET ROOM WORKSHEET
+    var roomSheet = targetSheetName ? getRoomSheetByName(ss, targetSheetName) : null;
+    var roomUpdated = false;
+    if (roomSheet) {
+      var schema = detectSheetHeaderAndColumns(roomSheet);
+      
+      // Auto repair or insert Row 5 headers if missing
+      if (schema.scanned69Col === -1 || schema.result69Col === -1 || schema.stickerCol === -1) {
+        setupRow5AuditHeaders(ss);
+        schema = detectSheetHeaderAndColumns(roomSheet);
+      }
+      
+      var assetIdCol = schema.colMap.inventoryNumber || 2;
+      var rLastRow = roomSheet.getLastRow();
+      
+      var foundRow = -1;
+      if (targetRowIndex && targetRowIndex >= schema.dataStartRow && targetRowIndex <= rLastRow) {
+        var chkId = String(roomSheet.getRange(targetRowIndex, assetIdCol).getValue() || "").trim();
+        if (chkId.toUpperCase() === rawAssetId.toUpperCase()) {
+          foundRow = targetRowIndex;
+        }
+      }
+      
+      if (foundRow === -1 && rLastRow >= schema.dataStartRow) {
+        var valRange = roomSheet.getRange(schema.dataStartRow, assetIdCol, rLastRow - schema.dataStartRow + 1, 1).getValues();
+        for (var vr = 0; vr < valRange.length; vr++) {
+          if (String(valRange[vr][0] || "").trim().toUpperCase() === rawAssetId.toUpperCase()) {
+            foundRow = schema.dataStartRow + vr;
+            break;
+          }
+        }
+      }
+      
+      if (foundRow !== -1) {
+        if (schema.scanned69Col !== -1) roomSheet.getRange(foundRow, schema.scanned69Col).setValue(newStatus);
+        if (schema.result69Col !== -1) roomSheet.getRange(foundRow, schema.result69Col).setValue(finalRemarks);
+        if (schema.stickerCol !== -1) roomSheet.getRange(foundRow, schema.stickerCol).setValue(sticker);
+        if (schema.auditorCol !== -1) {
+          var auditorName = (authUser && (authUser.name || authUser.displayName)) ? (authUser.name || authUser.displayName) : (payload.auditor || "Nattapat Poolyam (Mek)");
+          roomSheet.getRange(foundRow, schema.auditorCol).setValue(auditorName);
+        }
+        if (renameText && schema.colMap.description1) {
+          roomSheet.getRange(foundRow, schema.colMap.description1).setValue(renameText);
+        }
+        if (destinationRoom && schema.colMap.room) {
+          roomSheet.getRange(foundRow, schema.colMap.room).setValue(destinationRoom);
+        }
+        roomUpdated = true;
+      }
+    }
     
-    // Invalidate local cache
+    // Immediate flush to guarantee real-time persistence across sheets
+    try {
+      SpreadsheetApp.flush();
+    } catch (flushErr) {}
+    
+    // Invalidate caches
     try {
       CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
+      CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
     } catch (e) {}
     
-    logEvent("UPDATE_ASSET_STATUS", "SUCCESS", 0, "Asset " + rawAssetId + " recorded in " + PROCUREMENT_COLUMNS.AUDIT_RESULT_69 + " as " + resultText, {
+    logEvent("UPDATE_ASSET_STATUS", "SUCCESS", 0, "Asset " + rawAssetId + " updated: " + newStatus, {
       assetId: rawAssetId,
       sheet: targetSheetName,
-      row: targetRowIndex,
       status: newStatus,
-      result69: resultText,
-      sticker: "Yes"
+      scanned69: newStatus,
+      result69: finalRemarks,
+      sticker: sticker,
+      masterUpdated: masterUpdated,
+      roomUpdated: roomUpdated
     });
     
     return {
       success: true,
       assetId: rawAssetId,
       sheetName: targetSheetName,
-      rowIndex: targetRowIndex,
       status: newStatus,
-      auditResult69: resultText,
-      sticker: "Yes",
-      roomSummary: getRoomAuditSummary(targetSheetName)
+      scanned69: newStatus,
+      auditResult69: finalRemarks,
+      sticker: sticker,
+      masterUpdated: masterUpdated,
+      roomUpdated: roomUpdated,
+      roomSummary: getRoomAuditSummary(targetSheetName || "ALL")
     };
   }, 30000);
 }
 
 /**
+ * Register & Audit an Unlisted Asset (v1.1.2a)
+ * Appends a new asset record into both the target Room Worksheet and Master_Asset.
+ * Default Column N ('หมายเหตุปี 69'): "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ"
+ */
+function addNewUnlistedAsset(payload) {
+  return withLock(function() {
+    var rawAssetId = cleanAssetCode(payload.assetId);
+    if (!rawAssetId) throw new Error("Missing asset inventory number.");
+
+    var newStatus = String(payload.status || payload.scanned69 || "ใช้งานอยู่").trim();
+    var itemName = String(payload.itemName || "ครุภัณฑ์ตรวจพบนอกฐานข้อมูล").trim();
+    var targetRoom = String(payload.targetRoom || payload.registeredLocation || payload.sheetName || "Storage").trim();
+    var notes = String(payload.notes || "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ").trim();
+    var sticker = String(payload.sticker || "ปกติ").trim();
+    var bangkokNow = getBangkokTimestamp();
+    
+    var ss = getSpreadsheet();
+    if (!ss) throw new Error("No active spreadsheet available.");
+
+    var roomSheet = getRoomSheetByName(ss, targetRoom);
+    if (!roomSheet) {
+      var sheets = getRoomSheets(ss);
+      if (sheets.length > 0) {
+        roomSheet = ss.getSheetByName(sheets[0].name);
+        targetRoom = sheets[0].name;
+      }
+    }
+
+    var roomInserted = false;
+    var nextItemNo = 1;
+    if (roomSheet) {
+      var schema = detectSheetHeaderAndColumns(roomSheet);
+      if (schema.scanned69Col === -1 || schema.result69Col === -1 || schema.stickerCol === -1) {
+        setupRow5AuditHeaders(ss);
+        schema = detectSheetHeaderAndColumns(roomSheet);
+      }
+
+      var lastRow = roomSheet.getLastRow();
+      var insertRow = Math.max(lastRow + 1, schema.dataStartRow);
+      nextItemNo = (insertRow >= schema.dataStartRow) ? (insertRow - schema.dataStartRow + 1) : 1;
+
+      var maxCols = Math.max(roomSheet.getLastColumn(), 21);
+      var newRowValues = new Array(maxCols).fill("");
+      
+      if (schema.colMap.no) newRowValues[schema.colMap.no - 1] = nextItemNo;
+      if (schema.colMap.inventoryNumber) newRowValues[schema.colMap.inventoryNumber - 1] = rawAssetId;
+      if (schema.colMap.asset) newRowValues[schema.colMap.asset - 1] = rawAssetId;
+      if (schema.colMap.description1) newRowValues[schema.colMap.description1 - 1] = itemName;
+      if (schema.colMap.room) newRowValues[schema.colMap.room - 1] = targetRoom;
+      if (schema.scanned69Col !== -1) newRowValues[schema.scanned69Col - 1] = newStatus;
+      if (schema.result69Col !== -1) newRowValues[schema.result69Col - 1] = notes;
+      if (schema.stickerCol !== -1) newRowValues[schema.stickerCol - 1] = sticker;
+      if (schema.auditorCol !== -1) {
+        var unlistedAuditor = (authUser && (authUser.name || authUser.displayName)) ? (authUser.name || authUser.displayName) : (payload.auditor || "Nattapat Poolyam (Mek)");
+        newRowValues[schema.auditorCol - 1] = unlistedAuditor;
+      }
+
+      roomSheet.getRange(insertRow, 1, 1, newRowValues.length).setValues([newRowValues]);
+      roomInserted = true;
+    }
+
+    // Bi-sync to Master_Asset if present
+    var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
+    var masterInserted = false;
+    if (masterSheet && masterSheet.getLastRow() >= 1) {
+      var mHeaders = masterSheet.getRange(1, 1, 1, masterSheet.getLastColumn()).getValues()[0].map(function(h) { return String(h || "").trim(); });
+      var mRowVals = new Array(mHeaders.length).fill("");
+      
+      var mNoIdx = mHeaders.indexOf("No.");
+      var mIdIdx = mHeaders.indexOf("Inventory number");
+      var mAssetIdx = mHeaders.indexOf("Asset");
+      var mDesc1Idx = mHeaders.indexOf("Asset description1");
+      var mRoomIdx = mHeaders.indexOf("Room");
+      var mLocIdx = mHeaders.indexOf("Asset location");
+      var mCondIdx = mHeaders.indexOf("สภาพของสินทรัพย์");
+      var mCapIdx = mHeaders.indexOf("Cap.date");
+      var mScanned69Idx = mHeaders.indexOf("Scanned 69");
+      var mResult69Idx = mHeaders.indexOf("หมายเหตุปี 69");
+      var mStickerIdx = mHeaders.indexOf("สติกเกอร์");
+      var mSourceIdx = mHeaders.indexOf("SourceSheet");
+      
+      if (mNoIdx !== -1) mRowVals[mNoIdx] = masterSheet.getLastRow();
+      if (mIdIdx !== -1) mRowVals[mIdIdx] = rawAssetId;
+      if (mAssetIdx !== -1) mRowVals[mAssetIdx] = rawAssetId;
+      if (mDesc1Idx !== -1) mRowVals[mDesc1Idx] = itemName;
+      if (mRoomIdx !== -1) mRowVals[mRoomIdx] = targetRoom;
+      if (mLocIdx !== -1) mRowVals[mLocIdx] = targetRoom;
+      if (mCondIdx !== -1) mRowVals[mCondIdx] = "ใช้งานได้";
+      if (mCapIdx !== -1) mRowVals[mCapIdx] = bangkokNow;
+      if (mScanned69Idx !== -1) mRowVals[mScanned69Idx] = newStatus;
+      if (mResult69Idx !== -1) mRowVals[mResult69Idx] = notes;
+      if (mStickerIdx !== -1) mRowVals[mStickerIdx] = sticker;
+      if (mSourceIdx !== -1) mRowVals[mSourceIdx] = targetRoom;
+
+      masterSheet.appendRow(mRowVals);
+      masterInserted = true;
+    }
+
+    // Immediate flush to guarantee real-time persistence across sheets
+    try {
+      SpreadsheetApp.flush();
+    } catch (flushErr) {}
+
+    // Invalidate caches
+    try {
+      CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
+      CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
+    } catch (e) {}
+
+    logEvent("ADD_UNLISTED_ASSET", "SUCCESS", 0, "New asset " + rawAssetId + " registered into " + targetRoom, {
+      assetId: rawAssetId,
+      itemName: itemName,
+      room: targetRoom,
+      status: newStatus,
+      notes: notes,
+      sticker: sticker,
+      roomInserted: roomInserted,
+      masterInserted: masterInserted
+    });
+
+    return {
+      success: true,
+      assetId: rawAssetId,
+      itemName: itemName,
+      sheetName: targetRoom,
+      registeredLocation: targetRoom,
+      status: newStatus,
+      scanned69: newStatus,
+      auditResult69: notes,
+      sticker: sticker,
+      roomSummary: getRoomAuditSummary(targetRoom || "ALL")
+    };
+  }, 30000);
+}
+
+/**
+ * Fast Master Table Audit Summary Engine (v1.1.3l 6-Column Dynamic Schema)
+ * Extracts lean mobile-only payloads for 10x faster JSON serialization & network streaming.
+ */
+function getMasterAuditSummary(masterSheet, roomName) {
+  var lastRow = masterSheet.getLastRow();
+  if (lastRow <= 1) {
+    return {
+      roomName: roomName || "ALL",
+      total: 0,
+      verified: 0,
+      unverified: 0,
+      percentComplete: 0,
+      good: 0,
+      damaged: 0,
+      missing: 0,
+      items: [],
+      source: "Master_Asset"
+    };
+  }
+
+  // Fetch columns dynamically according to Master Table schema
+  var numCols = Math.max(6, masterSheet.getLastColumn());
+  var data = masterSheet.getRange(1, 1, lastRow, numCols).getValues();
+  var headers = data[0].map(function(h) { return String(h || "").trim(); });
+
+  var idIdx = headers.indexOf("Inventory number");
+  if (idIdx === -1) idIdx = 0;
+  var desc1Idx = headers.indexOf("Asset description1");
+  if (desc1Idx === -1) desc1Idx = 1;
+  var roomIdx = headers.indexOf("Room");
+  if (roomIdx === -1) roomIdx = 2;
+  var scannedIdx = headers.indexOf("Scanned 69");
+  if (scannedIdx === -1) scannedIdx = 3;
+  var resultIdx = headers.indexOf("หมายเหตุปี 69");
+  if (resultIdx === -1) resultIdx = 4;
+  var stickerIdx = headers.indexOf("สติกเกอร์");
+  if (stickerIdx === -1 && headers.length > 5) stickerIdx = 5;
+
+  var targetRoom = (roomName && roomName.toUpperCase() !== "ALL") ? roomName.trim().toLowerCase() : null;
+
+  var total = 0;
+  var verified = 0;
+  var good = 0;
+  var damaged = 0;
+  var missing = 0;
+  var items = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var aId = String(row[idIdx] || "").trim();
+    if (!aId) continue;
+
+    var rName = String(row[roomIdx] || "").trim();
+    if (targetRoom && rName.toLowerCase() !== targetRoom) {
+      continue;
+    }
+
+    total++;
+    var desc1 = String(row[desc1Idx] || "").trim();
+    var scanned69Val = String(row[scannedIdx] || "").trim();
+    var result69Val = String(row[resultIdx] || "").trim();
+    var stickerVal = (stickerIdx !== -1 ? String(row[stickerIdx] || "").trim() : "") || "ปกติ";
+
+    var isVerified = (scanned69Val !== "");
+    var statusVal = "";
+
+    if (isVerified) {
+      verified++;
+      var statusKey = scanned69Val.toLowerCase();
+      if (statusKey.indexOf("ชำรุด") !== -1 || statusKey.indexOf("damaged") !== -1) {
+        statusVal = "Damaged";
+        damaged++;
+      } else if (statusKey.indexOf("สูญหาย") !== -1 || statusKey.indexOf("หาไม่เจอ") !== -1 || statusKey.indexOf("missing") !== -1 || statusKey.indexOf("ไม่พบ") !== -1) {
+        statusVal = "Missing";
+        missing++;
+      } else {
+        statusVal = "Good";
+        good++;
+      }
+    }
+
+    // Lean payload: strictly only what the mobile app displays & filters!
+    items.push({
+      assetId: aId,
+      no: i,
+      itemName: desc1 || "Unnamed Asset",
+      registeredLocation: rName,
+      sheetName: rName,
+      rowIndex: i + 1,
+      status: statusVal,
+      scanned69: scanned69Val,
+      auditResult69: result69Val,
+      sticker: stickerVal,
+      isVerified: isVerified
+    });
+  }
+
+  var unverified = total - verified;
+  var percent = total > 0 ? Math.round((verified / total) * 100) : 0;
+
+  return {
+    roomName: roomName || "ALL",
+    total: total,
+    verified: verified,
+    unverified: unverified,
+    percentComplete: percent,
+    good: good,
+    damaged: damaged,
+    missing: missing,
+    items: items,
+    source: "Master_Asset"
+  };
+}
+
+/**
  * Returns audit statistics and items checklist for a given room or all rooms
+ * Primary: Queries Master_Asset for instant sub-second speed. Secondary: Iterates room sheets with fixed Row 6 offsets.
  */
 function getRoomAuditSummary(roomName) {
   var ss = getSpreadsheet();
   if (!ss) return { total: 0, verified: 0, unverified: 0, items: [] };
+
+  // 1. Primary: Aggregate directly from Master_Asset sheet
+  var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
+  if (masterSheet && masterSheet.getLastRow() > 1) {
+    return getMasterAuditSummary(masterSheet, roomName);
+  }
   
+  // 2. Secondary fallback: Scan room worksheets using fixed Row 6 offsets
   var roomSheets = getRoomSheets(ss);
   var targetRooms = [];
   
@@ -886,37 +1270,32 @@ function getRoomAuditSummary(roomName) {
     if (!sheet) return;
     
     var lastRow = sheet.getLastRow();
-    var lastCol = sheet.getLastColumn();
-    if (lastRow <= 1 || lastCol === 0) return;
+    if (lastRow < 6) return; // Row 5 is header, data starts at Row 6
     
-    var schema = detectSheetHeaderAndColumns(sheet);
-    var startRow = schema.dataStartRow;
-    if (startRow > lastRow) return;
-    
-    var values = sheet.getRange(startRow, 1, lastRow - startRow + 1, lastCol).getValues();
+    var values = sheet.getRange(6, 1, lastRow - 5, 20).getValues();
     
     for (var r = 0; r < values.length; r++) {
       var row = values[r];
-      var aId = String(row[schema.colMap.inventoryNumber - 1] || "").trim();
+      var aId = String(row[1] || "").trim(); // Col B (idx 1)
       if (!aId) continue;
       
       total++;
-      var result69Val = (schema.result69Col !== -1) ? String(row[schema.result69Col - 1] || "").trim() : "";
-      var stickerVal = (schema.stickerCol !== -1) ? String(row[schema.stickerCol - 1] || "").trim() : "";
+      var desc1 = String(row[3] || "").trim(); // Col D (idx 3)
+      var roomLocation = String(row[8] || rName).trim(); // Col I (idx 8)
+      var scanned69Val = String(row[12] || "").trim(); // Col M (idx 12)
+      var result69Val = String(row[13] || "").trim(); // Col N (idx 13)
+      var stickerVal = String(row[14] || "").trim() || "ปกติ"; // Col O (idx 14)
       
-      var isVerified = (result69Val !== "");
-      var statusVal = "Unverified";
+      var isVerified = (scanned69Val !== "");
+      var statusVal = "";
       
       if (isVerified) {
         verified++;
-        var rLow = result69Val.toLowerCase();
-        if (rLow.indexOf("good") !== -1 || rLow.indexOf("ปกติ") !== -1 || rLow.indexOf("ดี") !== -1) {
-          statusVal = "Good";
-          good++;
-        } else if (rLow.indexOf("damaged") !== -1 || rLow.indexOf("ชำรุด") !== -1) {
+        var statusKey = scanned69Val.toLowerCase();
+        if (statusKey.indexOf("ชำรุด") !== -1 || statusKey.indexOf("damaged") !== -1) {
           statusVal = "Damaged";
           damaged++;
-        } else if (rLow.indexOf("missing") !== -1 || rLow.indexOf("สูญหาย") !== -1) {
+        } else if (statusKey.indexOf("สูญหาย") !== -1 || statusKey.indexOf("หาไม่เจอ") !== -1 || statusKey.indexOf("missing") !== -1 || statusKey.indexOf("ไม่พบ") !== -1) {
           statusVal = "Missing";
           missing++;
         } else {
@@ -925,30 +1304,18 @@ function getRoomAuditSummary(roomName) {
         }
       }
       
-      var itemName = schema.colMap.description1 ? String(row[schema.colMap.description1 - 1] || "").trim() : "Unnamed";
-      var brandModel = schema.colMap.description2 ? String(row[schema.colMap.description2 - 1] || "").trim() : "";
-      var roomLocation = schema.colMap.room ? String(row[schema.colMap.room - 1] || "").trim() : rName;
-      var procurementCondition = schema.colMap.conditionThai ? String(row[schema.colMap.conditionThai - 1] || "").trim() : "";
-      var noVal = schema.colMap.no ? String(row[schema.colMap.no - 1] || "").trim() : (r + 1);
-
-      var historicalData = {};
-      Object.keys(schema.historicalCols).forEach(function(yr) {
-        historicalData[yr] = String(row[schema.historicalCols[yr] - 1] || "").trim();
-      });
-      
       items.push({
         assetId: aId,
-        no: noVal,
-        itemName: itemName,
-        brandModel: brandModel,
+        no: row[0] || (r + 1),
+        itemName: desc1 || "Unnamed Asset",
         registeredLocation: roomLocation || rName,
         sheetName: rName,
-        rowIndex: startRow + r,
+        rowIndex: 6 + r,
         status: statusVal,
+        scanned69: scanned69Val,
         auditResult69: result69Val,
-        sticker: stickerVal || (isVerified ? "Yes" : "No"),
-        procurementCondition: procurementCondition,
-        historicalResults: historicalData
+        sticker: stickerVal,
+        isVerified: isVerified
       });
     }
   });
@@ -978,10 +1345,12 @@ function getInitialPayload() {
   var config = getLocalConfig();
   var roomSheets = ss ? getRoomSheets(ss) : [];
   var rooms = roomSheets.map(function(r) { return r.name; });
+  if (!rooms || rooms.length === 0) {
+    rooms = (typeof ROOM_SHEETS_CONFIG !== "undefined" ? ROOM_SHEETS_CONFIG : []).slice();
+  }
   var kernelRooms = getNexusRoomDirectory();
-  var dynamicRoomData = ss ? inspectDynamicRoomTypes(ss) : { roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"], roomMap: {} };
   
-  var defaultRoom = rooms.length > 0 ? rooms[0] : "ALL";
+  var defaultRoom = "ALL";
   var initialSummary = getRoomAuditSummary(defaultRoom);
   
   return {
@@ -990,8 +1359,10 @@ function getInitialPayload() {
     rooms: rooms,
     roomSheets: roomSheets,
     kernelRooms: kernelRooms,
-    roomTypes: dynamicRoomData.roomTypes,
-    roomMap: dynamicRoomData.roomMap,
+    statusGroups: typeof STATUS_GROUPS !== "undefined" ? STATUS_GROUPS : {},
+    statusOptions: typeof STATUS_OPTIONS !== "undefined" ? STATUS_OPTIONS : [],
+    stickerOptions: typeof STICKER_OPTIONS !== "undefined" ? STICKER_OPTIONS : ["ปกติ", "ปริ้นใหม่", "ปริ้นใหม่+แก้ข้อมูล"],
+    roomSheetsConfig: typeof ROOM_SHEETS_CONFIG !== "undefined" ? ROOM_SHEETS_CONFIG : rooms,
     currentRoom: defaultRoom,
     summary: initialSummary,
     spreadsheetId: ss ? ss.getId() : DEFAULT_ASSET_SPREADSHEET_ID
@@ -999,10 +1370,11 @@ function getInitialPayload() {
 }
 
 /**
- * Creates/refreshes Master Table ('Master_Asset') from all room worksheets
- * Populates only essential columns + dynamic room type
+ * Menu 2: Fast Single-Batch Aggregation of Room Sheets into Master Table ('Master_Asset')
+ * Extracts 6 essential columns from selected room sheets:
+ * Col B (Inventory number), Col D (Asset description1), Col I (Room), Col M (Scanned 69), Col N (หมายเหตุปี 69), Col O (สติกเกอร์)
  */
-function buildMasterTableFromRooms(ss) {
+function buildMasterTableFromRooms(ss, selectedSheetNames) {
   if (!ss) ss = getSpreadsheet();
   if (!ss) throw new Error("No active spreadsheet available.");
   
@@ -1012,72 +1384,54 @@ function buildMasterTableFromRooms(ss) {
       masterSheet = ss.insertSheet(MASTER_SHEET_NAME);
     }
     
-    var roomInspection = inspectDynamicRoomTypes(ss);
-    var roomSheets = getRoomSheets(ss);
-    var masterHeaders = MASTER_ESSENTIAL_COLUMNS;
+    var sheetsToProcess = [];
+    if (Array.isArray(selectedSheetNames) && selectedSheetNames.length > 0) {
+      selectedSheetNames.forEach(function(sName) {
+        var s = ss.getSheetByName(sName);
+        if (s) {
+          sheetsToProcess.push({ name: sName, sheet: s });
+        }
+      });
+    } else {
+      var allRoomSheets = getRoomSheets(ss);
+      allRoomSheets.forEach(function(rInfo) {
+        var s = ss.getSheetByName(rInfo.name);
+        if (s) {
+          sheetsToProcess.push({ name: rInfo.name, sheet: s });
+        }
+      });
+    }
     
+    var masterHeaders = MASTER_HEADERS; // 6 columns: ["Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"]
     var masterRows = [];
     var bangkokNow = getBangkokTimestamp();
     
-    roomSheets.forEach(function(roomInfo) {
-      var sheet = ss.getSheetByName(roomInfo.name);
+    sheetsToProcess.forEach(function(entry) {
+      var sheet = entry.sheet || ss.getSheetByName(entry.name);
       if (!sheet) return;
       
       var lastRow = sheet.getLastRow();
-      var lastCol = sheet.getLastColumn();
-      if (lastRow <= 1 || lastCol === 0) return;
+      if (lastRow < 6) return; // Row 5 is header, data starts at Row 6
       
-      var schema = detectSheetHeaderAndColumns(sheet);
-      var startRow = schema.dataStartRow;
-      if (startRow > lastRow) return;
-      
-      var values = sheet.getRange(startRow, 1, lastRow - startRow + 1, lastCol).getValues();
-      var roomMeta = roomInspection.roomMap[roomInfo.name] || { roomType: "Lab" };
+      // Batch read columns up to Col O (Col 15) from Row 6 down
+      var values = sheet.getRange(6, 1, lastRow - 5, 15).getValues();
       
       for (var r = 0; r < values.length; r++) {
         var row = values[r];
-        var assetId = String(row[schema.colMap.inventoryNumber - 1] || "").trim();
+        var assetId = String(row[1] || "").trim(); // Col B (Inventory number, idx 1)
         if (!assetId) continue;
         
-        var noVal = schema.colMap.no ? String(row[schema.colMap.no - 1] || "").trim() : (r + 1);
-        var desc1 = schema.colMap.description1 ? String(row[schema.colMap.description1 - 1] || "").trim() : "";
-        var desc2 = schema.colMap.description2 ? String(row[schema.colMap.description2 - 1] || "").trim() : "";
-        var roomVal = schema.colMap.room ? String(row[schema.colMap.room - 1] || "").trim() : roomInfo.name;
-        var condition = schema.colMap.conditionThai ? String(row[schema.colMap.conditionThai - 1] || "").trim() : "";
-        var fiscalYear = schema.colMap.fiscalYear ? String(row[schema.colMap.fiscalYear - 1] || "").trim() : "";
+        var desc1 = String(row[3] || "").trim(); // Col D (Asset description1, idx 3)
+        var roomVal = String(row[8] || "").trim() || entry.name; // Col I (Room, idx 8)
+        var scanned69 = String(row[12] || "").trim(); // Col M (Scanned 69, idx 12)
+        var result69 = String(row[13] || "").trim(); // Col N (หมายเหตุปี 69, idx 13)
+        var sticker = String(row[14] || "").trim(); // Col O (สติกเกอร์, idx 14)
         
-        var result69 = (schema.result69Col !== -1) ? String(row[schema.result69Col - 1] || "").trim() : "";
-        var sticker = (schema.stickerCol !== -1) ? String(row[schema.stickerCol - 1] || "").trim() : (result69 ? "Yes" : "No");
-        
-        var yr68 = schema.historicalCols["68"] ? String(row[schema.historicalCols["68"] - 1] || "").trim() : "";
-        var yr67 = schema.historicalCols["67"] ? String(row[schema.historicalCols["67"] - 1] || "").trim() : "";
-        var yr66 = schema.historicalCols["66"] ? String(row[schema.historicalCols["66"] - 1] || "").trim() : "";
-        var yr64 = schema.historicalCols["64"] ? String(row[schema.historicalCols["64"] - 1] || "").trim() : "";
-        var yr63 = schema.historicalCols["63"] ? String(row[schema.historicalCols["63"] - 1] || "").trim() : "";
-        
-        masterRows.push([
-          noVal,
-          assetId,
-          desc1,
-          desc2,
-          roomVal || roomInfo.name,
-          roomMeta.roomType,
-          condition,
-          fiscalYear,
-          result69,
-          sticker,
-          yr68,
-          yr67,
-          yr66,
-          yr64,
-          yr63,
-          roomInfo.name,
-          bangkokNow
-        ]);
+        masterRows.push([assetId, desc1, roomVal, scanned69, result69, sticker]);
       }
     });
     
-    // Clear and write to Master Sheet
+    // Clear existing data and format on Master Sheet in 1 atomic batch
     masterSheet.clear();
     masterSheet.getRange(1, 1, 1, masterHeaders.length)
       .setValues([masterHeaders])
@@ -1090,29 +1444,31 @@ function buildMasterTableFromRooms(ss) {
       masterSheet.getRange(2, 1, masterRows.length, masterHeaders.length).setValues(masterRows);
     }
     
-    // Cache master snapshot
+    // Invalidate caches
     try {
       CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
       CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
     } catch (e) {}
     
-    logEvent("BUILD_MASTER_TABLE", "SUCCESS", 0, "Master Table built with " + masterRows.length + " assets across " + roomSheets.length + " rooms.", {
+    logEvent("BUILD_MASTER_TABLE", "SUCCESS", 0, "Master Table built with " + masterRows.length + " assets across " + sheetsToProcess.length + " sheets (6 columns including Sticker).", {
       totalAssets: masterRows.length,
-      roomsProcessed: roomSheets.length
+      roomsProcessed: sheetsToProcess.length
     });
     
     return {
       success: true,
-      message: "Master Table built with " + masterRows.length + " assets across " + roomSheets.length + " rooms.",
+      message: "Master Table built with " + masterRows.length + " assets across " + sheetsToProcess.length + " sheets (Cols B, D, I, M, N, O).",
       totalAssets: masterRows.length,
-      roomsProcessed: roomSheets.length,
+      roomsProcessed: sheetsToProcess.length,
       timestamp: bangkokNow
     };
   }, 30000);
 }
 
 /**
- * Migrates audit results ('หมายเหตุปี 69' and 'สติกเกอร์') from Master Table to individual room sheets
+ * Menu 3: Sync Master Table to Individual Room Sheets (v1.1.3i)
+ * Updates Scanned 69 (Col M), หมายเหตุปี 69 (Col N), and สติกเกอร์ (Col O) for matched inventory numbers.
+ * Appends new/moved items after the last entry of the destination room sheet with FULL-ROW YELLOW HIGHLIGHT (#FFF2CC).
  */
 function migrateMasterToRoomSheets(ss) {
   if (!ss) ss = getSpreadsheet();
@@ -1125,117 +1481,173 @@ function migrateMasterToRoomSheets(ss) {
     }
     
     var lastRow = masterSheet.getLastRow();
-    var lastCol = masterSheet.getLastColumn();
     if (lastRow <= 1) {
-      return { success: true, message: "Master table has no data rows to migrate.", rowsMigrated: 0 };
+      return { success: true, message: "Master table has no data rows to migrate.", rowsMigrated: 0, rowsAppended: 0 };
     }
     
-    var masterData = masterSheet.getRange(1, 1, lastRow, lastCol).getValues();
-    var headers = masterData[0].map(function(h) { return String(h || "").trim(); });
+    var numCols = Math.max(6, masterSheet.getLastColumn());
+    var mHeaders = masterSheet.getRange(1, 1, 1, numCols).getValues()[0].map(function(h) { return String(h || "").trim(); });
+    var mAssetIdIdx = mHeaders.indexOf("Inventory number");
+    if (mAssetIdIdx === -1) mAssetIdIdx = 0;
+    var mDesc1Idx = mHeaders.indexOf("Asset description1");
+    if (mDesc1Idx === -1) mDesc1Idx = 1;
+    var mRoomIdx = mHeaders.indexOf("Room");
+    if (mRoomIdx === -1) mRoomIdx = 2;
+    var mScanned69Idx = mHeaders.indexOf("Scanned 69");
+    if (mScanned69Idx === -1) mScanned69Idx = 3;
+    var mResult69Idx = mHeaders.indexOf("หมายเหตุปี 69");
+    if (mResult69Idx === -1) mResult69Idx = 4;
+    var mStickerIdx = mHeaders.indexOf("สติกเกอร์");
+    if (mStickerIdx === -1 && mHeaders.length > 5) mStickerIdx = 5;
     
-    var assetIdIdx = headers.indexOf("Inventory number");
-    var result69Idx = headers.indexOf("หมายเหตุปี 69");
-    var stickerIdx = headers.indexOf("สติกเกอร์");
-    var sourceSheetIdx = headers.indexOf("SourceSheet");
-    var roomIdx = headers.indexOf("Room");
-    var yr68Idx = headers.indexOf("ปี68");
-    var yr67Idx = headers.indexOf("ปี67");
-    var yr66Idx = headers.indexOf("ปี66");
-    var yr64Idx = headers.indexOf("ปี64");
-    var yr63Idx = headers.indexOf("ปี63");
+    var masterData = masterSheet.getRange(2, 1, lastRow - 1, numCols).getValues();
     
-    if (assetIdIdx === -1) {
-      throw new Error("Master table is missing 'Inventory number' column.");
-    }
-    
-    var updatesBySheet = {};
-    for (var i = 1; i < masterData.length; i++) {
+    // Group master rows by canonical Room Sheet
+    var rowsByRoom = {};
+    for (var i = 0; i < masterData.length; i++) {
       var row = masterData[i];
-      var assetId = String(row[assetIdIdx] || "").trim();
+      var assetId = String(row[mAssetIdIdx] || "").trim();
       if (!assetId) continue;
       
-      var targetSheetName = String((sourceSheetIdx !== -1 ? row[sourceSheetIdx] : "") || (roomIdx !== -1 ? row[roomIdx] : "")).trim();
-      if (!targetSheetName) continue;
+      var targetRoom = String(row[mRoomIdx] || "").trim();
+      if (!targetRoom) continue;
       
-      if (!updatesBySheet[targetSheetName]) updatesBySheet[targetSheetName] = [];
-      updatesBySheet[targetSheetName].push({
-        assetId: assetId,
-        result69: (result69Idx !== -1) ? String(row[result69Idx] || "").trim() : "",
-        sticker: (stickerIdx !== -1) ? String(row[stickerIdx] || "").trim() : "",
-        yr68: (yr68Idx !== -1) ? String(row[yr68Idx] || "").trim() : "",
-        yr67: (yr67Idx !== -1) ? String(row[yr67Idx] || "").trim() : "",
-        yr66: (yr66Idx !== -1) ? String(row[yr66Idx] || "").trim() : "",
-        yr64: (yr64Idx !== -1) ? String(row[yr64Idx] || "").trim() : "",
-        yr63: (yr63Idx !== -1) ? String(row[yr63Idx] || "").trim() : ""
-      });
+      var targetSheet = getRoomSheetByName(ss, targetRoom);
+      var canonicalSheetName = targetSheet ? targetSheet.getName() : targetRoom;
+      
+      if (!rowsByRoom[canonicalSheetName]) rowsByRoom[canonicalSheetName] = [];
+      rowsByRoom[canonicalSheetName].push(row);
     }
     
-    var totalMigrated = 0;
+    var totalMatched = 0;
+    var totalAppended = 0;
     var sheetsAffected = 0;
     
-    Object.keys(updatesBySheet).forEach(function(sName) {
-      var sheet = getRoomSheetByName(ss, sName);
+    Object.keys(rowsByRoom).forEach(function(rName) {
+      var sheet = getRoomSheetByName(ss, rName);
       if (!sheet) return;
       
-      var schema = detectSheetHeaderAndColumns(sheet);
+      // Ensure sheet has at least 20 columns
+      if (sheet.getMaxColumns() < 20) {
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), 20 - sheet.getMaxColumns());
+      }
+      
       var sLastRow = sheet.getLastRow();
-      var sLastCol = sheet.getLastColumn();
-      if (sLastRow < schema.dataStartRow || sLastCol === 0) return;
+      if (sLastRow < 5) return;
       
-      var res69Col = schema.result69Col;
-      var stickCol = schema.stickerCol;
+      var existingNumRows = Math.max(0, sLastRow - 5);
+      var existingAssetMap = {}; // assetId -> array of rowOffsets (0-indexed from Row 6)
+      var roomAuditCols = [];
       
-      if (res69Col === -1 || stickCol === -1) {
-        setupRow5AuditHeaders(ss);
-        schema = detectSheetHeaderAndColumns(sheet);
-        res69Col = schema.result69Col;
-        stickCol = schema.stickerCol;
+      if (existingNumRows > 0) {
+        var existingAssetIds = sheet.getRange(6, 2, existingNumRows, 1).getValues(); // Col B (Inventory number)
+        roomAuditCols = sheet.getRange(6, 13, existingNumRows, 3).getValues(); // Cols M, N, O (Columns 13, 14, 15)
+        for (var r = 0; r < existingNumRows; r++) {
+          var aId = String(existingAssetIds[r][0] || "").trim().toUpperCase();
+          if (aId) {
+            if (!existingAssetMap[aId]) {
+              existingAssetMap[aId] = [r];
+            } else {
+              existingAssetMap[aId].push(r);
+            }
+          }
+        }
       }
       
-      var assetColIdx = schema.colMap.inventoryNumber || 2;
-      var rowRange = sheet.getRange(schema.dataStartRow, assetColIdx, sLastRow - schema.dataStartRow + 1, 1).getValues();
-      var rowMap = {};
-      for (var r = 0; r < rowRange.length; r++) {
-        var id = String(rowRange[r][0] || "").trim().toUpperCase();
-        if (id) rowMap[id] = schema.dataStartRow + r;
-      }
+      var masterRowsForRoom = rowsByRoom[rName];
+      var matchedCount = 0;
+      var newOrMovedRows = [];
       
-      var sheetUpdates = updatesBySheet[sName];
-      sheetUpdates.forEach(function(item) {
-        var targetRow = rowMap[item.assetId.toUpperCase()];
-        if (targetRow) {
-          if (res69Col !== -1 && item.result69 !== "") {
-            sheet.getRange(targetRow, res69Col).setValue(item.result69);
+      masterRowsForRoom.forEach(function(mRow) {
+        var mAssetId = String(mRow[mAssetIdIdx] || "").trim().toUpperCase();
+        var mDesc1 = String(mRow[mDesc1Idx] || "").trim();
+        var mScanned69 = String(mRow[mScanned69Idx] || "").trim();
+        var mResult69 = String(mRow[mResult69Idx] || "").trim();
+        var mSticker = mStickerIdx !== -1 ? String(mRow[mStickerIdx] || "").trim() : "";
+        var targetSticker = mSticker || (mScanned69 !== "" ? "ปกติ" : "");
+        
+        if (existingAssetMap.hasOwnProperty(mAssetId)) {
+          // Matched existing asset on this room sheet -> update Cols M, N (and O auto-set to 'ปกติ' if scanned)
+          var rIndices = existingAssetMap[mAssetId];
+          for (var k = 0; k < rIndices.length; k++) {
+            var rIdx = rIndices[k];
+            roomAuditCols[rIdx][0] = mScanned69; // Col M (Scanned 69)
+            roomAuditCols[rIdx][1] = mResult69;  // Col N (หมายเหตุปี 69)
+            if (mScanned69 !== "" || mSticker) {
+              roomAuditCols[rIdx][2] = targetSticker; // Col O (สติกเกอร์ -> "ปกติ" if scanned)
+            }
           }
-          if (stickCol !== -1 && item.sticker !== "") {
-            sheet.getRange(targetRow, stickCol).setValue(item.sticker);
-          }
-          
-          if (schema.historicalCols["68"] && item.yr68 !== "") sheet.getRange(targetRow, schema.historicalCols["68"]).setValue(item.yr68);
-          if (schema.historicalCols["67"] && item.yr67 !== "") sheet.getRange(targetRow, schema.historicalCols["67"]).setValue(item.yr67);
-          if (schema.historicalCols["66"] && item.yr66 !== "") sheet.getRange(targetRow, schema.historicalCols["66"]).setValue(item.yr66);
-          if (schema.historicalCols["64"] && item.yr64 !== "") sheet.getRange(targetRow, schema.historicalCols["64"]).setValue(item.yr64);
-          if (schema.historicalCols["63"] && item.yr63 !== "") sheet.getRange(targetRow, schema.historicalCols["63"]).setValue(item.yr63);
-          
-          totalMigrated++;
+          matchedCount += rIndices.length;
+        } else {
+          // Unmatched asset (newly registered or moved from other room) -> append full 21-col row
+          var newRow = new Array(21).fill("");
+          newRow[0] = existingNumRows + newOrMovedRows.length + 1; // Col A (No.)
+          newRow[1] = String(mRow[mAssetIdIdx] || "").trim();      // Col B (Inventory number)
+          newRow[2] = "";                                          // Col C (Asset)
+          newRow[3] = mDesc1;                                      // Col D (Asset description1)
+          newRow[4] = "";                                          // Col E (Asset description2)
+          newRow[5] = "";                                          // Col F (Curr.acq.value)
+          newRow[6] = "";                                          // Col G (Original value)
+          newRow[7] = "";                                          // Col H (Asset location)
+          newRow[8] = rName;                                       // Col I (Room)
+          newRow[9] = "";                                          // Col J (สภาพของสินทรัพย์)
+          newRow[10] = "";                                         // Col K (Cap.date)
+          newRow[11] = "";                                         // Col L (ปีงบฯที่ได้มา)
+          newRow[12] = mScanned69;                                 // Col M (Scanned 69)
+          newRow[13] = mResult69;                                  // Col N (หมายเหตุปี 69)
+          newRow[14] = targetSticker;                              // Col O (สติกเกอร์ -> "ปกติ" if scanned)
+          newRow[15] = "";                                         // Col P (Auditor)
+          newOrMovedRows.push(newRow);
         }
       });
-      sheetsAffected++;
+      
+      var sheetHasChanges = false;
+      
+      // 1. Write back updated audit columns for existing matching rows in 1 batch call
+      if (matchedCount > 0 && existingNumRows > 0) {
+        sheet.getRange(6, 13, existingNumRows, 3).setValues(roomAuditCols);
+        sheetHasChanges = true;
+        totalMatched += matchedCount;
+      }
+      
+      // 2. Append new or moved rows after the last entry with FULL-ROW YELLOW HIGHLIGHT (#FFF2CC)
+      if (newOrMovedRows.length > 0) {
+        var appendStartRow = Math.max(6, sheet.getLastRow() + 1);
+        var appendRange = sheet.getRange(appendStartRow, 1, newOrMovedRows.length, 21);
+        appendRange.setValues(newOrMovedRows);
+        appendRange.setBackground("#FFF2CC"); // Full-row soft yellow highlight
+        appendRange.setFontColor("#0f172a");
+        try {
+          appendRange.setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
+          sheet.getRange(appendStartRow, 1, newOrMovedRows.length, 1).setHorizontalAlignment("center");
+          sheet.getRange(appendStartRow, 2, newOrMovedRows.length, 1).setNumberFormat("@");
+        } catch (fmtErr) {}
+        sheetHasChanges = true;
+        totalAppended += newOrMovedRows.length;
+      }
+      
+      if (sheetHasChanges) {
+        sheetsAffected++;
+      }
     });
     
     try {
       CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
+      CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
     } catch (e) {}
     
-    logEvent("MIGRATE_MASTER_TO_ROOMS", "SUCCESS", 0, "Migrated " + totalMigrated + " assets to " + sheetsAffected + " room sheets.", {
-      rowsMigrated: totalMigrated,
+    var msg = "Successfully migrated Master Table: " + totalMatched + " matched items updated, " + totalAppended + " new/moved items appended with yellow highlight across " + sheetsAffected + " room sheets.";
+    logEvent("MIGRATE_MASTER_TO_ROOMS", "SUCCESS", 0, msg, {
+      rowsMatched: totalMatched,
+      rowsAppended: totalAppended,
       sheetsAffected: sheetsAffected
     });
     
     return {
       success: true,
-      message: "Successfully migrated " + totalMigrated + " asset records across " + sheetsAffected + " room sheets.",
-      rowsMigrated: totalMigrated,
+      message: msg,
+      rowsMigrated: totalMatched,
+      rowsAppended: totalAppended,
       sheetsAffected: sheetsAffected,
       timestamp: getBangkokTimestamp()
     };
@@ -1243,31 +1655,157 @@ function migrateMasterToRoomSheets(ss) {
 }
 
 /**
- * Fast Master Table Query Engine with Dynamic Room Type and Room Filtering
+ * Menu 4: Checks Master_Asset table for data contradictions and duplicate inventory numbers (v1.1.3e)
+ * Identifies duplicates, inconsistencies, and highlights problematic rows in soft red on the Master_Asset sheet.
+ */
+function checkMasterTableContradictions(ss) {
+  if (!ss) ss = getSpreadsheet();
+  if (!ss) throw new Error("No active spreadsheet available.");
+  
+  var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
+  if (!masterSheet || masterSheet.getLastRow() <= 1) {
+    return {
+      success: true,
+      totalScanned: 0,
+      duplicatesCount: 0,
+      duplicatesList: [],
+      missingIdCount: 0,
+      missingIdRows: [],
+      message: "Master Table is empty or not yet generated."
+    };
+  }
+
+  var lastRow = masterSheet.getLastRow();
+  var numRows = lastRow - 1;
+  var numCols = Math.max(5, masterSheet.getLastColumn());
+  var dataRange = masterSheet.getRange(2, 1, numRows, numCols);
+  var data = dataRange.getValues();
+  var headers = masterSheet.getRange(1, 1, 1, numCols).getValues()[0].map(function(h) { return String(h || "").trim(); });
+
+  var idIdx = headers.indexOf("Inventory number");
+  if (idIdx === -1) idIdx = 0;
+  var desc1Idx = headers.indexOf("Asset description1");
+  if (desc1Idx === -1) desc1Idx = 1;
+  var roomIdx = headers.indexOf("Room");
+  if (roomIdx === -1) roomIdx = 2;
+
+  // Reset previous error background colors to default white
+  dataRange.setBackground("#ffffff");
+
+  var idOccurrences = {}; // id -> [ { row: 2, room: "Bio1", name: "..." } ]
+  var missingIdRows = [];
+  var totalScanned = 0;
+
+  for (var i = 0; i < data.length; i++) {
+    var rowNum = i + 2; // 1-indexed sheet row
+    var row = data[i];
+    var rawId = String(row[idIdx] || "").trim();
+    var desc1 = String(row[desc1Idx] || "").trim();
+    var roomVal = String(row[roomIdx] || "").trim();
+
+    if (!rawId) {
+      if (desc1 || roomVal) {
+        missingIdRows.push(rowNum);
+        masterSheet.getRange(rowNum, 1, 1, numCols).setBackground("#FEF3C7"); // Soft amber
+      }
+      continue;
+    }
+
+    totalScanned++;
+    var cleanId = rawId.toUpperCase();
+    if (!idOccurrences[cleanId]) {
+      idOccurrences[cleanId] = [];
+    }
+    idOccurrences[cleanId].push({
+      row: rowNum,
+      assetId: rawId,
+      room: roomVal,
+      itemName: desc1
+    });
+  }
+
+  var duplicatesList = [];
+  var rowsToHighlightRed = [];
+
+  Object.keys(idOccurrences).forEach(function(cleanId) {
+    var occList = idOccurrences[cleanId];
+    if (occList.length > 1) {
+      var rows = occList.map(function(o) { return o.row; });
+      var rooms = occList.map(function(o) { return o.room || "Unknown"; });
+      var names = occList.map(function(o) { return o.itemName || "Unnamed"; });
+      duplicatesList.push({
+        assetId: occList[0].assetId,
+        occurrences: occList.length,
+        rows: rows,
+        rooms: rooms,
+        itemNames: names
+      });
+      rows.forEach(function(r) {
+        rowsToHighlightRed.push(r);
+      });
+    }
+  });
+
+  // Highlight duplicate rows in soft red
+  rowsToHighlightRed.forEach(function(r) {
+    masterSheet.getRange(r, 1, 1, numCols).setBackground("#FEE2E2"); // Soft red (#FEE2E2)
+    masterSheet.getRange(r, idIdx + 1).setBackground("#FECACA").setFontColor("#DC2626"); // Accent on ID
+  });
+
+  var msg = "";
+  if (duplicatesList.length === 0 && missingIdRows.length === 0) {
+    msg = "No contradictions found. All " + totalScanned + " assets in Master Table have unique inventory numbers.";
+  } else {
+    msg = "Found " + duplicatesList.length + " duplicate inventory numbers (" + rowsToHighlightRed.length + " total rows) and " + missingIdRows.length + " rows with missing IDs. Highlighted in Master_Asset sheet.";
+  }
+
+  return {
+    success: true,
+    totalScanned: totalScanned,
+    duplicatesCount: duplicatesList.length,
+    duplicateRowsCount: rowsToHighlightRed.length,
+    duplicatesList: duplicatesList,
+    missingIdCount: missingIdRows.length,
+    missingIdRows: missingIdRows,
+    message: msg
+  };
+}
+
+/**
+ * Fast Master Table Query Engine with Status and Room Filtering (5-Column Schema: B, D, I, M, N)
  */
 function queryMasterTable(filters) {
   if (!filters) filters = {};
   var ss = getSpreadsheet();
-  if (!ss) return { total: 0, items: [], roomTypes: [] };
+  if (!ss) return { total: 0, items: [] };
   
-  var roomInspection = inspectDynamicRoomTypes(ss);
   var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
-  
   if (!masterSheet || masterSheet.getLastRow() <= 1) {
     buildMasterTableFromRooms(ss);
     masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
   }
   
   if (!masterSheet || masterSheet.getLastRow() <= 1) {
-    return { total: 0, items: [], roomTypes: roomInspection.roomTypes };
+    return { total: 0, items: [] };
   }
   
   var lastRow = masterSheet.getLastRow();
-  var lastCol = masterSheet.getLastColumn();
-  var data = masterSheet.getRange(1, 1, lastRow, lastCol).getValues();
+  var numCols = Math.max(5, masterSheet.getLastColumn());
+  var data = masterSheet.getRange(1, 1, lastRow, numCols).getValues();
   var headers = data[0].map(function(h) { return String(h || "").trim(); });
   
-  var targetRoomType = String(filters.roomType || "ALL").trim();
+  var idIdx = headers.indexOf("Inventory number");
+  if (idIdx === -1) idIdx = 0;
+  var desc1Idx = headers.indexOf("Asset description1");
+  if (desc1Idx === -1) desc1Idx = 1;
+  var roomIdx = headers.indexOf("Room");
+  if (roomIdx === -1) roomIdx = 2;
+  var scannedIdx = headers.indexOf("Scanned 69");
+  if (scannedIdx === -1) scannedIdx = 3;
+  var resultIdx = headers.indexOf("หมายเหตุปี 69");
+  if (resultIdx === -1) resultIdx = 4;
+  var stickerIdx = headers.indexOf("สติกเกอร์");
+  
   var targetRoom = String(filters.room || "ALL").trim();
   var targetStatus = String(filters.status || "ALL").trim();
   var search = String(filters.search || "").trim().toLowerCase();
@@ -1280,28 +1818,24 @@ function queryMasterTable(filters) {
   
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
-    var item = {};
-    headers.forEach(function(h, idx) {
-      item[h] = row[idx];
-    });
+    var aId = String(row[idIdx] || "").trim();
+    if (!aId) continue;
     
-    var rType = String(item.RoomType || "Lab").trim();
-    var rName = String(item.Room || item.SourceSheet || "").trim();
-    var result69 = String(item["หมายเหตุปี 69"] || "").trim();
-    var sticker = String(item["สติกเกอร์"] || "").trim();
+    var desc1 = String(row[desc1Idx] || "").trim();
+    var rName = String(row[roomIdx] || "").trim();
+    var scanned69 = String(row[scannedIdx] || "").trim();
+    var result69 = String(row[resultIdx] || "").trim();
+    var sticker = (stickerIdx !== -1 ? String(row[stickerIdx] || "").trim() : "") || "ปกติ";
     
-    var derivedStatus = "Unverified";
-    var isVerified = (result69 !== "");
+    var isVerified = (scanned69 !== "");
+    var derivedStatus = "";
     if (isVerified) {
       verifiedCount++;
-      var rLow = result69.toLowerCase();
-      if (rLow.indexOf("good") !== -1 || rLow.indexOf("ปกติ") !== -1 || rLow.indexOf("ดี") !== -1) {
-        derivedStatus = "Good";
-        goodCount++;
-      } else if (rLow.indexOf("damaged") !== -1 || rLow.indexOf("ชำรุด") !== -1) {
+      var statusKey = scanned69.toLowerCase();
+      if (statusKey.indexOf("ชำรุด") !== -1 || statusKey.indexOf("damaged") !== -1) {
         derivedStatus = "Damaged";
         damagedCount++;
-      } else if (rLow.indexOf("missing") !== -1 || rLow.indexOf("สูญหาย") !== -1) {
+      } else if (statusKey.indexOf("สูญหาย") !== -1 || statusKey.indexOf("หาไม่เจอ") !== -1 || statusKey.indexOf("missing") !== -1 || statusKey.indexOf("ไม่พบ") !== -1) {
         derivedStatus = "Missing";
         missingCount++;
       } else {
@@ -1310,50 +1844,156 @@ function queryMasterTable(filters) {
       }
     }
     
-    if (targetRoomType !== "ALL" && rType.toLowerCase() !== targetRoomType.toLowerCase()) continue;
     if (targetRoom !== "ALL" && rName.toLowerCase() !== targetRoom.toLowerCase()) continue;
-    if (targetStatus !== "ALL" && derivedStatus.toLowerCase() !== targetStatus.toLowerCase()) continue;
+    if (targetStatus === "UNVERIFIED" && isVerified) continue;
+    if (targetStatus === "VERIFIED" && !isVerified) continue;
+    if (targetStatus === "Good" && derivedStatus !== "Good") continue;
+    if (targetStatus === "Damaged" && derivedStatus !== "Damaged") continue;
+    if (targetStatus === "Missing" && derivedStatus !== "Missing") continue;
+    if (targetStatus !== "ALL" && targetStatus !== "UNVERIFIED" && targetStatus !== "VERIFIED" && targetStatus !== "Good" && targetStatus !== "Damaged" && targetStatus !== "Missing") {
+      if (derivedStatus.toLowerCase() !== targetStatus.toLowerCase()) continue;
+    }
     
     if (search) {
-      var matchSearch = String(item["Inventory number"] || "").toLowerCase().indexOf(search) !== -1 ||
-                         String(item["Asset description1"] || "").toLowerCase().indexOf(search) !== -1 ||
-                         String(item["Asset description2"] || "").toLowerCase().indexOf(search) !== -1 ||
-                         rName.toLowerCase().indexOf(search) !== -1;
+      var matchSearch = aId.toLowerCase().indexOf(search) !== -1 ||
+                        desc1.toLowerCase().indexOf(search) !== -1 ||
+                        rName.toLowerCase().indexOf(search) !== -1 ||
+                        result69.toLowerCase().indexOf(search) !== -1;
       if (!matchSearch) continue;
     }
     
     items.push({
-      assetId: item["Inventory number"],
-      no: item["No."],
-      itemName: item["Asset description1"] || "Unnamed",
-      brandModel: item["Asset description2"] || "",
+      assetId: aId,
+      no: i,
+      itemName: desc1 || "Unnamed Asset",
       registeredLocation: rName,
-      sheetName: item.SourceSheet || rName,
-      roomType: rType,
+      sheetName: rName,
+      rowIndex: i + 1,
       status: derivedStatus,
+      scanned69: scanned69,
       auditResult69: result69,
-      sticker: sticker || (isVerified ? "Yes" : "No"),
-      procurementCondition: item["สภาพของสินทรัพย์"] || "",
-      fiscalYear: item["ปีงบฯที่ได้มา"] || "",
-      historicalResults: {
-        "68": item["ปี68"] || "",
-        "67": item["ปี67"] || "",
-        "66": item["ปี66"] || "",
-        "64": item["ปี64"] || "",
-        "63": item["ปี63"] || ""
-      }
+      sticker: sticker,
+      isVerified: isVerified
     });
   }
   
   return {
     total: items.length,
-    verified: verifiedCount,
-    unverified: items.length - verifiedCount,
-    good: goodCount,
-    damaged: damagedCount,
-    missing: missingCount,
     items: items,
-    roomTypes: roomInspection.roomTypes,
-    roomMap: roomInspection.roomMap
+    summary: {
+      total: items.length,
+      verified: verifiedCount,
+      unverified: items.length - verifiedCount,
+      good: goodCount,
+      damaged: damagedCount,
+      missing: missingCount
+    }
   };
 }
+
+/**
+ * Retrieves aggregate usage and audit statistics across all rooms and the Stats sheet
+ */
+function getAppUsageStats() {
+  var ss = getSpreadsheet();
+  if (!ss) throw new Error("No active spreadsheet available.");
+  
+  var roomSheets = getRoomSheets(ss);
+  var totalAssets = 0;
+  var totalAudited = 0;
+  var statusCounts = {};
+  var stickerCounts = {};
+  var auditorCounts = {};
+  var roomBreakdown = [];
+  
+  roomSheets.forEach(function(rInfo) {
+    var sheet = ss.getSheetByName(rInfo.name);
+    if (!sheet) return;
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 6) {
+      roomBreakdown.push({
+        room: rInfo.name,
+        total: 0,
+        audited: 0,
+        percent: 0
+      });
+      return;
+    }
+    
+    var schema = detectSheetHeaderAndColumns(sheet);
+    var numRows = lastRow - 5;
+    var invCol = schema.colMap.inventoryNumber || 2;
+    var scannedCol = schema.scanned69Col !== -1 ? schema.scanned69Col : 13;
+    var stickerCol = schema.stickerCol !== -1 ? schema.stickerCol : 15;
+    var auditorCol = schema.auditorCol !== -1 ? schema.auditorCol : 16;
+    
+    var maxColToFetch = Math.max(invCol, scannedCol, stickerCol, auditorCol, 16);
+    var grid = sheet.getRange(6, 1, numRows, maxColToFetch).getValues();
+    
+    var roomTotal = 0;
+    var roomAudited = 0;
+    
+    for (var r = 0; r < grid.length; r++) {
+      var row = grid[r];
+      var inv = String(row[invCol - 1] || "").trim();
+      if (!inv) continue;
+      
+      roomTotal++;
+      totalAssets++;
+      
+      var scanned = String(row[scannedCol - 1] || "").trim();
+      var stk = String(row[stickerCol - 1] || "").trim();
+      var auditor = String(row[auditorCol - 1] || "").trim();
+      
+      if (scanned) {
+        roomAudited++;
+        totalAudited++;
+        
+        statusCounts[scanned] = (statusCounts[scanned] || 0) + 1;
+        
+        var effectiveStk = stk || "ปกติ";
+        stickerCounts[effectiveStk] = (stickerCounts[effectiveStk] || 0) + 1;
+        
+        if (auditor) {
+          auditorCounts[auditor] = (auditorCounts[auditor] || 0) + 1;
+        } else {
+          auditorCounts["Unassigned"] = (auditorCounts["Unassigned"] || 0) + 1;
+        }
+      }
+    }
+    
+    roomBreakdown.push({
+      room: rInfo.name,
+      total: roomTotal,
+      audited: roomAudited,
+      percent: roomTotal > 0 ? Math.round((roomAudited / roomTotal) * 1000) / 10 : 0
+    });
+  });
+  
+  // Sort rooms by percent descending
+  roomBreakdown.sort(function(a, b) { return b.percent - a.percent; });
+  
+  // Convert auditorCounts to array
+  var auditorLeaderboard = Object.keys(auditorCounts).map(function(name) {
+    return { name: name, count: auditorCounts[name] };
+  }).sort(function(a, b) { return b.count - a.count; });
+  
+  var percentComplete = totalAssets > 0 ? Math.round((totalAudited / totalAssets) * 1000) / 10 : 0;
+  
+  return {
+    success: true,
+    stats: {
+      totalAssets: totalAssets,
+      totalAudited: totalAudited,
+      totalRemaining: totalAssets - totalAudited,
+      percentComplete: percentComplete,
+      statusCounts: statusCounts,
+      stickerCounts: stickerCounts,
+      auditorLeaderboard: auditorLeaderboard,
+      roomBreakdown: roomBreakdown,
+      timestamp: getBangkokTimestamp()
+    }
+  };
+}
+

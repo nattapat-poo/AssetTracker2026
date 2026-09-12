@@ -1,7 +1,7 @@
 <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.0e)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.1g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.1g)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -429,6 +429,11 @@ window.ScannerController = (function() {
     if (placeholder) placeholder.classList.toggle("hidden", isScanning);
   }
 
+  function resetLastScannedCode() {
+    lastScannedCode = null;
+    lastScanTimestamp = 0;
+  }
+
   return {
     startScanner: startScanner,
     stopScanner: stopScanner,
@@ -439,7 +444,8 @@ window.ScannerController = (function() {
     scanUploadedFile: scanUploadedFile,
     playSuccessChime: playSuccessChime,
     triggerHaptic: triggerHaptic,
-    initAudioContext: initAudioContext
+    initAudioContext: initAudioContext,
+    resetLastScannedCode: resetLastScannedCode
   };
 })();
 </script>

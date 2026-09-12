@@ -1,0 +1,336 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-size: 13px;
+    }
+    .header-box {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .metric-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .metric-val {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: monospace;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .val-total { color: #38bdf8; }
+    .val-dup { color: #fbbf24; }
+    .val-conflict { color: #f43f5e; }
+    .val-missing { color: #c084fc; }
+
+    .scroll-container {
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #090d16;
+      padding: 8px;
+    }
+    .group-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .group-card.conflict {
+      border-color: rgba(244, 63, 94, 0.5);
+      background: rgba(244, 63, 94, 0.05);
+    }
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .group-id {
+      font-weight: 700;
+      font-family: monospace;
+      color: #38bdf8;
+      font-size: 13px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-conflict { background: #f43f5e; color: #fff; }
+    .badge-dup { background: #d97706; color: #fff; }
+    .badge-room { background: #8b5cf6; color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    th, td {
+      padding: 4px 6px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #334155;
+    }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #0284c7;
+      color: white;
+    }
+    .btn-primary:hover { background: #0369a1; }
+    .btn-warning {
+      background: #d97706;
+      color: white;
+    }
+    .btn-warning:hover { background: #b45309; }
+    .btn-secondary {
+      background: #334155;
+      color: #f8fafc;
+      border-color: #475569;
+    }
+    .btn-secondary:hover { background: #475569; }
+    .empty-state {
+      text-align: center;
+      padding: 30px 10px;
+      color: #34d399;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="title">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Master Table Integrity &amp; Contradiction Audit (v1.1.3a)</span>
+    </div>
+    <span style="font-size: 11px; color: #94a3b8;"><?= report.totalRows ?> Total Rows Scanned</span>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-val val-total"><?= report.totalRows ?></div>
+      <div class="metric-label">Valid Rows</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val val-dup"><?= report.duplicateGroups.length ?></div>
+      <div class="metric-label">Duplicate Groups (<?= report.duplicateRowCount ?> rows)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val val-conflict"><?= report.conflictCount ?></div>
+      <div class="metric-label">Active Conflicts</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val val-missing"><?= report.missingIdCount ?></div>
+      <div class="metric-label">Missing Inv No.</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <? if (report.duplicateGroups.length === 0 && report.missingIdRows.length === 0) { ?>
+      <div class="empty-state">
+        <i class="fa-solid fa-circle-check" style="font-size: 28px; margin-bottom: 8px;"></i>
+        <div style="font-weight: 700; font-size: 14px;">Master Table is 100% Consistent!</div>
+        <div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">Zero duplicate inventory numbers or conflicting audit records detected.</div>
+      </div>
+    <? } ?>
+
+    <? for (var g = 0; g < report.duplicateGroups.length; g++) { 
+        var group = report.duplicateGroups[g];
+        var isConflict = group.hasStatusMismatch || group.hasRoomMismatch;
+    ?>
+      <div class="group-card <?= isConflict ? 'conflict' : '' ?>">
+        <div class="group-header">
+          <div class="group-id">
+            <i class="fa-solid fa-barcode"></i> <?= group.inventoryNumber ?>
+            <span style="color: #94a3b8; font-size: 11px; font-weight: normal; margin-left: 6px;">(<?= group.count ?> entries)</span>
+          </div>
+          <div style="display: flex; gap: 4px;">
+            <? if (group.hasStatusMismatch) { ?>
+              <span class="badge badge-conflict"><i class="fa-solid fa-triangle-exclamation"></i> Status Conflict</span>
+            <? } ?>
+            <? if (group.hasRoomMismatch) { ?>
+              <span class="badge badge-room"><i class="fa-solid fa-door-open"></i> Multiple Rooms</span>
+            <? } ?>
+            <? if (!isConflict) { ?>
+              <span class="badge badge-dup">Duplicate Row</span>
+            <? } ?>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Row</th>
+              <th>Asset Name</th>
+              <th style="width: 80px;">Room (Col I)</th>
+              <th style="width: 100px;">Scanned 69 (Col M)</th>
+              <th>หมายเหตุ 69 (Col N)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <? for (var e = 0; e < group.entries.length; e++) { 
+                var entry = group.entries[e];
+            ?>
+              <tr>
+                <td style="font-family: monospace; color: #fbbf24;">Row <?= entry.rowIndex ?></td>
+                <td><?= entry.desc1 || "-" ?></td>
+                <td style="font-weight: 600; color: #a78bfa;"><?= entry.room || "-" ?></td>
+                <td style="color: <?= entry.scanned69 ? '#34d399' : '#94a3b8' ?>;"><?= entry.scanned69 || "<em>(blank)</em>" ?></td>
+                <td style="color: #cbd5e1;"><?= entry.notes69 || "-" ?></td>
+              </tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+    <? } ?>
+
+    <? if (report.missingIdRows.length > 0) { ?>
+      <div class="group-card conflict" style="border-color: #c084fc;">
+        <div class="group-header">
+          <div class="group-id" style="color: #c084fc;">
+            <i class="fa-solid fa-circle-exclamation"></i> Rows Missing Inventory Number (<?= report.missingIdRows.length ?>)
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Row</th>
+              <th>Asset Name</th>
+              <th>Room</th>
+              <th>Issue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <? for (var m = 0; m < report.missingIdRows.length; m++) { 
+                var item = report.missingIdRows[m];
+            ?>
+              <tr>
+                <td style="font-family: monospace; color: #c084fc;">Row <?= item.rowIndex ?></td>
+                <td><?= item.desc1 ?></td>
+                <td><?= item.room ?></td>
+                <td style="color: #f43f5e;"><?= item.issue ?></td>
+              </tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+    <? } ?>
+  </div>
+
+  <div class="footer-actions">
+    <div style="display: flex; gap: 8px;">
+      <button onclick="highlightRows()" id="btn-highlight" class="btn btn-warning">
+        <i class="fa-solid fa-highlighter"></i> Highlight Rows in Sheet
+      </button>
+      <button onclick="clearHighlights()" id="btn-clear" class="btn btn-secondary">
+        <i class="fa-solid fa-eraser"></i> Clear Highlights
+      </button>
+    </div>
+    <button onclick="google.script.host.close()" class="btn btn-secondary">
+      Close
+    </button>
+  </div>
+
+  <script>
+    function highlightRows() {
+      var btn = document.getElementById("btn-highlight");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Highlighting...';
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (res.message || "Highlighted");
+          setTimeout(function() {
+            btn.innerHTML = '<i class="fa-solid fa-highlighter"></i> Highlight Rows in Sheet';
+          }, 3000);
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error';
+          alert("Highlight Error: " + err);
+        })
+        .runHighlightMasterContradictions();
+    }
+
+    function clearHighlights() {
+      var btn = document.getElementById("btn-clear");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Clearing...';
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Cleared';
+          setTimeout(function() {
+            btn.innerHTML = '<i class="fa-solid fa-eraser"></i> Clear Highlights';
+          }, 3000);
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          alert("Clear Error: " + err);
+        })
+        .menuClearMasterHighlights();
+    }
+  </script>
+</body>
+</html>

@@ -1,12 +1,54 @@
 <style>
-  /* Base typography and smooth transitions */
+  /* ==========================================================================
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.4 Moderate Mobile & Desktop Fit)
+     Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
+     and snug, perfect container fit without layout overflow.
+     ========================================================================== */
+  :root, html {
+    font-size: 16.5px;
+  }
+  @media (min-width: 640px) {
+    :root, html {
+      font-size: 17px;
+    }
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
     -webkit-tap-highlight-color: transparent;
   }
   
   .font-mono {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  /* Moderate Responsive Typography Hierarchy (v1.1.4) */
+  h1, .text-xl { font-size: 1.30rem; }
+  h2, .text-lg { font-size: 1.15rem; }
+  h3, .text-base { font-size: 1.02rem; }
+  .text-sm { font-size: 0.92rem; }
+  .text-xs { font-size: 0.82rem; }
+  .text-\[11px\] { font-size: 0.78rem; }
+  .text-\[10px\] { font-size: 0.74rem; }
+  .text-\[9px\] { font-size: 0.70rem; }
+
+  /* Status Category Tone Chips (v1.1.3n: Only Green / Red / Gray) */
+  .badge-status-green {
+    background-color: rgba(6, 78, 59, 0.45) !important;
+    color: #6ee7b7 !important;
+    border: 1.5px solid rgba(16, 185, 129, 0.6) !important;
+  }
+  .badge-status-red {
+    background-color: rgba(136, 19, 55, 0.45) !important;
+    color: #fda4af !important;
+    border: 1.5px solid rgba(244, 63, 94, 0.6) !important;
+  }
+  .badge-status-gray {
+    background-color: rgba(30, 41, 59, 0.7) !important;
+    color: #e2e8f0 !important;
+    border: 1.5px solid rgba(100, 116, 139, 0.6) !important;
   }
 
   /* Dark Theme Palette (Default Ecosystem Theme) */
@@ -21,54 +63,448 @@
     --brand-emerald-light: #34d399;
   }
 
-  /* WCAG AAA High-Contrast Light Theme */
+  /* ==========================================================================
+     WCAG AAA HIGH-CONTRAST LIGHT THEME OVERHAUL (v1.1.3n)
+     Pure light surfaces, clear readable text, no dark remnants.
+     ========================================================================== */
   body.theme-light {
     --bg-primary: #f8fafc;
     --bg-surface: #ffffff;
-    --bg-card: rgba(255, 255, 255, 0.95);
-    --border-color: rgba(203, 213, 225, 0.9);
+    --bg-card: #ffffff;
+    --border-color: #cbd5e1;
     --text-primary: #0f172a;
-    --text-muted: #475569;
+    --text-muted: #334155;
     background-color: #f1f5f9 !important;
     color: #0f172a !important;
   }
 
-  body.theme-light .bg-slate-950 {
+  /* High-Contrast Light Theme Category Tone Chips */
+  body.theme-light .badge-status-green {
+    background-color: #ecfdf5 !important;
+    color: #047857 !important;
+    border: 1.5px solid #10b981 !important;
+  }
+  body.theme-light .badge-status-red {
+    background-color: #fff1f2 !important;
+    color: #be123c !important;
+    border: 1.5px solid #f43f5e !important;
+  }
+  body.theme-light .badge-status-gray {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1.5px solid #94a3b8 !important;
+  }
+
+  /* Header & Navigation */
+  body.theme-light header {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  body.theme-light nav {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Surfaces & Background Overrides */
+  body.theme-light .bg-slate-950,
+  body.theme-light .bg-slate-950\/80,
+  body.theme-light .bg-slate-950\/85,
+  body.theme-light .bg-slate-950\/90,
+  body.theme-light .bg-slate-950\/95 {
     background-color: #f8fafc !important;
   }
 
-  body.theme-light .bg-slate-900 {
+  body.theme-light .bg-slate-900,
+  body.theme-light .bg-slate-900\/60,
+  body.theme-light .bg-slate-900\/80,
+  body.theme-light .bg-slate-900\/90,
+  body.theme-light .bg-slate-900\/95 {
     background-color: #ffffff !important;
   }
 
-  body.theme-light .bg-slate-900\/80,
-  body.theme-light .bg-slate-900\/90 {
-    background-color: rgba(255, 255, 255, 0.95) !important;
+  body.theme-light .bg-slate-800,
+  body.theme-light .bg-slate-800\/40,
+  body.theme-light .bg-slate-800\/60,
+  body.theme-light .bg-slate-800\/80,
+  body.theme-light .bg-slate-800\/90 {
+    background-color: #f1f5f9 !important;
   }
 
-  body.theme-light .bg-slate-800 {
+  body.theme-light .bg-slate-700 {
     background-color: #e2e8f0 !important;
   }
 
+  /* Borders */
   body.theme-light .border-slate-800,
+  body.theme-light .border-slate-800\/80,
   body.theme-light .border-slate-700 {
     border-color: #cbd5e1 !important;
   }
 
+  /* Text & Typography */
   body.theme-light .text-white {
     color: #0f172a !important;
   }
 
-  body.theme-light .text-slate-300,
+  body.theme-light .text-slate-100,
+  body.theme-light .text-slate-200 {
+    color: #0f172a !important;
+  }
+
+  body.theme-light .text-slate-300 {
+    color: #1e293b !important;
+  }
+
   body.theme-light .text-slate-400 {
     color: #334155 !important;
   }
 
   body.theme-light .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  body.theme-light .text-slate-600 {
     color: #64748b !important;
   }
 
-  /* Mobile Touch Hit Target Standard (>=44x44px) */
+  /* --------------------------------------------------------------------------
+     Semantic Color Tint Overrides (Fixes Muddy Backgrounds in Stats & Badges)
+     -------------------------------------------------------------------------- */
+  
+  /* Emerald / Verified / Good */
+  body.theme-light .text-emerald-400,
+  body.theme-light .text-emerald-300,
+  body.theme-light .text-emerald-200 {
+    color: #047857 !important;
+  }
+
+  body.theme-light .bg-emerald-500\/10,
+  body.theme-light .bg-emerald-500\/15,
+  body.theme-light .bg-emerald-500\/20,
+  body.theme-light .bg-emerald-600\/25,
+  body.theme-light .bg-emerald-950\/30,
+  body.theme-light .bg-emerald-950\/40,
+  body.theme-light .bg-emerald-950\/60,
+  body.theme-light .bg-emerald-950\/80,
+  body.theme-light .bg-emerald-950\/90,
+  body.theme-light .bg-emerald-950 {
+    background-color: #ecfdf5 !important;
+  }
+
+  body.theme-light .border-emerald-500\/20,
+  body.theme-light .border-emerald-500\/30,
+  body.theme-light .border-emerald-500\/40,
+  body.theme-light .border-emerald-500\/50,
+  body.theme-light .border-emerald-500\/60,
+  body.theme-light .border-emerald-500 {
+    border-color: #059669 !important;
+  }
+
+  /* Amber / Damaged / Warning / Notes */
+  body.theme-light .text-amber-400,
+  body.theme-light .text-amber-300,
+  body.theme-light .text-amber-200 {
+    color: #92400e !important;
+  }
+
+  body.theme-light .bg-amber-500\/10,
+  body.theme-light .bg-amber-500\/15,
+  body.theme-light .bg-amber-500\/20,
+  body.theme-light .bg-amber-600\/25,
+  body.theme-light .bg-amber-950\/30,
+  body.theme-light .bg-amber-950\/40,
+  body.theme-light .bg-amber-950\/60,
+  body.theme-light .bg-amber-950\/80,
+  body.theme-light .bg-amber-950\/90,
+  body.theme-light .bg-amber-950 {
+    background-color: #fffbeb !important;
+  }
+
+  body.theme-light .border-amber-500\/20,
+  body.theme-light .border-amber-500\/25,
+  body.theme-light .border-amber-500\/30,
+  body.theme-light .border-amber-500\/40,
+  body.theme-light .border-amber-500\/60,
+  body.theme-light .border-amber-500 {
+    border-color: #d97706 !important;
+  }
+
+  /* Rose / Missing / Error */
+  body.theme-light .text-rose-400,
+  body.theme-light .text-rose-300,
+  body.theme-light .text-rose-200 {
+    color: #9f1239 !important;
+  }
+
+  body.theme-light .bg-rose-500\/10,
+  body.theme-light .bg-rose-500\/15,
+  body.theme-light .bg-rose-500\/20,
+  body.theme-light .bg-rose-950\/30,
+  body.theme-light .bg-rose-950\/40,
+  body.theme-light .bg-rose-950\/60,
+  body.theme-light .bg-rose-950\/80,
+  body.theme-light .bg-rose-950\/90,
+  body.theme-light .bg-rose-950 {
+    background-color: #fff1f2 !important;
+  }
+
+  body.theme-light .border-rose-500\/20,
+  body.theme-light .border-rose-500\/30,
+  body.theme-light .border-rose-500\/40,
+  body.theme-light .border-rose-500\/50,
+  body.theme-light .border-rose-500\/60,
+  body.theme-light .border-rose-500 {
+    border-color: #e11d48 !important;
+  }
+
+  /* Sky / Blue / Pending */
+  body.theme-light .text-sky-400,
+  body.theme-light .text-sky-300,
+  body.theme-light .text-sky-200 {
+    color: #0369a1 !important;
+  }
+
+  body.theme-light .bg-sky-500\/10,
+  body.theme-light .bg-sky-500\/15,
+  body.theme-light .bg-sky-500\/20,
+  body.theme-light .bg-sky-950\/30,
+  body.theme-light .bg-sky-950\/40,
+  body.theme-light .bg-sky-950\/60,
+  body.theme-light .bg-sky-950\/80,
+  body.theme-light .bg-sky-950\/90,
+  body.theme-light .bg-sky-950 {
+    background-color: #f0f9ff !important;
+  }
+
+  body.theme-light .border-sky-500\/20,
+  body.theme-light .border-sky-500\/30,
+  body.theme-light .border-sky-500\/40,
+  body.theme-light .border-sky-500\/50,
+  body.theme-light .border-sky-500 {
+    border-color: #0284c7 !important;
+  }
+
+  /* Purple / Indigo */
+  body.theme-light .text-purple-400,
+  body.theme-light .text-purple-300,
+  body.theme-light .text-indigo-400,
+  body.theme-light .text-indigo-300 {
+    color: #6b21a8 !important;
+  }
+
+  body.theme-light .bg-purple-950\/30,
+  body.theme-light .bg-purple-950\/40,
+  body.theme-light .bg-purple-950\/60,
+  body.theme-light .bg-purple-950\/80,
+  body.theme-light .bg-purple-950,
+  body.theme-light .bg-indigo-600\/25 {
+    background-color: #faf5ff !important;
+  }
+
+  body.theme-light .border-purple-500\/50,
+  body.theme-light .border-purple-500,
+  body.theme-light .border-indigo-500\/40 {
+    border-color: #9333ea !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     Camera Scanner Standby Card (Screenshot 2 Fix)
+     -------------------------------------------------------------------------- */
+  body.theme-light .scanner-overlay-box {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+
+  body.theme-light #scanner-placeholder {
+    background-color: #ffffff !important;
+  }
+
+  body.theme-light #scanner-placeholder h3 {
+    color: #0f172a !important;
+  }
+
+  body.theme-light #scanner-placeholder p {
+    color: #334155 !important;
+  }
+
+  body.theme-light #scanner-placeholder .bg-slate-800 {
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light #scanner-placeholder .bg-slate-800:hover {
+    background-color: #e2e8f0 !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     Toast Notifications (Screenshot 2 Fix)
+     -------------------------------------------------------------------------- */
+  body.theme-light #toast-container .app-toast,
+  body.theme-light #toast-container div {
+    background-color: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body.theme-light .toast-success,
+  body.theme-light #toast-container .bg-emerald-950\/90 {
+    background-color: #ecfdf5 !important;
+    border: 1.5px solid #059669 !important;
+    color: #065f46 !important;
+  }
+
+  body.theme-light .toast-error,
+  body.theme-light #toast-container .bg-rose-950\/90 {
+    background-color: #fff1f2 !important;
+    border: 1.5px solid #e11d48 !important;
+    color: #9f1239 !important;
+  }
+
+  body.theme-light .toast-warning,
+  body.theme-light #toast-container .bg-amber-950\/90 {
+    background-color: #fffbeb !important;
+    border: 1.5px solid #d97706 !important;
+    color: #92400e !important;
+  }
+
+  body.theme-light .toast-info,
+  body.theme-light #toast-container .bg-slate-900\/95 {
+    background-color: #f0f9ff !important;
+    border: 1.5px solid #0284c7 !important;
+    color: #075985 !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     Modal Dialogs & Floating Drawers
+     -------------------------------------------------------------------------- */
+  body.theme-light #manual-lookup-modal,
+  body.theme-light #unrecognized-asset-modal,
+  body.theme-light #dev-gateway-modal,
+  body.theme-light #asset-details-modal {
+    background-color: rgba(15, 23, 42, 0.45) !important;
+  }
+
+  body.theme-light #manual-lookup-modal > div,
+  body.theme-light #unrecognized-asset-modal > div,
+  body.theme-light #dev-gateway-modal > div,
+  body.theme-light #asset-details-modal > div {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  body.theme-light #modal-asset-note-container {
+    background-color: #fffbeb !important;
+    border: 1.5px solid #f59e0b !important;
+    color: #92400e !important;
+  }
+
+  body.theme-light #modal-asset-note-display {
+    color: #78350f !important;
+    font-weight: 800 !important;
+  }
+
+  body.theme-light #modal-asset-id,
+  body.theme-light #asset-card-id {
+    background-color: #d1fae5 !important;
+    border: 1.5px solid #10b981 !important;
+    color: #065f46 !important;
+    font-weight: 800 !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     Buttons & Action Controls
+     -------------------------------------------------------------------------- */
+  body.theme-light [data-modal-status="สูญหาย"],
+  body.theme-light [data-modal-status="หาไม่เจอ"],
+  body.theme-light [data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"],
+  body.theme-light [data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน"],
+  body.theme-light [data-status="สูญหาย"],
+  body.theme-light [data-status="หาไม่เจอ"],
+  body.theme-light [data-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"],
+  body.theme-light [data-status="งง+ให้พัสดุมาตรวจสอบหน้างาน"] {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  }
+
+  body.theme-light [data-modal-status="สูญหาย"]:hover,
+  body.theme-light [data-modal-status="หาไม่เจอ"]:hover,
+  body.theme-light [data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"]:hover,
+  body.theme-light [data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน"]:hover,
+  body.theme-light [data-status="สูญหาย"]:hover,
+  body.theme-light [data-status="หาไม่เจอ"]:hover,
+  body.theme-light [data-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"]:hover,
+  body.theme-light [data-status="งง+ให้พัสดุมาตรวจสอบหน้างาน"]:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+
+  /* Form Elements in Light Mode */
+  body.theme-light input,
+  body.theme-light textarea,
+  body.theme-light select {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light input:focus,
+  body.theme-light textarea:focus,
+  body.theme-light select:focus {
+    border-color: #059669 !important;
+    outline: none !important;
+  }
+
+  /* Sublayer Panels in Light Mode */
+  body.theme-light #modal-sublayer-sticker,
+  body.theme-light #card-sublayer-sticker,
+  body.theme-light #modal-sublayer-move,
+  body.theme-light #card-sublayer-move,
+  body.theme-light #modal-sublayer-rename,
+  body.theme-light #card-sublayer-rename {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+
+  body.theme-light .inspection-sticker-btn {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  body.theme-light .inspection-sticker-btn:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+
+  /* Roster Skeleton Loading in Light Mode */
+  body.theme-light #roster-loading-state {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+
+  body.theme-light #roster-loading-state .bg-slate-800\/80,
+  body.theme-light #roster-loading-state .bg-slate-800\/60,
+  body.theme-light #roster-loading-state .bg-slate-800\/40 {
+    background-color: #e2e8f0 !important;
+  }
+
+  body.theme-light #dev-json-state {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #065f46 !important;
+  }
+
+  body.theme-light footer {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Mobile Touch Hit Target Standard (>=44x44px) & High-Legibility Sizing */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
@@ -77,8 +513,14 @@
     justify-content: center;
   }
 
+  /* Form Elements - Comfortable reading across Desktop & Mobile */
+  input, select, textarea {
+    font-size: 1rem !important;
+  }
+
   .thumb-btn {
-    min-height: 56px;
+    min-height: 52px;
+    font-size: 1rem;
     border-radius: 0.75rem;
     font-weight: 700;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -87,6 +529,34 @@
 
   .thumb-btn:active {
     transform: scale(0.97);
+  }
+
+  .inspection-sticker-btn {
+    min-height: 46px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .sticker-pill, .modal-sticker-pill {
+    font-size: 0.88rem;
+    min-height: 36px;
+    font-weight: 600;
+  }
+
+  .filter-chip {
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .app-toast {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .asset-row-card h4 {
+    font-size: 1.05rem;
+    line-height: 1.35;
   }
 
   /* Viewfinder & QR Scanner styles */

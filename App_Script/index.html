@@ -48,12 +48,24 @@
         <!-- Application Title with Canonical Version Badge -->
         <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
           <span>🔍 QR Asset Survey</span>
-          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.0e</span>
+          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.4</span>
         </h1>
       </div>
 
       <!-- Header Right Utilities -->
       <div class="flex items-center gap-2">
+        <!-- Usage Stats Dashboard Button (v1.1.4) -->
+        <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="View Usage & Audit Stats">
+          <i class="fa-solid fa-chart-pie text-sky-400"></i>
+          <span class="hidden sm:inline">Stats</span>
+        </button>
+
+        <!-- Force Sync / Refresh from Sheet Button -->
+        <button id="btn-force-refresh" onclick="ModalController.triggerForceSync()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Force Refresh & Sync with Google Sheet">
+          <i id="btn-force-refresh-icon" class="fa-solid fa-arrows-rotate text-emerald-400 sync-refresh-icon"></i>
+          <span class="hidden sm:inline">Sync</span>
+        </button>
+
         <!-- Manual Asset ID Lookup Button -->
         <button onclick="ModalController.openManualLookupModal()" class="touch-target px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5" title="Type Asset ID Manually">
           <i class="fa-solid fa-keyboard text-emerald-400"></i>
@@ -77,7 +89,7 @@
       <div class="flex items-center gap-2 flex-1 min-w-[200px]">
         <span class="text-xs font-medium text-slate-400 shrink-0"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Lab Room:</span>
         <select id="room-selector" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-emerald-400">
-          <option value="ALL">All Laboratories (Overview)</option>
+          <option value="ALL">Master Table (All Rooms)</option>
         </select>
       </div>
 
@@ -166,21 +178,21 @@
             
             <!-- Multi-Modal Action Buttons -->
             <div class="w-full max-w-[260px] space-y-2">
-              <!-- Primary: Instant Native Camera Snap (100% bypass of GAS iframe permission block) -->
-              <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target w-full px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all">
-                <i class="fa-solid fa-camera text-sm"></i>
-                <span>📸 SNAP WITH CAMERA</span>
+              <!-- Primary: Live Webcam Stream -->
+              <button onclick="ScannerController.startScanner()" class="touch-target w-full px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all">
+                <i class="fa-solid fa-video text-sm"></i>
+                <span>📹 START LIVE SCANNER</span>
               </button>
               
-              <!-- Secondary: Live Webcam Stream -->
-              <button onclick="ScannerController.startScanner()" class="touch-target w-full px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 active:scale-[0.98] transition-all">
-                <i class="fa-solid fa-video text-xs text-emerald-400"></i>
-                <span>📹 Live Video Stream</span>
+              <!-- Secondary: Instant Native Camera Snap -->
+              <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target w-full px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 active:scale-[0.98] transition-all">
+                <i class="fa-solid fa-camera text-xs text-emerald-400"></i>
+                <span>📸 Snap Photo with Camera</span>
               </button>
             </div>
 
             <p class="text-[10px] text-slate-500 mt-2.5">
-              <i class="fa-solid fa-bolt text-amber-400 mr-1"></i>Mobile tip: "Snap with Camera" works instantly on any phone!
+              <i class="fa-solid fa-bolt text-emerald-400 mr-1"></i>Live scanner reads QR directly inside camera feed!
             </p>
           </div>
 
@@ -189,21 +201,21 @@
         <!-- Camera Control Toolbar -->
         <div class="mt-3 flex items-center justify-between gap-1.5 max-w-[340px] mx-auto">
           
-          <!-- Native Camera Snap Button -->
-          <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1" title="Snap Photo with Device Camera">
-            <i class="fa-solid fa-camera"></i>
-            <span>Snap</span>
-          </button>
-
-          <!-- Live Stream Start/Pause Buttons -->
-          <button id="btn-start-scanner" onclick="ScannerController.startScanner()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1" title="Start Live Video Stream">
-            <i class="fa-solid fa-play text-emerald-400 text-[10px]"></i>
+          <!-- Live Stream Start/Pause Buttons (Primary) -->
+          <button id="btn-start-scanner" onclick="ScannerController.startScanner()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1" title="Start Live Video Stream">
+            <i class="fa-solid fa-video text-[11px]"></i>
             <span>Live</span>
           </button>
 
           <button id="btn-stop-scanner" onclick="ScannerController.stopScanner()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1 hidden" title="Pause Live Video Stream">
             <i class="fa-solid fa-pause text-[10px]"></i>
             <span>Pause</span>
+          </button>
+
+          <!-- Native Camera Snap Button (Secondary) -->
+          <button onclick="ScannerController.openNativeCameraSnap()" class="touch-target flex-1 py-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1" title="Snap Photo with Device Camera">
+            <i class="fa-solid fa-camera text-[11px] text-slate-400"></i>
+            <span>Snap</span>
           </button>
 
           <!-- Flip Camera (Front/Rear) -->
@@ -233,15 +245,29 @@
       <!-- ==================== 1-TAP STATUS CONFIRMATION CARD ==================== -->
       <div id="active-asset-card" class="hidden rounded-2xl bg-slate-900 border-2 border-emerald-500/60 p-4 shadow-2xl space-y-3 transition-all">
         
-        <!-- Header Info -->
+        <!-- Header Info (Title: Asset Name, Subtitle: Inventory Number) -->
         <div class="flex items-start justify-between gap-2">
-          <div>
+          <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
-              <span id="asset-card-id" class="font-mono text-sm font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded">MUIDS-EQ-000</span>
+              <span class="text-[10px] uppercase tracking-wider font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
+                <i class="fa-solid fa-qrcode mr-1"></i>Matched Asset
+              </span>
               <span id="asset-card-prev-status"></span>
             </div>
-            <h3 id="asset-card-name" class="text-base font-bold text-white">Asset Name</h3>
-            <p id="asset-card-spec" class="text-xs text-slate-400 mt-0.5">Brand / Specification</p>
+            <!-- Title: Asset Name (Asset description1, Column D) + Front Copy Button -->
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="ModalController.copyToClipboard('name')" class="touch-target p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-emerald-400 transition active:scale-95 shrink-0" title="Copy Asset Name">
+                <i class="fa-regular fa-copy text-xs"></i>
+              </button>
+              <h3 id="asset-card-name" class="text-base sm:text-lg font-bold text-white leading-snug break-words flex-1">Asset Name</h3>
+            </div>
+            <!-- Subtitle: Inventory Number (Column B) + Front Copy Button -->
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+              <button type="button" onclick="ModalController.copyToClipboard('id')" class="touch-target p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-emerald-400 transition active:scale-95 shrink-0" title="Copy Inventory Number">
+                <i class="fa-regular fa-copy text-[11px]"></i>
+              </button>
+              <span id="asset-card-id" class="font-mono text-xs font-extrabold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded tracking-wide">MUIDS-EQ-000</span>
+            </div>
           </div>
           
           <div class="text-right shrink-0">
@@ -250,16 +276,15 @@
           </div>
         </div>
 
-        <!-- Procurement Metadata & Historical Survey Context -->
+        <!-- Metadata Context (Strictly Cols N & O) -->
         <div class="flex items-center gap-2 flex-wrap text-[11px] pt-1">
-          <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-            <i class="fa-solid fa-clipboard-check text-sky-400 mr-1"></i>สภาพพัสดุ: <span id="asset-card-cond-val" class="font-semibold text-white">-</span>
+          <!-- Reference Note: Column N (หมายเหตุปี 69) ONLY -->
+          <span id="asset-card-result69-box" class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 hidden">
+            <i class="fa-solid fa-note-sticky mr-1"></i>หมายเหตุ 69: <span id="asset-card-result69-val" class="font-semibold text-white">-</span>
           </span>
-          <span id="asset-card-prev-audit-box" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 hidden">
-            <i class="fa-solid fa-clock-rotate-left text-amber-400 mr-1"></i>ผลปี 68: <span id="asset-card-prev-audit-val" class="font-semibold text-amber-300">-</span>
-          </span>
-          <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <i class="fa-solid fa-tag mr-1"></i>Sticker: <span id="asset-card-sticker-val" class="font-bold">Yes</span>
+          <!-- Sticker Status: Column O (สติกเกอร์) -->
+          <span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
+            <i class="fa-solid fa-tag mr-1"></i>Sticker: <span id="asset-card-sticker-val" class="font-bold">ปกติ</span>
           </span>
         </div>
 
@@ -269,35 +294,187 @@
           <span id="location-discrepancy-text">Registered room differs from current auditing location.</span>
         </div>
 
-        <!-- Condition Notes & Quick Chips -->
-        <div class="space-y-1.5">
+        <!-- Sticker Verification Options (3-Pill Toggle) -->
+        <div class="space-y-1.5 pt-1">
           <div class="flex items-center justify-between text-[11px] text-slate-400">
-            <span>Condition Remark (Optional):</span>
+            <span><i class="fa-solid fa-tag text-sky-400 mr-1"></i>สถานะสติกเกอร์ (Sticker):</span>
           </div>
-          <div class="flex flex-wrap gap-1.5 mb-1.5">
-            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Clear Optics</button>
-            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Missing Cable</button>
-            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Needs Calibration</button>
-            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Chipped Housing</button>
-            <button class="quick-note-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">Peeled QR</button>
+          <div id="card-sticker-pills" class="grid grid-cols-3 gap-1.5">
+            <button type="button" onclick="AuditController.selectSticker('ปกติ')" data-sticker="ปกติ" class="sticker-pill touch-target py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/20">
+              ปกติ
+            </button>
+            <button type="button" onclick="AuditController.selectSticker('ปริ้นใหม่')" data-sticker="ปริ้นใหม่" class="sticker-pill touch-target py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700">
+              ปริ้นใหม่
+            </button>
+            <button type="button" onclick="AuditController.selectSticker('ปริ้นใหม่+แก้ข้อมูล')" data-sticker="ปริ้นใหม่+แก้ข้อมูล" class="sticker-pill touch-target py-1.5 px-1 rounded-xl text-[11px] font-bold text-center border transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 leading-tight">
+              ปริ้นใหม่+แก้ข้อมูล
+            </button>
           </div>
-          <input type="text" id="condition-note-input" placeholder="Add custom condition notes..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
         </div>
 
-        <!-- 3 LARGE THUMB BUTTONS (1-Tap Confirmation) -->
-        <div class="pt-1 grid grid-cols-3 gap-2 sm:gap-3">
-          
-          <button onclick="AuditController.submitStatus('Good')" data-status="Good" class="thumb-btn bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-900/30">
-            <i class="fa-solid fa-circle-check text-xl mr-1.5"></i> GOOD
-          </button>
+        <!-- Column N Note Input -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span>หมายเหตุปี 69 / Remark (Optional):</span>
+          </div>
+          <input type="text" id="condition-note-input" placeholder="Add notes for Column N (หมายเหตุปี 69)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+        </div>
 
-          <button onclick="AuditController.submitStatus('Damaged')" data-status="Damaged" class="thumb-btn bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-900/30">
-            <i class="fa-solid fa-triangle-exclamation text-xl mr-1.5"></i> DAMAGED
-          </button>
+        <!-- ==================== STATUS CONFIRMATION (3 COLOR-CODED GROUPS) ==================== -->
+        <div id="card-status-main-panel" class="space-y-2.5 pt-1">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-300">
+            <span>บันทึกสถานะ Scanned 69 (AY 2569):</span>
+            <span class="text-[10px] text-emerald-400 font-mono">1-Tap Action</span>
+          </div>
 
-          <button onclick="AuditController.submitStatus('Missing')" data-status="Missing" class="thumb-btn bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-900/30">
-            <i class="fa-solid fa-circle-xmark text-xl mr-1.5"></i> MISSING
-          </button>
+          <!-- Group 1: ใช้งานอยู่ (Green shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">1. ใช้งานอยู่ (In Use)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'card')" data-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
+                <i class="fa-solid fa-circle-check text-sm"></i>
+                <span>ใช้งานอยู่</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'card')" data-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-screwdriver-wrench text-xs text-amber-300"></i>
+                <span>ใช้งานอยู่แต่ชำรุดนะ</span>
+              </button>
+              <button onclick="AuditController.openMoveRoomSublayer('card')" data-status="ใช้งานอยู่+ย้ายไป..." class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-arrow-right-arrow-left text-xs text-sky-300"></i>
+                <span>ใช้งานอยู่+ย้ายไป...</span>
+              </button>
+              <button onclick="AuditController.openRenameSublayer('card')" data-status="ใช้งานอยู่+แก้ไขชื่อเป็น..." class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-pen-to-square text-xs text-amber-300"></i>
+                <span>ใช้งานอยู่+แก้ไขชื่อเป็น...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 2: หมดความจำเป็น (Red shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">2. หมดความจำเป็น (No Longer Needed)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'card')" data-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
+                <i class="fa-solid fa-ban text-xs"></i>
+                <span class="truncate">หมดความจำเป็นต้องใช้</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'card')" data-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
+                <span>หมดความจำเป็นฯ(ชำรุด)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 3: สูญหาย / ตรวจสอบ (Grey shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. สูญหาย / ให้พัสดุตรวจ (Missing / Verify)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'card')" data-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-circle-xmark text-xs text-rose-400"></i>
+                <span>สูญหาย</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'card')" data-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-magnifying-glass text-xs text-amber-400"></i>
+                <span>หาไม่เจอ</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-clipboard-question text-xs text-sky-400"></i>
+                <span>หาไม่เจอ+ให้พัสดุตรวจ</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-circle-question text-xs text-purple-400"></i>
+                <span>งง+ให้พัสดุตรวจ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Move to Room Selector (Inline Card) -->
+        <div id="card-sublayer-move" class="hidden p-3 rounded-xl bg-slate-950 border border-sky-500/50 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i>
+              <span>เลือกห้องปลายทางที่ย้ายไป (15 Rooms):</span>
+            </span>
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
+              ยกเลิก
+            </button>
+          </div>
+          <div id="card-move-room-chips" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs">
+            <!-- Populated dynamically by AuditController -->
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Rename Asset (Inline Card) -->
+        <div id="card-sublayer-rename" class="hidden p-3 rounded-xl bg-slate-950 border border-emerald-500/50 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>แก้ไขชื่อสินทรัพย์ (Asset Description 1):</span>
+            </span>
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
+              ยกเลิก
+            </button>
+          </div>
+          <input type="text" id="card-rename-input" placeholder="พิมพ์ชื่อสินทรัพย์ที่ต้องการแก้ไข..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+          <div class="flex gap-2">
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+              ยกเลิก
+            </button>
+            <button type="button" onclick="AuditController.confirmRenameAndSubmit('card')" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold">
+              บันทึกชื่อ &amp; ยืนยัน
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Sticker Integrity & Inspection (Inline Card) -->
+        <div id="card-sublayer-sticker" class="hidden p-3 rounded-xl bg-slate-950 border border-sky-500/50 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-tag"></i>
+              <span>Sticker Check</span>
+            </span>
+            <span id="card-sticker-selected-status-badge" class="badge-status-green text-xs font-bold px-2.5 py-0.5 rounded-full border truncate max-w-[170px]">
+              ใช้งานอยู่
+            </span>
+          </div>
+
+          <!-- 3 Sticker Options -->
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปกติ', 'card')" id="card-sticker-opt-normal" class="inspection-sticker-btn touch-target p-2 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 bg-emerald-950/80 border-emerald-500 text-emerald-200 font-bold">
+              <i class="fa-solid fa-circle-check text-sm text-emerald-400"></i>
+              <span class="text-xs">ปกติ (Intact)</span>
+            </button>
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปริ้นใหม่', 'card')" id="card-sticker-opt-reprint" class="inspection-sticker-btn touch-target p-2 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500">
+              <i class="fa-solid fa-print text-sm text-amber-400"></i>
+              <span class="text-xs">ปริ้นใหม่</span>
+            </button>
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปริ้นใหม่+แก้ข้อมูล', 'card')" id="card-sticker-opt-reprint-edit" class="inspection-sticker-btn touch-target p-2 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 bg-slate-900 border-slate-700 text-slate-300 hover:border-purple-500 leading-tight">
+              <i class="fa-solid fa-pen-to-square text-sm text-purple-400"></i>
+              <span class="text-[11px]">ปริ้นใหม่+แก้ข้อมูล</span>
+            </button>
+          </div>
+
+          <!-- Change Details / Remarks Textbox -->
+          <div class="space-y-1">
+            <label for="card-sticker-change-notes" class="text-[11px] font-medium text-slate-400 flex items-center justify-between">
+              <span>รายละเอียดการแก้ไข / หมายเหตุสติกเกอร์:</span>
+              <span class="text-[10px] text-slate-500">(Optional)</span>
+            </label>
+            <textarea id="card-sticker-change-notes" rows="2" placeholder="ระบุสิ่งที่ต้องแก้ไขหรือหมายเหตุสติกเกอร์ (เช่น ปรับชื่อ, แก้ไขมูลค่า, สติกเกอร์ฉีกขาด)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 resize-none"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+              ย้อนกลับ
+            </button>
+            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('card')" class="touch-target flex-1 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-sky-950/50 active:scale-[0.98] transition">
+              <i class="fa-solid fa-check"></i>
+              <span>ยืนยันและบันทึก (Save &amp; Next)</span>
+            </button>
+          </div>
+        </div>
 
         </div>
 
@@ -308,16 +485,6 @@
     <!-- ==================== TAB 2: ROSTER & CHECKLIST ==================== -->
     <div id="view-roster" class="space-y-4 hidden">
       
-      <!-- Dynamic Room Type Filter Bar (Hybrid Master Table) -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <span class="text-slate-400 font-semibold text-[11px] shrink-0"><i class="fa-solid fa-tags text-teal-400 mr-1"></i>Type:</span>
-        <div id="room-type-filter-chips" class="flex items-center gap-1.5 shrink-0">
-          <button data-room-type="ALL" class="room-type-chip touch-target px-2.5 py-1 rounded-xl bg-teal-500 text-white text-[11px] font-bold whitespace-nowrap">
-            All Types
-          </button>
-        </div>
-      </div>
-
       <!-- Filter Bar & Search Box -->
       <div class="flex flex-col sm:flex-row gap-2">
         
@@ -344,13 +511,29 @@
           <button data-filter="Missing" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
             Missing
           </button>
+          <button onclick="ModalController.triggerForceSync()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 text-xs font-bold whitespace-nowrap border border-emerald-500/30 flex items-center gap-1 transition active:scale-95 ml-auto" title="Force Sync & Refresh from Google Sheets">
+            <i class="fa-solid fa-arrows-rotate sync-refresh-icon"></i>
+            <span>Sync</span>
+          </button>
         </div>
 
       </div>
 
       <!-- Asset List Container -->
       <div id="asset-list-container" class="space-y-2">
-        <!-- Rendered by AuditController -->
+        <!-- Initial Skeleton Loading Visual Cue (v1.1.3b) -->
+        <div id="roster-loading-state" class="p-8 text-center bg-slate-900/60 rounded-2xl border border-slate-800 space-y-3 animate-pulse">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-1">
+            <i class="fa-solid fa-arrows-rotate fa-spin text-lg"></i>
+          </div>
+          <h4 class="text-sm sm:text-base font-bold text-white">กำลังโหลดข้อมูลครุภัณฑ์...</h4>
+          <p class="text-xs sm:text-sm text-slate-400">Loading laboratory inventory from Master Table...</p>
+          <div class="space-y-2 max-w-sm mx-auto pt-2">
+            <div class="h-12 bg-slate-800/80 rounded-xl"></div>
+            <div class="h-12 bg-slate-800/60 rounded-xl"></div>
+            <div class="h-12 bg-slate-800/40 rounded-xl"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -365,21 +548,49 @@
         </h3>
         <p class="text-xs text-slate-400">Dynamic multi-sheet status aggregate across all science laboratory rooms.</p>
         
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
-            <span class="text-[10px] font-mono uppercase text-slate-500">Total Registered</span>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-2">
+          <!-- 1. Total Registered -->
+          <div onclick="AuditController.filterFromStatCard('ALL')" class="p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-600 hover:bg-slate-900/80 transition active:scale-[0.98] group" title="Click to view all assets in roster">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase text-slate-500 group-hover:text-slate-300 transition">Total Registered</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-slate-600 group-hover:text-emerald-400 transition"></i>
+            </div>
             <div id="summary-stat-total" class="text-xl font-extrabold text-white mt-0.5">0</div>
           </div>
-          <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
-            <span class="text-[10px] font-mono uppercase text-emerald-400">Verified Good</span>
+
+          <!-- 2. Pending / Unaudited (v1.1.2b) -->
+          <div onclick="AuditController.filterFromStatCard('UNVERIFIED')" class="p-3 rounded-xl bg-sky-950/30 border border-sky-500/30 cursor-pointer hover:border-sky-400 hover:bg-sky-950/60 transition active:scale-[0.98] group" title="Click to filter unaudited/pending items">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase text-sky-400 group-hover:text-sky-300 transition">ยังไม่สำรวจ / Pending</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-sky-500/50 group-hover:text-sky-400 transition"></i>
+            </div>
+            <div id="summary-stat-unverified" class="text-xl font-extrabold text-sky-400 mt-0.5">0</div>
+          </div>
+
+          <!-- 3. Verified Good -->
+          <div onclick="AuditController.filterFromStatCard('Good')" class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 cursor-pointer hover:border-emerald-400 hover:bg-emerald-950/60 transition active:scale-[0.98] group" title="Click to filter verified good assets">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase text-emerald-400 group-hover:text-emerald-300 transition">Verified Good</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-emerald-500/50 group-hover:text-emerald-400 transition"></i>
+            </div>
             <div id="summary-stat-good" class="text-xl font-extrabold text-emerald-400 mt-0.5">0</div>
           </div>
-          <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30">
-            <span class="text-[10px] font-mono uppercase text-amber-400">Damaged / Issue</span>
+
+          <!-- 4. Damaged / Issue -->
+          <div onclick="AuditController.filterFromStatCard('Damaged')" class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 cursor-pointer hover:border-amber-400 hover:bg-amber-950/60 transition active:scale-[0.98] group" title="Click to filter damaged/issue assets">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase text-amber-400 group-hover:text-amber-300 transition">Damaged / Issue</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-amber-500/50 group-hover:text-amber-400 transition"></i>
+            </div>
             <div id="summary-stat-damaged" class="text-xl font-extrabold text-amber-400 mt-0.5">0</div>
           </div>
-          <div class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/30">
-            <span class="text-[10px] font-mono uppercase text-rose-400">Missing Assets</span>
+
+          <!-- 5. Missing Assets -->
+          <div onclick="AuditController.filterFromStatCard('Missing')" class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 cursor-pointer hover:border-rose-400 hover:bg-rose-950/60 transition active:scale-[0.98] group" title="Click to filter missing assets">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase text-rose-400 group-hover:text-rose-300 transition">Missing Assets</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-rose-500/50 group-hover:text-rose-400 transition"></i>
+            </div>
             <div id="summary-stat-missing" class="text-xl font-extrabold text-rose-400 mt-0.5">0</div>
           </div>
         </div>
@@ -410,7 +621,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.0e</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.4</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -434,8 +645,8 @@
   <!-- ==================== MODALS & DRAWERS ==================== -->
 
   <!-- 1. MANUAL ASSET ID LOOKUP MODAL -->
-  <div id="manual-lookup-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+  <div id="manual-lookup-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-keyboard text-emerald-400"></i>
@@ -458,30 +669,137 @@
     </div>
   </div>
 
-  <!-- 2. UNRECOGNIZED ASSET MODAL -->
-  <div id="unrecognized-asset-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-      <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <div class="text-center space-y-1">
-        <h3 class="text-sm font-bold text-white">Unrecognized Asset Tag</h3>
-        <p class="text-xs text-slate-400">The scanned QR code is not registered in the science inventory database:</p>
-        <div id="unrecognized-code-display" class="font-mono text-xs font-bold text-amber-300 bg-slate-950 border border-slate-800 p-2 rounded-xl break-all">
-          CODE
+  <!-- 2. UNRECOGNIZED / UNLISTED ASSET REGISTRATION & 1-TAP AUDIT MODAL (v1.1.2a) -->
+  <div id="unrecognized-asset-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
+            <i class="fa-solid fa-circle-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white leading-tight">เพิ่มครุภัณฑ์นอกฐานข้อมูล</h3>
+            <p class="text-[10px] text-amber-400 font-mono">Unlisted Asset Registration &amp; 1-Tap Audit</p>
+          </div>
         </div>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="ModalController.closeUnrecognizedModal()" class="touch-target w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
-          Dismiss &amp; Resume
+        <button onclick="ModalController.closeUnrecognizedModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
+
+      <!-- Scanned Barcode Display (Col B) -->
+      <div class="space-y-1">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Inventory Number / Barcode (Col B)</span>
+          <span class="text-amber-400 font-bold">Scanned QR</span>
+        </label>
+        <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl px-3 py-2">
+          <div id="unrecognized-code-display" class="font-mono text-xs font-bold text-amber-300 break-all select-all">
+            CODE
+          </div>
+          <button onclick="ModalController.copyToClipboard('unrecognized')" class="touch-target text-slate-400 hover:text-emerald-400 p-1 transition" title="Copy QR Code">
+            <i class="fa-regular fa-copy text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Target Room Selection (Col I) -->
+      <div class="space-y-1">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+          บันทึกเข้าห้อง (Room Sheet - Col I) <span class="text-rose-400">*</span>
+        </label>
+        <select id="unlisted-room-select" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-emerald-400">
+        </select>
+      </div>
+
+      <!-- Asset Name / Description1 (Col D) -->
+      <div class="space-y-1">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+          ชื่อครุภัณฑ์ (Asset Description - Col D)
+        </label>
+        <input type="text" id="unlisted-asset-name-input" placeholder="e.g. ตู้ดูดควันไอสารเคมี / Compound Microscope" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+      </div>
+
+      <!-- Condition Note: Column N (หมายเหตุปี 69) -->
+      <div class="space-y-1">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span>หมายเหตุปี 69 (Col N)</span>
+          <span class="text-emerald-400 text-[9px] font-sans">Default Pre-filled</span>
+        </label>
+        <input type="text" id="unlisted-note-input" value="พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+      </div>
+
+      <!-- Sticker Status: Column O (สติกเกอร์) -->
+      <div class="space-y-1.5 pt-1">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-tag text-emerald-400"></i>
+          <span>สถานะสติกเกอร์ (Col O)</span>
+        </label>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="AuditController.selectSticker('ปกติ')" data-sticker-val="ปกติ" class="sticker-pill touch-target py-2 px-1 text-center rounded-xl border text-[11px] font-semibold transition active:scale-95 border-emerald-500/50 bg-emerald-500/20 text-emerald-300">
+            ปกติ
+          </button>
+          <button type="button" onclick="AuditController.selectSticker('ปริ้นใหม่')" data-sticker-val="ปริ้นใหม่" class="sticker-pill touch-target py-2 px-1 text-center rounded-xl border text-[11px] font-semibold transition active:scale-95 border-slate-700 bg-slate-800/40 text-slate-400">
+            ปริ้นใหม่
+          </button>
+          <button type="button" onclick="AuditController.selectSticker('ปริ้นใหม่+แก้ข้อมูล')" data-sticker-val="ปริ้นใหม่+แก้ข้อมูล" class="sticker-pill touch-target py-2 px-1 text-center rounded-xl border text-[11px] font-semibold transition active:scale-95 border-slate-700 bg-slate-800/40 text-slate-400">
+            ปริ้น+แก้
+          </button>
+        </div>
+      </div>
+
+      <!-- 1-Tap Action Section (Col M: Scanned 69) -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <label class="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span>บันทึกสถานะ Scanned 69 (Col M)</span>
+          <span class="text-emerald-400 text-[10px]">1-Tap Save</span>
+        </label>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <!-- 1. ใช้งานอยู่ -->
+          <button onclick="AuditController.submitNewUnlistedAsset('ใช้งานอยู่')" data-status="ใช้งานอยู่" class="thumb-btn touch-target py-2.5 px-3 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+              <span>ใช้งานอยู่</span>
+            </div>
+            <span class="text-[9px] font-normal text-emerald-400/80">Good / Active</span>
+          </button>
+
+          <!-- 2. ใช้งานอยู่แต่ชำรุดนะ -->
+          <button onclick="AuditController.submitNewUnlistedAsset('ใช้งานอยู่แต่ชำรุดนะ')" data-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn touch-target py-2.5 px-3 rounded-xl bg-amber-600/25 hover:bg-amber-600/40 border border-amber-500/40 text-amber-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+              <span>ชำรุด</span>
+            </div>
+            <span class="text-[9px] font-normal text-amber-400/80">Damaged / Issue</span>
+          </button>
+
+          <!-- 3. หมดความจำเป็นต้องใช้งาน -->
+          <button onclick="AuditController.submitNewUnlistedAsset('หมดความจำเป็นต้องใช้งาน')" data-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn touch-target py-2.5 px-3 rounded-xl bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/40 text-indigo-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-box-archive text-indigo-400"></i>
+              <span>หมดความจำเป็น</span>
+            </div>
+            <span class="text-[9px] font-normal text-indigo-400/80">Surplus / Retire</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer / Cancel -->
+      <div class="pt-1">
+        <button onclick="ModalController.closeUnrecognizedModal()" class="touch-target w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition active:scale-[0.99]">
+          Cancel / Dismiss
+        </button>
+      </div>
+
     </div>
   </div>
 
   <!-- 3. STEALTH DEVELOPER GATEWAY MODAL (Ctrl + Shift + Q / PIN: 2026) -->
-  <div id="dev-gateway-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+  <div id="dev-gateway-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between shrink-0">
         <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
           <i class="fa-solid fa-terminal text-emerald-400"></i>
@@ -494,13 +812,13 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.0e</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.4</div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
         </div>
 
-        <!-- Master Table & Migration Control Center (v1.1.0e) -->
+        <!-- Master Table & Migration Control Center (v1.1.3b) -->
         <div class="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
           <div class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
             <i class="fa-solid fa-arrows-rotate text-emerald-400"></i>
@@ -509,7 +827,7 @@
           <p class="text-[10px] text-slate-400 leading-normal">
             Synchronize Config tab, configure row 5 audit columns on room sheets, aggregate data into Master Table, or migrate audit records to room sheets.
           </p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
             <button onclick="ModalController.triggerSyncConfigSheet()" class="touch-target px-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-purple-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition">
               <i class="fa-solid fa-gear text-purple-400"></i>
               <span>Sync Config</span>
@@ -525,6 +843,10 @@
             <button onclick="ModalController.triggerMigrateMasterToRooms()" class="touch-target px-2 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition shadow-lg shadow-emerald-950/50">
               <i class="fa-solid fa-share-from-square text-emerald-400"></i>
               <span>Migrate to Rooms</span>
+            </button>
+            <button onclick="ModalController.triggerCheckMasterContradictions()" class="touch-target px-2 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 text-[11px] font-bold flex items-center justify-center gap-1.5 text-center transition col-span-2 sm:col-span-1 shadow-lg shadow-rose-950/50">
+              <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+              <span>Check Duplicates</span>
             </button>
           </div>
         </div>
@@ -546,117 +868,331 @@
     </div>
   </div>
 
-  <!-- 4. MATCHED ASSET DETAILS MODAL (Pop-up on QR Scan) -->
-  <div id="asset-details-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-all duration-300">
-    <div class="bg-slate-900 border border-slate-700 w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-3.5 shadow-2xl max-h-[92vh] flex flex-col transform transition-transform duration-300">
+  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.4) -->
+  <div id="stats-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-sky-500/40 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
       
-      <!-- Mobile Pull-down Bar -->
-      <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto sm:hidden -mt-1 mb-1"></div>
-
-      <!-- Modal Header: Inventory Number & Status Badge & Close Button -->
-      <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[10px] uppercase tracking-wider font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
-              <i class="fa-solid fa-qrcode mr-1"></i>Matched Asset
-            </span>
-            <span id="modal-asset-prev-status"></span>
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-sm">
+            <i class="fa-solid fa-chart-pie"></i>
           </div>
-          <!-- Matched Inventory Number -->
-          <h2 id="modal-asset-id" class="text-lg sm:text-xl font-mono font-extrabold text-white tracking-tight break-all">
-            MUIDS-SCI-000
-          </h2>
+          <div>
+            <h3 class="text-sm font-bold text-white leading-tight">สถิติและการใช้งาน (Usage &amp; Audit Stats)</h3>
+            <p class="text-[10px] text-sky-400 font-mono">Live Multi-Sheet Survey Telemetry</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="ModalController.refreshStats()" class="touch-target p-1.5 rounded-lg bg-slate-800 text-sky-400 hover:text-white text-xs" title="Refresh Live Stats">
+            <i id="stats-refresh-icon" class="fa-solid fa-arrows-rotate"></i>
+          </button>
+          <button onclick="ModalController.closeStatsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Content Container -->
+      <div id="stats-content-area" class="space-y-4 overflow-y-auto flex-1 pr-1 text-xs text-slate-300">
+        <!-- Metric Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Total Items</span>
+            <div id="stats-metric-total" class="text-lg font-extrabold text-white mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-emerald-500/30 text-center">
+            <span class="text-[10px] font-mono text-emerald-400 uppercase">Audited</span>
+            <div id="stats-metric-audited" class="text-lg font-extrabold text-emerald-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-amber-500/30 text-center">
+            <span class="text-[10px] font-mono text-amber-400 uppercase">Remaining</span>
+            <div id="stats-metric-remaining" class="text-lg font-extrabold text-amber-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-sky-500/30 text-center">
+            <span class="text-[10px] font-mono text-sky-400 uppercase">Progress</span>
+            <div id="stats-metric-percent" class="text-lg font-extrabold text-sky-400 mt-0.5">0%</div>
+          </div>
         </div>
 
-        <button onclick="ModalController.closeAssetDetailsModal()" class="touch-target text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 shrink-0" title="Close Modal">
-          <i class="fa-solid fa-xmark text-base"></i>
+        <!-- Overall Progress Bar -->
+        <div class="space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between text-[11px] font-semibold">
+            <span class="text-slate-300">ความคืบหน้าการสำรวจโดยรวม</span>
+            <span id="stats-progress-label" class="text-emerald-400 font-mono font-bold">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div id="stats-progress-bar" class="bg-gradient-to-r from-emerald-500 to-sky-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Auditor Leaderboard -->
+        <div class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div class="text-[11px] font-bold text-purple-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-user-check"></i>
+            <span>ผลงานผู้สำรวจ (Auditor Breakdown)</span>
+          </div>
+          <div id="stats-auditor-list" class="space-y-1.5">
+            <div class="text-slate-500 text-[11px]">Loading auditor stats...</div>
+          </div>
+        </div>
+
+        <!-- Room Breakdown -->
+        <div class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <div class="text-[11px] font-bold text-sky-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-door-open"></i>
+            <span>ความคืบหน้ารายห้อง (Room Progress)</span>
+          </div>
+          <div id="stats-room-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div class="text-slate-500 text-[11px]">Loading room breakdown...</div>
+          </div>
+        </div>
+
+        <!-- Status Breakdown & Sticker Breakdown Chips -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div class="space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div class="text-[11px] font-bold text-emerald-400">สถานะที่บันทึก (Status)</div>
+            <div id="stats-status-chips" class="flex flex-wrap gap-1"></div>
+          </div>
+          <div class="space-y-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div class="text-[11px] font-bold text-sky-400">สติกเกอร์ (Stickers)</div>
+            <div id="stats-sticker-chips" class="flex flex-wrap gap-1"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-2 border-t border-slate-800 flex items-center justify-between shrink-0">
+        <span id="stats-last-updated" class="text-[10px] text-slate-500 font-mono">Updated: Just now</span>
+        <button onclick="ModalController.closeStatsModal()" class="touch-target px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+          Close
         </button>
-      </div>
-
-      <!-- Modal Body (Scrollable) -->
-      <div class="overflow-y-auto flex-1 space-y-3 pr-1 text-xs">
-        
-        <!-- Asset Description Card -->
-        <div class="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl space-y-1">
-          <h3 id="modal-asset-name" class="text-sm font-bold text-white leading-snug">Asset Name</h3>
-          <p id="modal-asset-spec" class="text-slate-400 text-xs">Specification / Brand Model</p>
-        </div>
-
-        <!-- Location Context -->
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl">
-            <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Registered Room</span>
-            <span id="modal-asset-room" class="font-bold text-slate-200 text-xs mt-0.5 block truncate">Lab Room</span>
-          </div>
-          <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl">
-            <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Current Audit Room</span>
-            <span id="modal-current-audit-room" class="font-bold text-emerald-400 text-xs mt-0.5 block truncate">Auditing Lab</span>
-          </div>
-        </div>
-
-        <!-- Location Discrepancy Alert Banner (Hidden by default) -->
-        <div id="modal-location-discrepancy-banner" class="hidden p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base shrink-0"></i>
-          <span id="modal-location-discrepancy-text">Registered room differs from current auditing location.</span>
-        </div>
-
-        <!-- Procurement Metadata & Historical Results -->
-        <div class="flex items-center gap-2 flex-wrap text-[11px]">
-          <span class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700">
-            <i class="fa-solid fa-clipboard-check text-sky-400 mr-1"></i>สภาพพัสดุ: <span id="modal-asset-cond-val" class="font-semibold text-white">-</span>
-          </span>
-          <span id="modal-asset-prev-audit-box" class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hidden">
-            <i class="fa-solid fa-clock-rotate-left text-amber-400 mr-1"></i>ผลปี 68: <span id="modal-asset-prev-audit-val" class="font-semibold text-amber-300">-</span>
-          </span>
-          <button id="modal-btn-toggle-sticker" onclick="AuditController.toggleModalSticker()" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 text-xs font-bold transition flex items-center gap-1.5" title="Click to toggle sticker verification">
-            <i class="fa-solid fa-tag"></i>
-            <span>Sticker: <strong id="modal-asset-sticker-val">Yes</strong></span>
-          </button>
-          <span id="modal-asset-year-box" class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 hidden">
-            <i class="fa-solid fa-calendar text-slate-400 mr-1"></i>ปีงบฯ: <span id="modal-asset-year-val" class="font-semibold text-white">-</span>
-          </span>
-        </div>
-
-        <!-- Condition Remark & Quick Chips -->
-        <div class="space-y-1.5 pt-1">
-          <div class="flex items-center justify-between text-[11px] text-slate-400">
-            <span>Condition Remark (Optional):</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Clear Optics</button>
-            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Missing Cable</button>
-            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Needs Calibration</button>
-            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Chipped Housing</button>
-            <button class="modal-quick-chip text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">Peeled QR</button>
-          </div>
-          <input type="text" id="modal-condition-note-input" placeholder="Add custom condition notes..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
-        </div>
-
-      </div>
-
-      <!-- 1-Tap Status Confirmation Action Bar (3 Large Thumb Buttons) -->
-      <div class="pt-2 border-t border-slate-800">
-        <div class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center justify-between">
-          <span>Tap 1 Button to Confirm Status (AY 2569):</span>
-        </div>
-        <div class="grid grid-cols-3 gap-2 sm:gap-3">
-          <button onclick="AuditController.submitStatusFromModal('Good')" data-modal-status="Good" class="thumb-btn bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
-            <i class="fa-solid fa-circle-check text-lg mr-1.5"></i> GOOD
-          </button>
-          <button onclick="AuditController.submitStatusFromModal('Damaged')" data-modal-status="Damaged" class="thumb-btn bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
-            <i class="fa-solid fa-triangle-exclamation text-lg mr-1.5"></i> DAMAGED
-          </button>
-          <button onclick="AuditController.submitStatusFromModal('Missing')" data-modal-status="Missing" class="thumb-btn bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-900/40 py-3.5 rounded-2xl text-xs font-extrabold active:scale-[0.98] transition">
-            <i class="fa-solid fa-circle-xmark text-lg mr-1.5"></i> MISSING
-          </button>
-        </div>
       </div>
 
     </div>
   </div>
 
-  <!-- TOAST CONTAINER -->
-  <div id="toast-container" class="fixed bottom-5 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>
+  <!-- 4. MATCHED ASSET DETAILS MODAL (Pop-up on QR Scan) -->
+  <div id="asset-details-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-all duration-300">
+    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-3.5 sm:p-4 space-y-2 shadow-2xl max-h-[92vh] overflow-y-auto transform transition-transform duration-300">
+      
+      <!-- Mobile Pull-down Bar -->
+      <div class="w-10 h-1 bg-slate-700 rounded-full mx-auto sm:hidden -mt-1 mb-0.5"></div>
+
+      <!-- Modal Header: Asset Name (Title) & Inventory Number (Subtitle) & Close Button -->
+      <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2">
+        <div class="flex-1 min-w-0 space-y-0.5">
+          <div class="flex items-center gap-2 flex-wrap mb-0.5">
+            <span class="text-[9px] uppercase tracking-wider font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+              <i class="fa-solid fa-qrcode mr-1"></i>Matched Asset
+            </span>
+            <span id="modal-asset-prev-status"></span>
+          </div>
+          <!-- Title: Asset Name (Asset description1, Column D) + Front Compact Copy Button -->
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="ModalController.copyToClipboard('name')" class="p-1 rounded text-slate-400 hover:text-emerald-400 transition active:scale-95 shrink-0" title="Copy Asset Name">
+              <i class="fa-regular fa-copy text-xs"></i>
+            </button>
+            <h2 id="modal-asset-name" class="text-sm font-bold text-white leading-tight break-words line-clamp-2 flex-1">
+              Asset Name
+            </h2>
+          </div>
+          <!-- Subtitle: Inventory Number (Column B) + Front Compact Copy Button -->
+          <div class="flex items-center gap-1.5 pt-0.5">
+            <button type="button" onclick="ModalController.copyToClipboard('id')" class="p-1 rounded text-slate-400 hover:text-emerald-400 transition active:scale-95 shrink-0" title="Copy Inventory Number">
+              <i class="fa-regular fa-copy text-[10px]"></i>
+            </button>
+            <span id="modal-asset-id" class="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded tracking-wide">
+              MUIDS-SCI-000
+            </span>
+          </div>
+        </div>
+
+        <button onclick="ModalController.closeAssetDetailsModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 shrink-0" title="Close Modal">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Scanned Entry หมายเหตุปี 69 Display Row (Prominent Column N Display + Front Copy Button) -->
+      <div id="modal-asset-note-container" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs">
+        <button type="button" onclick="ModalController.copyToClipboard('note')" class="p-0.5 text-slate-400 hover:text-amber-400 transition active:scale-95 shrink-0" title="Copy Remark">
+          <i class="fa-regular fa-copy text-[10px]"></i>
+        </button>
+        <i class="fa-solid fa-note-sticky text-amber-400 text-xs shrink-0"></i>
+        <span class="text-slate-400 font-medium shrink-0">หมายเหตุปี 69:</span>
+        <span id="modal-asset-note-display" class="font-bold text-amber-200 truncate flex-1">—</span>
+      </div>
+
+      <!-- Hidden Context Elements for Legacy Compatibility -->
+      <input type="hidden" id="modal-condition-note-input" value="">
+      <span id="modal-asset-room" class="hidden"></span>
+      <span id="modal-current-audit-room" class="hidden"></span>
+      <div id="modal-location-discrepancy-banner" class="hidden"><span id="modal-location-discrepancy-text"></span></div>
+      <span id="modal-asset-sticker-val" class="hidden">ปกติ</span>
+
+      <!-- ==================== MODAL STATUS ACTIONS (3 COLOR-CODED GROUPS) ==================== -->
+      <div class="pt-1 border-t border-slate-800">
+        
+        <!-- Main Status Panel -->
+        <div id="modal-status-main-panel" class="space-y-1.5">
+
+          <!-- Group 1: ใช้งานอยู่ (Green shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">1. ใช้งานอยู่ (IN USE)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'modal')" data-modal-status="ใช้งานอยู่" class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
+                <i class="fa-solid fa-circle-check text-xs"></i>
+                <span>ใช้งานอยู่</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'modal')" data-modal-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-screwdriver-wrench text-xs text-amber-300"></i>
+                <span class="truncate">ใช้งานอยู่แต่ชำรุดนะ</span>
+              </button>
+              <button onclick="AuditController.openMoveRoomSublayer('modal')" data-modal-status="ใช้งานอยู่+ย้ายไป..." class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-arrow-right-arrow-left text-xs text-sky-300"></i>
+                <span class="truncate">ใช้งานอยู่+ย้ายไป...</span>
+              </button>
+              <button onclick="AuditController.openRenameSublayer('modal')" data-modal-status="ใช้งานอยู่+แก้ไขชื่อเป็น..." class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-pen-to-square text-xs text-amber-300"></i>
+                <span class="truncate">ใช้งานอยู่+แก้ไขชื่อเป็น...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 2: หมดความจำเป็น (Red shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">2. หมดความจำเป็น (NO LONGER NEEDED)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-1.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
+                <i class="fa-solid fa-ban text-xs"></i>
+                <span class="truncate">หมดความจำเป็นต้องใช้</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
+                <span class="truncate">หมดความจำเป็นฯ(ชำรุด)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 3: สูญหาย / ตรวจสอบ (Grey shades) -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. สูญหาย / ให้พัสดุตรวจ (MISSING / VERIFY)</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'modal')" data-modal-status="สูญหาย" class="thumb-btn py-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-circle-xmark text-xs text-rose-400"></i>
+                <span>สูญหาย</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'modal')" data-modal-status="หาไม่เจอ" class="thumb-btn py-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                <i class="fa-solid fa-magnifying-glass text-xs text-amber-400"></i>
+                <span>หาไม่เจอ</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-clipboard-question text-xs text-sky-400"></i>
+                <span class="truncate">หาไม่เจอ+ให้พัสดุตรวจ</span>
+              </button>
+              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+                <i class="fa-solid fa-circle-question text-xs text-purple-400"></i>
+                <span class="truncate">งง+ให้พัสดุตรวจ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Move to Room Selector (Modal) -->
+        <div id="modal-sublayer-move" class="hidden p-2.5 rounded-xl bg-slate-950 border border-sky-500/50 space-y-2 mt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i>
+              <span>เลือกห้องปลายทางที่ย้ายไป (15 Rooms):</span>
+            </span>
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
+              ยกเลิก
+            </button>
+          </div>
+          <div id="modal-move-room-chips" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs max-h-40 overflow-y-auto">
+            <!-- Populated dynamically by AuditController -->
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Rename Asset (Modal) -->
+        <div id="modal-sublayer-rename" class="hidden p-2.5 rounded-xl bg-slate-950 border border-emerald-500/50 space-y-2 mt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>แก้ไขชื่อสินทรัพย์ (Asset Description 1):</span>
+            </span>
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
+              ยกเลิก
+            </button>
+          </div>
+          <input type="text" id="modal-rename-input" placeholder="พิมพ์ชื่อสินทรัพย์ที่ต้องการแก้ไข..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+          <div class="flex gap-2">
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+              ยกเลิก
+            </button>
+            <button type="button" onclick="AuditController.confirmRenameAndSubmit('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold">
+              บันทึกชื่อ &amp; ยืนยัน
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Sticker Integrity & Inspection (Modal) -->
+        <div id="modal-sublayer-sticker" class="hidden p-2.5 rounded-xl bg-slate-950 border border-sky-500/50 space-y-2 mt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-tag"></i>
+              <span>Sticker Check</span>
+            </span>
+            <span id="modal-sticker-selected-status-badge" class="badge-status-green text-xs font-bold px-2.5 py-0.5 rounded-full border truncate max-w-[170px]">
+              ใช้งานอยู่
+            </span>
+          </div>
+
+          <!-- 3 Sticker Options -->
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปกติ', 'modal')" id="modal-sticker-opt-normal" class="inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md shadow-emerald-950/40 font-bold">
+              <i class="fa-solid fa-circle-check text-xs text-emerald-400"></i>
+              <span class="text-[11px]">ปกติ (Intact)</span>
+            </button>
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปริ้นใหม่', 'modal')" id="modal-sticker-opt-reprint" class="inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500">
+              <i class="fa-solid fa-print text-xs text-amber-400"></i>
+              <span class="text-[11px]">ปริ้นใหม่</span>
+            </button>
+            <button type="button" onclick="AuditController.selectInspectionSticker('ปริ้นใหม่+แก้ข้อมูล', 'modal')" id="modal-sticker-opt-reprint-edit" class="inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-purple-500 leading-tight">
+              <i class="fa-solid fa-pen-to-square text-xs text-purple-400"></i>
+              <span class="text-[10px]">ปริ้นใหม่+แก้ข้อมูล</span>
+            </button>
+          </div>
+
+          <!-- Change Details / Remarks Textbox -->
+          <div class="space-y-1">
+            <label for="modal-sticker-change-notes" class="text-[10px] font-medium text-slate-400 flex items-center justify-between">
+              <span>รายละเอียดการแก้ไข / หมายเหตุสติกเกอร์:</span>
+              <span class="text-[9px] text-slate-500">(Optional)</span>
+            </label>
+            <textarea id="modal-sticker-change-notes" rows="2" placeholder="ระบุสิ่งที่ต้องแก้ไขหรือหมายเหตุสติกเกอร์ (เช่น ปรับชื่อ, แก้ไขมูลค่า, สติกเกอร์ฉีกขาด)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 resize-none"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2 pt-0.5">
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+              ย้อนกลับ
+            </button>
+            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-sky-950/50 active:scale-[0.98] transition">
+              <i class="fa-solid fa-check"></i>
+              <span>ยืนยันและบันทึก (Save &amp; Scan Next)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER (Non-blocking floating pill at top under header) -->
+  <div id="toast-container" class="fixed top-16 right-4 left-4 sm:left-auto sm:right-6 z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>
 
   <!-- ==================== CLIENT COMPONENT MODULES ==================== -->
   <?!= HtmlService.createHtmlOutputFromFile('AppState').getContent(); ?>
@@ -670,12 +1206,33 @@
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       // 1. Initialize Theme
-      ThemeController.init();
+      try {
+        ThemeController.init();
+      } catch (e) {
+        console.warn("ThemeController.init error:", e);
+      }
 
-      // 2. Initialize Audit Controller
-      AuditController.init();
+      // 2. Tab navigation click listeners (Double-bound for guaranteed responsiveness)
+      ["scanner", "roster", "summary"].forEach(function(tabKey) {
+        var btn = document.getElementById("nav-tab-" + tabKey);
+        if (btn) {
+          btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            if (window.AuditController && typeof AuditController.switchTab === "function") {
+              AuditController.switchTab(tabKey);
+            }
+          });
+        }
+      });
 
-      // 3. Search input handler with debounce
+      // 3. Initialize Audit Controller
+      try {
+        AuditController.init();
+      } catch (e) {
+        console.error("AuditController.init error:", e);
+      }
+
+      // 4. Search input handler with debounce
       var searchInput = document.getElementById("roster-search-input");
       if (searchInput) {
         var searchDebounceTimer = null;
@@ -688,7 +1245,7 @@
         });
       }
 
-      // 4. Filter chips click listeners
+      // 5. Filter chips click listeners
       document.querySelectorAll(".filter-chip").forEach(function(btn) {
         btn.addEventListener("click", function() {
           var f = this.dataset.filter;
@@ -696,7 +1253,7 @@
         });
       });
 
-      // 5. Room selector change listener
+      // 6. Room selector change listener
       var roomSel = document.getElementById("room-selector");
       if (roomSel) {
         roomSel.addEventListener("change", function() {
@@ -704,47 +1261,33 @@
         });
       }
 
-      // 6. Update dev environment status text
+      // 7. Update dev environment status text
       var devEnvStatus = document.getElementById("dev-env-status");
       if (devEnvStatus) {
         devEnvStatus.innerText = ApiClient.isGasEnvironment ? "Google Apps Script V8 Native" : "Local Mock Simulation Mode";
       }
 
-      // 7. Load Initial Payload
+      // 8. Load Initial Payload (Master Table & All Room Sheets)
       ApiClient.getInitialPayload()
         .then(function(payload) {
+          if (!payload) return;
           AppState.set("user", payload.user);
           AppState.set("config", payload.config);
           AppState.set("rooms", payload.rooms);
           AppState.set("currentRoom", payload.currentRoom || "ALL");
           AppState.set("summary", payload.summary);
 
-          // Populate Room Dropdown
-          if (roomSel && Array.isArray(payload.rooms)) {
-            roomSel.innerHTML = '<option value="ALL">All Laboratories (Overview)</option>';
-            payload.rooms.forEach(function(r) {
+          // Populate Room Dropdown with Master Table & All Room Sheets
+          if (roomSel) {
+            roomSel.innerHTML = '<option value="ALL">Master Table (All Rooms)</option>';
+            var roomList = (Array.isArray(payload.rooms) && payload.rooms.length > 0) ? payload.rooms : (payload.roomSheetsConfig || []);
+            roomList.forEach(function(r) {
+              if (r === "Master_Asset" || r === "Master" || r === "ALL") return;
               var opt = document.createElement("option");
               opt.value = r;
               opt.innerText = r;
               if (r === payload.currentRoom) opt.selected = true;
               roomSel.appendChild(opt);
-            });
-          }
-
-          // Populate Dynamic Room Type Filter Chips (Hybrid Master Table)
-          var typeChipsContainer = document.getElementById("room-type-filter-chips");
-          if (typeChipsContainer && Array.isArray(payload.roomTypes)) {
-            typeChipsContainer.innerHTML = '';
-            payload.roomTypes.forEach(function(t) {
-              var btn = document.createElement("button");
-              btn.dataset.roomType = t;
-              btn.className = "room-type-chip touch-target px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition " +
-                (t === "ALL" ? "bg-teal-500 text-white" : "bg-slate-800/80 text-slate-300 hover:text-white");
-              btn.innerText = (t === "ALL" ? "All Types" : t);
-              btn.addEventListener("click", function() {
-                AppState.set("roomTypeFilter", this.dataset.roomType);
-              });
-              typeChipsContainer.appendChild(btn);
             });
           }
 
@@ -759,10 +1302,12 @@
       function updateSummaryViewStats(summary) {
         if (!summary) return;
         var t = document.getElementById("summary-stat-total");
+        var u = document.getElementById("summary-stat-unverified");
         var g = document.getElementById("summary-stat-good");
         var d = document.getElementById("summary-stat-damaged");
         var m = document.getElementById("summary-stat-missing");
         if (t) t.innerText = summary.total || 0;
+        if (u) u.innerText = (summary.unverified !== undefined ? summary.unverified : ((summary.total || 0) - (summary.verified || 0)));
         if (g) g.innerText = summary.good || 0;
         if (d) d.innerText = summary.damaged || 0;
         if (m) m.innerText = summary.missing || 0;

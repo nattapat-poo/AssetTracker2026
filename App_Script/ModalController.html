@@ -1,61 +1,120 @@
 <script>
 /**
- * ModalController.html — Toast Feedback & Modal Gateway
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.ModalController = (function() {
 
   function showToast(message, type, duration) {
+    if (!message) return;
     if (!type) type = "info";
-    if (!duration) duration = 3000;
+    if (typeof duration === "undefined" || !duration) duration = 3500; // Standard 3.5s duration
+    if (duration < 3000) duration = 3000; // Minimum 3s per UX standard
 
     var container = document.getElementById("toast-container");
     if (!container) return;
 
     var toast = document.createElement("div");
     var borderClass = "border-slate-700";
-    var iconHtml = '<i class="fa-solid fa-circle-info text-sky-400"></i>';
+    var iconHtml = '<i class="fa-solid fa-circle-info text-sky-400 shrink-0"></i>';
 
     if (type === "success") {
-      borderClass = "border-emerald-500/50 bg-emerald-950/80 text-emerald-200";
-      iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+      borderClass = "border-emerald-500/60 bg-emerald-950/90 text-emerald-200 toast-success";
+      iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400 shrink-0"></i>';
     } else if (type === "error") {
-      borderClass = "border-rose-500/50 bg-rose-950/80 text-rose-200";
-      iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+      borderClass = "border-rose-500/60 bg-rose-950/90 text-rose-200 toast-error";
+      iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-400 shrink-0"></i>';
     } else if (type === "warning") {
-      borderClass = "border-amber-500/50 bg-amber-950/80 text-amber-200";
-      iconHtml = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>';
+      borderClass = "border-amber-500/60 bg-amber-950/90 text-amber-200 toast-warning";
+      iconHtml = '<i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0"></i>';
     } else {
-      borderClass = "border-sky-500/50 bg-slate-900/90 text-slate-200";
+      borderClass = "border-sky-500/60 bg-slate-900/95 text-slate-200 toast-info";
     }
 
-    toast.className = "flex items-center gap-3 px-4 py-3 rounded-xl border " + borderClass + " shadow-xl backdrop-blur text-xs font-medium transition-all transform translate-y-2 opacity-0 max-w-sm pointer-events-auto";
-    toast.innerHTML = iconHtml + '<span class="flex-1">' + message + '</span>';
+    // Floating, interactive, expand-on-hover/tap notification pill
+    toast.className = "app-toast flex items-start gap-2.5 px-4 py-2.5 rounded-full border " + borderClass + " shadow-2xl backdrop-blur-md text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md pointer-events-auto cursor-pointer select-text";
+    toast.title = "Tap to view full text / dismiss";
+    
+    var textSpan = document.createElement("span");
+    textSpan.className = "toast-message-text truncate flex-1 leading-snug";
+    textSpan.textContent = message;
+
+    var expandIndicator = document.createElement("i");
+    expandIndicator.className = "fa-solid fa-up-right-and-down-left-from-center text-[10px] opacity-40 shrink-0 mt-0.5";
+
+    toast.innerHTML = iconHtml;
+    toast.appendChild(textSpan);
+    toast.appendChild(expandIndicator);
 
     container.appendChild(toast);
 
     // Animate in
     requestAnimationFrame(function() {
-      toast.classList.remove("translate-y-2", "opacity-0");
+      toast.classList.remove("-translate-y-2", "opacity-0");
     });
 
-    // Auto dismiss
-    setTimeout(function() {
-      toast.classList.add("opacity-0", "translate-y-2");
-      setTimeout(function() {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, duration);
+    var isExpanded = false;
+    var dismissTimer = null;
+
+    function startDismissTimer(ms) {
+      if (dismissTimer) clearTimeout(dismissTimer);
+      dismissTimer = setTimeout(function() {
+        toast.classList.add("opacity-0", "-translate-y-2");
+        setTimeout(function() {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+      }, ms);
+    }
+
+    function expandToast() {
+      if (!isExpanded) {
+        isExpanded = true;
+        textSpan.classList.remove("truncate");
+        textSpan.classList.add("break-words", "whitespace-normal");
+        toast.classList.remove("rounded-full", "max-w-sm", "sm:max-w-md");
+        toast.classList.add("rounded-2xl", "max-w-lg", "w-full", "sm:w-auto");
+        expandIndicator.className = "fa-solid fa-xmark text-xs opacity-60 shrink-0 mt-0.5 hover:opacity-100";
+      }
+      if (dismissTimer) clearTimeout(dismissTimer);
+    }
+
+    function collapseOrDismiss() {
+      if (isExpanded) {
+        // Dismiss when tapped again while expanded
+        toast.classList.add("opacity-0", "-translate-y-2");
+        setTimeout(function() {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+      } else {
+        expandToast();
+      }
+    }
+
+    // Hover interactions (desktop)
+    toast.addEventListener("mouseenter", function() {
+      expandToast();
+    });
+
+    toast.addEventListener("mouseleave", function() {
+      startDismissTimer(2500); // Grace period after mouse leaves
+    });
+
+    // Tap/Click interactions (mobile & desktop)
+    toast.addEventListener("click", function(e) {
+      e.stopPropagation();
+      collapseOrDismiss();
+    });
+
+    // Start initial dismiss countdown
+    startDismissTimer(duration);
   }
 
   function openManualLookupModal() {
     var modal = document.getElementById("manual-lookup-modal");
-    var input = document.getElementById("manual-lookup-input");
     if (modal) modal.classList.remove("hidden");
+    var input = document.getElementById("manual-lookup-input");
     if (input) {
       input.value = "";
       setTimeout(function() { input.focus(); }, 150);
@@ -95,7 +154,36 @@ window.ModalController = (function() {
   function openUnrecognizedModal(rawCode) {
     var modal = document.getElementById("unrecognized-asset-modal");
     var codeDisplay = document.getElementById("unrecognized-code-display");
-    if (codeDisplay) codeDisplay.innerText = rawCode;
+    if (codeDisplay) codeDisplay.innerText = rawCode || "UNKNOWN";
+
+    var nameInput = document.getElementById("unlisted-asset-name-input");
+    if (nameInput) nameInput.value = "";
+
+    var noteInput = document.getElementById("unlisted-note-input");
+    if (noteInput) noteInput.value = "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ";
+
+    var roomSelect = document.getElementById("unlisted-room-select");
+    if (roomSelect) {
+      roomSelect.innerHTML = "";
+      var rooms = AppState.get("rooms") || [];
+      var currentRoom = AppState.get("currentRoom") || "";
+      rooms.forEach(function(r) {
+        if (r === "Master_Asset" || r === "Master" || r === "ALL") return;
+        var opt = document.createElement("option");
+        opt.value = r;
+        opt.innerText = r;
+        if (r === currentRoom) opt.selected = true;
+        roomSelect.appendChild(opt);
+      });
+      if (roomSelect.options.length > 0 && (!roomSelect.value || currentRoom === "ALL")) {
+        roomSelect.selectedIndex = 0;
+      }
+    }
+
+    if (window.AuditController && AuditController.selectSticker) {
+      AuditController.selectSticker("ปกติ");
+    }
+
     if (modal) modal.classList.remove("hidden");
   }
 
@@ -112,23 +200,37 @@ window.ModalController = (function() {
     var modal = document.getElementById("asset-details-modal");
     if (!modal) return;
 
-    // Matched Inventory Number & Status
+    // Matched Inventory Number & Status (blank if Column M is empty)
     var idElem = document.getElementById("modal-asset-id");
     if (idElem) idElem.innerText = asset.assetId || "Unknown ID";
 
     var statusBadge = document.getElementById("modal-asset-prev-status");
     if (statusBadge && window.AuditController && AuditController.renderStatusBadge) {
-      AuditController.renderStatusBadge(statusBadge, asset.status);
+      AuditController.renderStatusBadge(statusBadge, asset.scanned69 || "");
     }
 
-    // Asset Name & Specification
+    if (window.AuditController) {
+      if (AuditController.selectSticker) AuditController.selectSticker(asset.sticker || "ปกติ");
+      if (AuditController.closeSublayers) AuditController.closeSublayers("modal");
+    }
+
+    // Asset Name (Column D)
     var nameElem = document.getElementById("modal-asset-name");
     if (nameElem) nameElem.innerText = asset.itemName || "Unnamed Asset";
 
-    var specElem = document.getElementById("modal-asset-spec");
-    if (specElem) specElem.innerText = asset.brandModel || "Standard Specification";
+    // Column N (หมายเหตุปี 69) Display
+    var noteDisplay = document.getElementById("modal-asset-note-display");
+    if (noteDisplay) {
+      var noteVal = (asset.auditResult69 || asset.notes || "").trim();
+      noteDisplay.innerText = noteVal || "—";
+    }
 
-    // Rooms & Discrepancy Alert
+    var noteContainer = document.getElementById("modal-asset-note-container");
+    if (noteContainer) {
+      noteContainer.classList.remove("hidden");
+    }
+
+    // Room (Column I) & Discrepancy Alert
     var regRoom = asset.registeredLocation || asset.sheetName || "Unassigned";
     var currentRoom = AppState.get("currentRoom") || "ALL";
 
@@ -149,40 +251,14 @@ window.ModalController = (function() {
       }
     }
 
-    // Procurement Metadata & Historical Results
-    var condVal = document.getElementById("modal-asset-cond-val");
-    if (condVal) condVal.innerText = asset.procurementCondition || "ปกติ";
-
-    var prevBox = document.getElementById("modal-asset-prev-audit-box");
-    var prevVal = document.getElementById("modal-asset-prev-audit-val");
-    if (prevBox && prevVal) {
-      var hist68 = (asset.historicalResults && asset.historicalResults["68"]) ? asset.historicalResults["68"] : "";
-      if (hist68) {
-        prevBox.classList.remove("hidden");
-        prevVal.innerText = hist68;
-      } else {
-        prevBox.classList.add("hidden");
-      }
-    }
-
+    // Sticker Status: Column O (สติกเกอร์)
     var stickerVal = document.getElementById("modal-asset-sticker-val");
-    if (stickerVal) stickerVal.innerText = asset.sticker || "Yes";
+    if (stickerVal) stickerVal.innerText = asset.sticker || "ปกติ";
 
-    var yearBox = document.getElementById("modal-asset-year-box");
-    var yearVal = document.getElementById("modal-asset-year-val");
-    if (yearBox && yearVal) {
-      if (asset.budgetYear) {
-        yearBox.classList.remove("hidden");
-        yearVal.innerText = asset.budgetYear;
-      } else {
-        yearBox.classList.add("hidden");
-      }
-    }
-
-    // Condition Notes
+    // Column N (หมายเหตุปี 69) Remark Input
     var noteInput = document.getElementById("modal-condition-note-input");
     if (noteInput) {
-      noteInput.value = asset.notes || "";
+      noteInput.value = asset.notes || asset.auditResult69 || "";
     }
 
     modal.classList.remove("hidden");
@@ -191,6 +267,115 @@ window.ModalController = (function() {
   function closeAssetDetailsModal() {
     var modal = document.getElementById("asset-details-modal");
     if (modal) modal.classList.add("hidden");
+    if (AppState.get("activeTab") === "scanner" && window.ScannerController) {
+      ScannerController.startScanner();
+      ScannerController.resetLastScannedCode();
+    }
+  }
+
+  /**
+   * Universal Modal Backdrop Dismissal Standard
+   * Clicking or tapping on the dark backdrop outside any modal dialog dismisses it.
+   */
+  function handleBackdropClick(event, backdropElem) {
+    if (event.target === backdropElem) {
+      if (backdropElem.id === "asset-details-modal") {
+        closeAssetDetailsModal();
+      } else if (backdropElem.id === "manual-lookup-modal") {
+        closeManualLookupModal();
+      } else if (backdropElem.id === "unrecognized-asset-modal") {
+        closeUnrecognizedModal();
+      } else if (backdropElem.id === "dev-gateway-modal") {
+        closeDeveloperModal();
+      }
+    }
+  }
+
+  /**
+   * Clipboard Copy Utility for Asset ID and Asset Name
+   */
+  function copyToClipboard(type) {
+    var textToCopy = "";
+    var label = "Value";
+    if (type === "id") {
+      var idElem = document.getElementById("modal-asset-id");
+      var cardIdElem = document.getElementById("asset-card-id");
+      textToCopy = (idElem && idElem.innerText) ? idElem.innerText.trim() : (cardIdElem ? cardIdElem.innerText.trim() : "");
+      label = "Inventory Number";
+    } else if (type === "name") {
+      var nameElem = document.getElementById("modal-asset-name");
+      var cardNameElem = document.getElementById("asset-card-name");
+      textToCopy = (nameElem && nameElem.innerText) ? nameElem.innerText.trim() : (cardNameElem ? cardNameElem.innerText.trim() : "");
+      label = "Asset Description";
+    } else if (type === "note") {
+      var noteElem = document.getElementById("modal-asset-note-display");
+      textToCopy = (noteElem && noteElem.innerText && noteElem.innerText.trim() !== "—") ? noteElem.innerText.trim() : "";
+      label = "Remark (หมายเหตุปี 69)";
+    } else if (type === "unrecognized") {
+      var unrecElem = document.getElementById("unrecognized-code-display");
+      textToCopy = (unrecElem && unrecElem.innerText) ? unrecElem.innerText.trim() : "";
+      label = "Scanned Code";
+    }
+
+    if (!textToCopy) {
+      showToast("Nothing to copy", "warning");
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(function() {
+        showToast("📋 Copied " + label + ": " + textToCopy, "success", 2000);
+      }).catch(function(err) {
+        fallbackCopy(textToCopy, label);
+      });
+    } else {
+      fallbackCopy(textToCopy, label);
+    }
+  }
+
+  function fallbackCopy(text, label) {
+    try {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.top = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      var successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (successful) {
+        showToast("📋 Copied " + label + ": " + text, "success", 2000);
+      } else {
+        showToast("Unable to copy to clipboard", "error");
+      }
+    } catch (err) {
+      showToast("Clipboard error: " + err.toString(), "error");
+    }
+  }
+
+  /**
+   * Force Synchronize / Flush WebApp Data with Google Spreadsheet
+   */
+  function triggerForceSync() {
+    var refreshIcons = document.querySelectorAll(".sync-refresh-icon, #btn-force-refresh-icon");
+    refreshIcons.forEach(function(icon) { icon.classList.add("fa-spin"); });
+    showToast("🔄 Syncing fresh data with Google Sheets...", "info", 1500);
+
+    ApiClient.flushCache()
+      .then(function() {
+        var currentRoom = AppState.get("currentRoom") || "ALL";
+        return ApiClient.getRoomAuditSummary(currentRoom);
+      })
+      .then(function(summary) {
+        AppState.set("summary", summary);
+        refreshIcons.forEach(function(icon) { icon.classList.remove("fa-spin"); });
+        showToast("✅ Successfully synchronized with Google Sheets!", "success", 2500);
+      })
+      .catch(function(err) {
+        refreshIcons.forEach(function(icon) { icon.classList.remove("fa-spin"); });
+        showToast("Sync failed: " + err.toString(), "error", 4000);
+      });
   }
 
   // Stealth Developer Gateway (Ctrl + Shift + Q & Signature Click)
@@ -230,7 +415,7 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    showToast("Synchronizing Config sheet tab (v1.1.0e)...", "info");
+    showToast("Synchronizing Config sheet tab (v1.1.2a)...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
         showToast("✅ " + (res.message || "Config synchronized."), "success", 4000);
@@ -287,6 +472,144 @@ window.ModalController = (function() {
       });
   }
 
+  function triggerCheckMasterContradictions() {
+    showToast("Scanning Master Table for duplicates & contradictions...", "info");
+    ApiClient.checkMasterContradictions()
+      .then(function(res) {
+        if (res.duplicatesCount === 0 && res.missingIdCount === 0) {
+          showToast("✅ Integrity Passed: 0 duplicates in " + res.totalScanned + " assets.", "success", 4000);
+        } else {
+          showToast("⚠️ Found " + res.duplicatesCount + " duplicate IDs (" + res.duplicateRowsCount + " rows). Highlighted in red.", "warning", 6000);
+        }
+        var jsonView = document.getElementById("dev-json-state");
+        if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
+      })
+      .catch(function(err) {
+        showToast("❌ Check failed: " + err.toString(), "error", 5000);
+      });
+  }
+
+  function openStatsModal() {
+    var modal = document.getElementById("stats-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      refreshStats();
+    }
+  }
+
+  function closeStatsModal() {
+    var modal = document.getElementById("stats-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function refreshStats() {
+    var icon = document.getElementById("stats-refresh-icon");
+    if (icon) icon.classList.add("fa-spin");
+
+    ApiClient.getAppUsageStats()
+      .then(function(res) {
+        if (icon) icon.classList.remove("fa-spin");
+        if (res && res.stats) {
+          renderStatsData(res.stats);
+        } else {
+          showToast("Failed to retrieve statistics payload", "warning");
+        }
+      })
+      .catch(function(err) {
+        if (icon) icon.classList.remove("fa-spin");
+        showToast("Error loading stats: " + err.toString(), "error");
+      });
+  }
+
+  function renderStatsData(stats) {
+    if (!stats) return;
+
+    var totalEl = document.getElementById("stats-metric-total");
+    var auditedEl = document.getElementById("stats-metric-audited");
+    var remainingEl = document.getElementById("stats-metric-remaining");
+    var percentEl = document.getElementById("stats-metric-percent");
+    var progressLabel = document.getElementById("stats-progress-label");
+    var progressBar = document.getElementById("stats-progress-bar");
+    var lastUpdated = document.getElementById("stats-last-updated");
+
+    if (totalEl) totalEl.innerText = stats.totalAssets || 0;
+    if (auditedEl) auditedEl.innerText = stats.totalAudited || 0;
+    if (remainingEl) remainingEl.innerText = stats.totalRemaining || 0;
+    var pct = (stats.percentComplete !== undefined ? stats.percentComplete : 0) + "%";
+    if (percentEl) percentEl.innerText = pct;
+    if (progressLabel) progressLabel.innerText = pct + " (" + (stats.totalAudited || 0) + " / " + (stats.totalAssets || 0) + ")";
+    if (progressBar) progressBar.style.width = pct;
+    if (lastUpdated) lastUpdated.innerText = "Updated: " + (stats.timestamp || new Date().toLocaleTimeString());
+
+    // Auditor breakdown
+    var auditorList = document.getElementById("stats-auditor-list");
+    if (auditorList) {
+      if (Array.isArray(stats.auditorLeaderboard) && stats.auditorLeaderboard.length > 0) {
+        auditorList.innerHTML = stats.auditorLeaderboard.map(function(aud) {
+          return '<div class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">' +
+            '<div class="flex items-center gap-2">' +
+              '<i class="fa-solid fa-user-pen text-xs text-purple-400"></i>' +
+              '<span class="font-semibold text-slate-200">' + aud.name + '</span>' +
+            '</div>' +
+            '<span class="font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">' + aud.count + ' รายการ</span>' +
+          '</div>';
+        }).join("");
+      } else {
+        auditorList.innerHTML = '<div class="text-slate-500 text-[11px] p-2">ยังไม่มีข้อมูลการสำรวจโดยผู้ใช้</div>';
+      }
+    }
+
+    // Room breakdown
+    var roomList = document.getElementById("stats-room-list");
+    if (roomList) {
+      if (Array.isArray(stats.roomBreakdown) && stats.roomBreakdown.length > 0) {
+        roomList.innerHTML = stats.roomBreakdown.map(function(rb) {
+          return '<div class="space-y-1 p-2 rounded-lg bg-slate-900 border border-slate-800">' +
+            '<div class="flex items-center justify-between text-[11px]">' +
+              '<span class="font-bold text-slate-200">' + rb.room + '</span>' +
+              '<span class="font-mono text-slate-400">' + rb.audited + ' / ' + rb.total + ' (' + rb.percent + '%)</span>' +
+            '</div>' +
+            '<div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">' +
+              '<div class="bg-sky-400 h-1.5 rounded-full" style="width: ' + rb.percent + '%"></div>' +
+            '</div>' +
+          '</div>';
+        }).join("");
+      } else {
+        roomList.innerHTML = '<div class="text-slate-500 text-[11px] p-2">No room data available</div>';
+      }
+    }
+
+    // Status chips
+    var statusChips = document.getElementById("stats-status-chips");
+    if (statusChips) {
+      var sEntries = Object.keys(stats.statusCounts || {});
+      if (sEntries.length > 0) {
+        statusChips.innerHTML = sEntries.map(function(k) {
+          return '<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold">' +
+            k + ' <span class="font-mono font-bold text-white bg-emerald-950 px-1.5 py-0.2 rounded-md">' + stats.statusCounts[k] + '</span>' +
+          '</span>';
+        }).join("");
+      } else {
+        statusChips.innerHTML = '<span class="text-slate-500 text-[11px]">-</span>';
+      }
+    }
+
+    // Sticker chips
+    var stickerChips = document.getElementById("stats-sticker-chips");
+    if (stickerChips) {
+      var stkEntries = Object.keys(stats.stickerCounts || {});
+      if (stkEntries.length > 0) {
+        stickerChips.innerHTML = stkEntries.map(function(k) {
+          return '<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-300 text-[11px] font-semibold">' +
+            k + ' <span class="font-mono font-bold text-white bg-sky-950 px-1.5 py-0.2 rounded-md">' + stats.stickerCounts[k] + '</span>' +
+          '</span>';
+        }).join("");
+      } else {
+        stickerChips.innerHTML = '<span class="text-slate-500 text-[11px]">-</span>';
+      }
+    }
+  }
+
   // Keyboard shortcut listener for Ctrl + Shift + Q
   window.addEventListener("keydown", function(e) {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Q" || e.key === "q")) {
@@ -304,6 +627,13 @@ window.ModalController = (function() {
     closeUnrecognizedModal: closeUnrecognizedModal,
     openAssetDetailsModal: openAssetDetailsModal,
     closeAssetDetailsModal: closeAssetDetailsModal,
+    openStatsModal: openStatsModal,
+    closeStatsModal: closeStatsModal,
+    refreshStats: refreshStats,
+    renderStatsData: renderStatsData,
+    handleBackdropClick: handleBackdropClick,
+    copyToClipboard: copyToClipboard,
+    triggerForceSync: triggerForceSync,
     handleDeveloperTrigger: handleDeveloperTrigger,
     openDeveloperModal: openDeveloperModal,
     closeDeveloperModal: closeDeveloperModal,
@@ -311,7 +641,8 @@ window.ModalController = (function() {
     triggerSyncConfigSheet: triggerSyncConfigSheet,
     triggerSetupRow5Headers: triggerSetupRow5Headers,
     triggerBuildMasterTable: triggerBuildMasterTable,
-    triggerMigrateMasterToRooms: triggerMigrateMasterToRooms
+    triggerMigrateMasterToRooms: triggerMigrateMasterToRooms,
+    triggerCheckMasterContradictions: triggerCheckMasterContradictions
   };
 })();
 </script>

@@ -35,6 +35,16 @@ def build_standalone_html():
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(standalone)
     
+    docs_dir = os.path.join(BASE_DIR, "docs")
+    if os.path.exists(docs_dir):
+        docs_index = os.path.join(docs_dir, "index.html")
+        with open(docs_index, "w", encoding="utf-8") as df:
+            df.write(standalone)
+
+    root_index = os.path.join(BASE_DIR, "index.html")
+    with open(root_index, "w", encoding="utf-8") as rf:
+        rf.write(standalone)
+    
     print(f"[BUILD] Generated standalone preview bundle: {out_path}")
     return standalone
 

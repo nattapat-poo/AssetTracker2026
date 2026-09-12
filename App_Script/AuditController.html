@@ -1,13 +1,57 @@
 <script>
 /**
- * AuditController.html — Survey Workflow & 1-Tap Mutation UI
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * AuditController.html — QR Camera Scanner, In-Place Row Mutation & Roster Controller
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AuditController = (function() {
   var activeAsset = null;
   var isSubmitting = false;
+  var selectedSticker = "ปกติ";
+  var ROOM_LIST = [
+    "Bio Prep", "Bio1", "Bio2", "Chem Pre", "Chem1", "Chem2",
+    "Physics P", "Physics1", "Physics2", "Mobile", "Science",
+    "ปาณิษา", "ชำรุด", "ไม่ใช้งาน", "Storage"
+  ];
+
+  function updateStickerStatusBadgeTone(badgeElem, status) {
+    if (!badgeElem) return;
+    badgeElem.innerText = status;
+    
+    // Remove previous tone classes
+    badgeElem.classList.remove(
+      "badge-status-green", "badge-status-red", "badge-status-gray",
+      "bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40",
+      "bg-rose-500/20", "text-rose-300", "border-rose-500/40",
+      "bg-slate-800", "text-slate-300", "border-slate-700"
+    );
+
+    // Determine category tone: only green, red, gray
+    var isGreen = (
+      status.indexOf("ใช้งานอยู่") !== -1 ||
+      status === "Good" ||
+      status === "ปกติ" ||
+      status.indexOf("ย้ายไป") !== -1 ||
+      status.indexOf("แก้ไขชื่อ") !== -1
+    );
+
+    var isRed = (
+      status.indexOf("หมดความจำเป็น") !== -1 ||
+      status.indexOf("ชำรุด") !== -1 ||
+      status === "Damaged" ||
+      status === "รอแทงจำหน่าย"
+    );
+
+    if (isGreen) {
+      badgeElem.classList.add("badge-status-green", "bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+    } else if (isRed) {
+      badgeElem.classList.add("badge-status-red", "bg-rose-500/20", "text-rose-300", "border-rose-500/40");
+    } else {
+      // Gray (สูญหาย, หาไม่เจอ, งง+ให้พัสดุตรวจ, etc.)
+      badgeElem.classList.add("badge-status-gray", "bg-slate-800", "text-slate-300", "border-slate-700");
+    }
+  }
 
   function init() {
     // Subscribe to state updates
@@ -21,56 +65,12 @@ window.AuditController = (function() {
       renderAssetList();
     });
 
-    AppState.subscribe("change:roomTypeFilter", function() {
-      updateRoomTypeChipsUI();
-      renderAssetList();
-    });
-
     AppState.subscribe("change:searchQuery", function() {
       renderAssetList();
     });
 
     AppState.subscribe("change:currentRoom", function(data) {
       loadRoomData(data.value);
-    });
-
-    // Quick tag chips click handler (inline card)
-    document.querySelectorAll(".quick-note-chip").forEach(function(chip) {
-      chip.addEventListener("click", function() {
-        var input = document.getElementById("condition-note-input");
-        if (!input) return;
-        var tag = this.dataset.note || this.innerText.trim();
-        if (input.value) {
-          input.value += " | " + tag;
-        } else {
-          input.value = tag;
-        }
-      });
-    });
-
-    // Quick tag chips click handler (modal)
-    document.querySelectorAll(".modal-quick-chip").forEach(function(chip) {
-      chip.addEventListener("click", function() {
-        var input = document.getElementById("modal-condition-note-input");
-        if (!input) return;
-        var tag = this.dataset.note || this.innerText.trim();
-        if (input.value) {
-          input.value += " | " + tag;
-        } else {
-          input.value = tag;
-        }
-      });
-    });
-  }
-
-  function updateRoomTypeChipsUI() {
-    var activeType = AppState.get("roomTypeFilter") || "ALL";
-    document.querySelectorAll(".room-type-chip").forEach(function(chip) {
-      var isSelected = (chip.dataset.roomType === activeType);
-      chip.classList.toggle("bg-teal-500", isSelected);
-      chip.classList.toggle("text-white", isSelected);
-      chip.classList.toggle("bg-slate-800/80", !isSelected);
-      chip.classList.toggle("text-slate-300", !isSelected);
     });
   }
 
@@ -85,43 +85,277 @@ window.AuditController = (function() {
       });
   }
 
+  var pendingAudit = {
+    status: "",
+    scope: "modal",
+    extraData: {},
+    sticker: "ปกติ"
+  };
+
+  function selectSticker(val) {
+    selectedSticker = val || "ปกติ";
+    if (activeAsset) {
+      activeAsset.sticker = selectedSticker;
+    }
+
+    // Update Pills UI in Card & Modal
+    document.querySelectorAll(".sticker-pill, .modal-sticker-pill").forEach(function(btn) {
+      var isCurrent = (btn.dataset.sticker === selectedSticker);
+      if (isCurrent) {
+        btn.classList.remove("bg-slate-800", "text-slate-300", "border-slate-700");
+        btn.classList.add("bg-sky-500", "text-white", "border-sky-400", "shadow-md", "shadow-sky-500/20");
+      } else {
+        btn.classList.remove("bg-sky-500", "text-white", "border-sky-400", "shadow-md", "shadow-sky-500/20");
+        btn.classList.add("bg-slate-800", "text-slate-300", "border-slate-700");
+      }
+    });
+
+    var cardStickerVal = document.getElementById("asset-card-sticker-val");
+    if (cardStickerVal) cardStickerVal.innerText = selectedSticker;
+
+    var modalStickerVal = document.getElementById("modal-asset-sticker-val");
+    if (modalStickerVal) modalStickerVal.innerText = selectedSticker;
+  }
+
+  /**
+   * Sticker Inspection & Validity Workflow (v1.1.3n)
+   * Opens dedicated sublayer to inspect sticker condition, reprint requirement, and note edits.
+   */
+  function openStickerInspectionSublayer(status, scope, extraData) {
+    pendingAudit.status = status;
+    pendingAudit.scope = scope || "modal";
+    pendingAudit.extraData = extraData || {};
+    
+    var assetSticker = (activeAsset && activeAsset.sticker) ? activeAsset.sticker : "ปกติ";
+    pendingAudit.sticker = (extraData && extraData.defaultSticker) ? extraData.defaultSticker : assetSticker;
+
+    var isModal = (pendingAudit.scope === "modal");
+    var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
+    var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
+    var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
+
+    if (mainPanel) mainPanel.classList.add("hidden");
+    if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (stickerSublayer) stickerSublayer.classList.remove("hidden");
+
+    // Update Status Badge in Sublayer with Category Tone Matching (Green / Red / Gray)
+    var badgeId = isModal ? "modal-sticker-selected-status-badge" : "card-sticker-selected-status-badge";
+    var badgeElem = document.getElementById(badgeId);
+    if (badgeElem) {
+      updateStickerStatusBadgeTone(badgeElem, status);
+    }
+
+    // Set initial sticker selection
+    selectInspectionSticker(pendingAudit.sticker, pendingAudit.scope);
+
+    // Populate notes textarea (blank by default per v1.1.3i requirements)
+    var notesId = isModal ? "modal-sticker-change-notes" : "card-sticker-change-notes";
+    var notesElem = document.getElementById(notesId);
+    if (notesElem) {
+      notesElem.value = "";
+    }
+  }
+
+  function selectInspectionSticker(val, scope) {
+    pendingAudit.sticker = val || "ปกติ";
+    selectedSticker = pendingAudit.sticker;
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    var prefix = isModal ? "modal" : "card";
+
+    var btnNormal = document.getElementById(prefix + "-sticker-opt-normal");
+    var btnReprint = document.getElementById(prefix + "-sticker-opt-reprint");
+    var btnReprintEdit = document.getElementById(prefix + "-sticker-opt-reprint-edit");
+
+    var resetBtn = function(btn) {
+      if (!btn) return;
+      btn.className = "inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-slate-900 border-slate-700 text-slate-300";
+    };
+
+    resetBtn(btnNormal);
+    resetBtn(btnReprint);
+    resetBtn(btnReprintEdit);
+
+    if (val === "ปกติ" && btnNormal) {
+      btnNormal.className = "inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md shadow-emerald-950/40 font-bold";
+    } else if (val === "ปริ้นใหม่" && btnReprint) {
+      btnReprint.className = "inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-amber-950/80 border-amber-500 text-amber-200 shadow-md shadow-amber-950/40 font-bold";
+      var notesElem = document.getElementById(prefix + "-sticker-change-notes");
+      if (notesElem && !notesElem.value) {
+        notesElem.placeholder = "ระบุสาเหตุที่ต้องปริ้นใหม่ (เช่น สติกเกอร์เลือนราง, ฉีกขาด)...";
+        notesElem.focus();
+      }
+    } else if (val === "ปริ้นใหม่+แก้ข้อมูล" && btnReprintEdit) {
+      btnReprintEdit.className = "inspection-sticker-btn touch-target p-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 bg-purple-950/80 border-purple-500 text-purple-200 shadow-md shadow-purple-950/40 font-bold";
+      var notesElem2 = document.getElementById(prefix + "-sticker-change-notes");
+      if (notesElem2 && !notesElem2.value) {
+        notesElem2.placeholder = "ระบุข้อมูลที่ต้องการแก้ไข (เช่น แก้ไขชื่อ, มูลค่า, สภาพ)...";
+        notesElem2.focus();
+      }
+    }
+  }
+
+  function confirmStickerInspectionAndSubmit(scope) {
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    var prefix = isModal ? "modal" : "card";
+    var notesElem = document.getElementById(prefix + "-sticker-change-notes");
+    var enteredNote = notesElem ? notesElem.value.trim() : "";
+
+    var finalExtra = Object.assign({}, pendingAudit.extraData);
+    if (enteredNote) {
+      if (finalExtra.notes && finalExtra.notes !== enteredNote) {
+        finalExtra.notes = finalExtra.notes + " | " + enteredNote;
+      } else {
+        finalExtra.notes = enteredNote;
+      }
+    }
+    finalExtra.sticker = pendingAudit.sticker;
+
+    closeSublayers(scope);
+    submitStatus(pendingAudit.status, finalExtra);
+  }
+
+  function populateMoveRoomChips(containerId, scope) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var rooms = (AppState.get("roomSheetsConfig") && AppState.get("roomSheetsConfig").length > 0)
+      ? AppState.get("roomSheetsConfig")
+      : ROOM_LIST;
+    var html = '';
+    rooms.forEach(function(room) {
+      html += '<button type="button" onclick="AuditController.confirmMoveToRoom(\'' + escapeHtml(room) + '\', \'' + scope + '\')" class="touch-target p-2 rounded-xl bg-slate-900 hover:bg-sky-950/80 border border-slate-700 hover:border-sky-500/60 text-slate-200 hover:text-sky-300 text-xs font-semibold text-center truncate transition">' +
+        escapeHtml(room) +
+      '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  function openMoveRoomSublayer(scope) {
+    var isModal = (scope === "modal");
+    var containerId = isModal ? "modal-move-room-chips" : "card-move-room-chips";
+    populateMoveRoomChips(containerId, scope);
+
+    var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
+    var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
+    var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
+
+    if (mainPanel) mainPanel.classList.add("hidden");
+    if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (stickerSublayer) stickerSublayer.classList.add("hidden");
+    if (moveSublayer) moveSublayer.classList.remove("hidden");
+  }
+
+  function confirmMoveToRoom(destRoom, scope) {
+    closeSublayers(scope);
+    var noteInput = document.getElementById(scope === "modal" ? "modal-condition-note-input" : "condition-note-input");
+    var noteVal = noteInput ? noteInput.value.trim() : "";
+    openStickerInspectionSublayer("ใช้งานอยู่+ย้ายไป...", scope, { destinationRoom: destRoom, notes: noteVal, defaultSticker: "ปกติ" });
+  }
+
+  function openRenameSublayer(scope) {
+    var isModal = (scope === "modal");
+    var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
+    var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
+    var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
+
+    if (mainPanel) mainPanel.classList.add("hidden");
+    if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (stickerSublayer) stickerSublayer.classList.add("hidden");
+    if (renameSublayer) renameSublayer.classList.remove("hidden");
+
+    var inputId = isModal ? "modal-rename-input" : "card-rename-input";
+    var inp = document.getElementById(inputId);
+    if (inp && activeAsset) {
+      inp.value = activeAsset.itemName || "";
+      setTimeout(function() {
+        inp.focus();
+        inp.select();
+      }, 50);
+    }
+  }
+
+  function confirmRenameAndSubmit(scope) {
+    var isModal = (scope === "modal");
+    var inputId = isModal ? "modal-rename-input" : "card-rename-input";
+    var inp = document.getElementById(inputId);
+    var newName = inp ? inp.value.trim() : "";
+    if (!newName) {
+      ModalController.showToast("กรุณากรอกชื่อสินทรัพย์ที่ต้องการแก้ไข", "warning");
+      return;
+    }
+
+    closeSublayers(scope);
+    var noteInput = document.getElementById(isModal ? "modal-condition-note-input" : "condition-note-input");
+    var noteVal = noteInput ? noteInput.value.trim() : "";
+    openStickerInspectionSublayer("ใช้งานอยู่+แก้ไขชื่อเป็น...", scope, { renameText: newName, notes: noteVal, defaultSticker: "ปริ้นใหม่+แก้ข้อมูล" });
+  }
+
+  function closeSublayers(scope) {
+    if (!scope || scope === "card") {
+      var cardMain = document.getElementById("card-status-main-panel");
+      var cardMove = document.getElementById("card-sublayer-move");
+      var cardRename = document.getElementById("card-sublayer-rename");
+      var cardSticker = document.getElementById("card-sublayer-sticker");
+      if (cardMain) cardMain.classList.remove("hidden");
+      if (cardMove) cardMove.classList.add("hidden");
+      if (cardRename) cardRename.classList.add("hidden");
+      if (cardSticker) cardSticker.classList.add("hidden");
+    }
+    if (!scope || scope === "modal") {
+      var modalMain = document.getElementById("modal-status-main-panel");
+      var modalMove = document.getElementById("modal-sublayer-move");
+      var modalRename = document.getElementById("modal-sublayer-rename");
+      var modalSticker = document.getElementById("modal-sublayer-sticker");
+      if (modalMain) modalMain.classList.remove("hidden");
+      if (modalMove) modalMove.classList.add("hidden");
+      if (modalRename) modalRename.classList.add("hidden");
+      if (modalSticker) modalSticker.classList.add("hidden");
+    }
+  }
+
+  function submitStatusFromModal(status) {
+    openStickerInspectionSublayer(status, "modal");
+  }
+
   function displayScannedAsset(asset) {
     activeAsset = asset;
     AppState.set("selectedAsset", asset);
 
+    // Reset sticker to asset's current sticker or default to ปกติ
+    var currentSticker = asset.sticker || "ปกติ";
+    selectSticker(currentSticker);
+    closeSublayers();
+
     var card = document.getElementById("active-asset-card");
     if (!card) return;
 
-    // Fill in asset fields
+    // Fill in asset fields (Strictly Allowed Columns: B, D, I, M, N, O)
     document.getElementById("asset-card-id").innerText = asset.assetId || "Unknown ID";
     document.getElementById("asset-card-name").innerText = asset.itemName || "Unnamed Asset";
-    document.getElementById("asset-card-spec").innerText = asset.brandModel || "Standard Specification";
     document.getElementById("asset-card-registered-room").innerText = asset.registeredLocation || asset.sheetName || "Unassigned";
     
-    // Status badge
+    // Status badge (Column M: Scanned 69 — blank if unverified)
     var statusBadge = document.getElementById("asset-card-prev-status");
-    renderStatusBadge(statusBadge, asset.status);
+    renderStatusBadge(statusBadge, asset.scanned69 || "");
 
-    // Procurement Condition (สภาพของสินทรัพย์)
-    var condVal = document.getElementById("asset-card-cond-val");
-    if (condVal) condVal.innerText = asset.procurementCondition || "ปกติ";
+    // Sticker Status (Column O: สติกเกอร์)
+    var stickerVal = document.getElementById("asset-card-sticker-val");
+    if (stickerVal) stickerVal.innerText = currentSticker;
 
-    // Historical Result (ผลปี 68)
-    var prevAuditBox = document.getElementById("asset-card-prev-audit-box");
-    var prevAuditVal = document.getElementById("asset-card-prev-audit-val");
-    if (prevAuditBox && prevAuditVal) {
-      var hist68 = (asset.historicalResults && asset.historicalResults["68"]) ? asset.historicalResults["68"] : "";
-      if (hist68) {
-        prevAuditBox.classList.remove("hidden");
-        prevAuditVal.innerText = hist68;
+    // Reference Note: Column N (หมายเหตุปี 69) ONLY
+    var res69Box = document.getElementById("asset-card-result69-box");
+    var res69Val = document.getElementById("asset-card-result69-val");
+    if (res69Box && res69Val) {
+      if (asset.auditResult69) {
+        res69Box.classList.remove("hidden");
+        res69Val.innerText = asset.auditResult69;
       } else {
-        prevAuditBox.classList.add("hidden");
+        res69Box.classList.add("hidden");
       }
     }
-
-    // Sticker Status
-    var stickerVal = document.getElementById("asset-card-sticker-val");
-    if (stickerVal) stickerVal.innerText = asset.sticker || "Yes";
 
     // Check location discrepancy
     var currentRoom = AppState.get("currentRoom");
@@ -162,47 +396,79 @@ window.AuditController = (function() {
     ModalController.openUnrecognizedModal(rawCode);
   }
 
-  function submitStatus(newStatus) {
+  function submitStatus(newStatus, extraData) {
     if (isSubmitting || !activeAsset) return;
+    extraData = extraData || {};
     isSubmitting = true;
     setThumbButtonsLoading(true, newStatus);
 
-    var noteInput = document.getElementById("condition-note-input");
-    var notes = noteInput ? noteInput.value.trim() : "";
+    var targetAsset = activeAsset;
+    var cardNoteInput = document.getElementById("condition-note-input");
+    var modalNoteInput = document.getElementById("modal-condition-note-input");
+    var notes = extraData.notes || (modalNoteInput && modalNoteInput.value ? modalNoteInput.value.trim() : (cardNoteInput ? cardNoteInput.value.trim() : ""));
     var currentRoom = AppState.get("currentRoom");
 
     var payload = {
-      assetId: activeAsset.assetId,
-      sheetName: activeAsset.sheetName || activeAsset.registeredLocation,
-      rowIndex: activeAsset.rowIndex,
+      assetId: targetAsset.assetId,
+      sheetName: targetAsset.sheetName || targetAsset.registeredLocation,
+      rowIndex: targetAsset.rowIndex,
       status: newStatus,
+      scanned69: newStatus,
+      sticker: selectedSticker,
       notes: notes,
-      currentRoom: (currentRoom === "ALL" ? activeAsset.registeredLocation : currentRoom)
+      destinationRoom: extraData.destinationRoom || null,
+      renameText: extraData.renameText || null,
+      currentRoom: (currentRoom === "ALL" ? targetAsset.registeredLocation : currentRoom)
     };
+
+    // Close sublayers & modal immediately for seamless 1-tap UX
+    closeSublayers();
+    ModalController.closeAssetDetailsModal();
+
+    var card = document.getElementById("active-asset-card");
+    if (card) card.classList.add("hidden");
+
+    // Haptic feedback & non-blocking floating 3s toast (duration = 3000ms)
+    if (window.ScannerController && ScannerController.triggerHaptic) {
+      ScannerController.triggerHaptic();
+    }
+    var icon = (newStatus.indexOf("ใช้งานอยู่") === 0) ? "✅" : (newStatus.indexOf("หมดความจำเป็น") === 0 ? "⚠️" : "📋");
+    ModalController.showToast(icon + " " + targetAsset.assetId + " marked: " + newStatus, "success", 3000);
+
+    // Switch to scanner tab & resume live camera feed immediately for next scan
+    if (AppState.get("activeTab") !== "scanner") {
+      switchTab("scanner");
+    } else {
+      if (window.ScannerController && ScannerController.startScanner) {
+        ScannerController.startScanner();
+      }
+    }
+    if (window.ScannerController && ScannerController.resetLastScannedCode) {
+      ScannerController.resetLastScannedCode();
+    }
 
     ApiClient.updateAssetStatus(payload)
       .then(function(res) {
         isSubmitting = false;
         setThumbButtonsLoading(false);
 
-        // Haptic feedback & Toast
-        ScannerController.triggerHaptic();
-        var icon = (newStatus === "Good") ? "✅" : (newStatus === "Damaged" ? "⚠️" : "❌");
-        ModalController.showToast(icon + " " + activeAsset.assetId + " marked as " + newStatus, "success", 2000);
-
         // Record recent scan
         AppState.addRecentScan({
-          assetId: activeAsset.assetId,
-          itemName: activeAsset.itemName,
+          assetId: targetAsset.assetId,
+          itemName: extraData.renameText || targetAsset.itemName,
           status: newStatus,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
         });
 
         // Update active asset in state
-        activeAsset.status = newStatus;
-        activeAsset.notes = notes;
-        activeAsset.auditedBy = res.auditedBy || "Me";
-        activeAsset.auditDate = res.auditDate;
+        targetAsset.status = newStatus;
+        targetAsset.scanned69 = newStatus;
+        targetAsset.sticker = selectedSticker;
+        if (extraData.renameText) targetAsset.itemName = extraData.renameText;
+        if (extraData.destinationRoom) targetAsset.registeredLocation = extraData.destinationRoom;
+        targetAsset.notes = notes;
+        targetAsset.auditedBy = res.auditedBy || "Me";
+        targetAsset.auditDate = res.auditDate;
 
         // If backend returned refreshed room summary, update AppState
         if (res.roomSummary) {
@@ -212,25 +478,17 @@ window.AuditController = (function() {
           loadRoomData(AppState.get("currentRoom"));
         }
 
-        // Auto-rearm or dismiss card & modal
-        var card = document.getElementById("active-asset-card");
-        ModalController.closeAssetDetailsModal();
-
-        if (AppState.get("autoResumeScanner")) {
-          setTimeout(function() {
-            if (card) card.classList.add("hidden");
-            activeAsset = null;
-          }, 1200);
-        }
+        activeAsset = null;
       })
       .catch(function(err) {
         isSubmitting = false;
         setThumbButtonsLoading(false);
-        ModalController.showToast("Failed to save: " + err.toString(), "error");
+        activeAsset = null;
+        ModalController.showToast("Failed to save: " + err.toString(), "error", 4000);
       });
   }
 
-  function submitStatusFromModal(newStatus) {
+  function submitStatusFromModal(newStatus, extraData) {
     if (isSubmitting || !activeAsset) return;
 
     var modalNoteInput = document.getElementById("modal-condition-note-input");
@@ -239,20 +497,64 @@ window.AuditController = (function() {
       cardNoteInput.value = modalNoteInput.value;
     }
 
-    submitStatus(newStatus);
+    submitStatus(newStatus, extraData);
+  }
+
+  /**
+   * Submit Unlisted Asset Registration & 1-Tap Audit (v1.1.2a)
+   * Inserts asset into target Room Worksheet and Master_Asset.
+   * Default Column N ('หมายเหตุปี 69'): "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ"
+   */
+  function submitNewUnlistedAsset(newStatus, extraData) {
+    if (isSubmitting) return;
+    extraData = extraData || {};
+    isSubmitting = true;
+
+    var assetId = (document.getElementById("unrecognized-code-display") ? document.getElementById("unrecognized-code-display").innerText : "").trim();
+    var nameInput = document.getElementById("unlisted-asset-name-input");
+    var itemName = (nameInput && nameInput.value) ? nameInput.value.trim() : "ครุภัณฑ์ตรวจพบนอกฐานข้อมูล";
+    var roomSelect = document.getElementById("unlisted-room-select");
+    var targetRoom = (roomSelect && roomSelect.value) ? roomSelect.value : (AppState.get("currentRoom") || "Storage");
+    if (targetRoom === "ALL") targetRoom = "Storage";
+    var noteInput = document.getElementById("unlisted-note-input");
+    var notes = (noteInput && noteInput.value) ? noteInput.value.trim() : "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ";
+    var sticker = selectedSticker || "ปกติ";
+
+    // Immediate UX Close & Auto Resume Camera
+    ModalController.closeUnrecognizedModal();
+    if (AppState.get("activeTab") !== "scanner") {
+      switchTab("scanner");
+    }
+    if (window.ScannerController) {
+      ScannerController.startScanner();
+      ScannerController.resetLastScannedCode();
+    }
+
+    ModalController.showToast("✅ เพิ่มและบันทึก " + assetId + " สำเร็จ!", "success", 3000);
+
+    ApiClient.addNewUnlistedAsset({
+      assetId: assetId,
+      itemName: itemName,
+      targetRoom: targetRoom,
+      status: newStatus,
+      notes: notes,
+      sticker: sticker
+    })
+    .then(function(res) {
+      isSubmitting = false;
+      if (res && res.roomSummary) {
+        AppState.set("summary", res.roomSummary);
+      }
+    })
+    .catch(function(err) {
+      isSubmitting = false;
+      ModalController.showToast("Failed to add asset: " + err.toString(), "error", 4000);
+    });
   }
 
   function toggleModalSticker() {
-    if (!activeAsset) return;
-    var current = activeAsset.sticker || "Yes";
-    var next = (current === "Yes") ? "No" : "Yes";
-    activeAsset.sticker = next;
-
-    var stickerVal = document.getElementById("modal-asset-sticker-val");
-    if (stickerVal) stickerVal.innerText = next;
-
-    var cardStickerVal = document.getElementById("asset-card-sticker-val");
-    if (cardStickerVal) cardStickerVal.innerText = next;
+    var next = (selectedSticker === "ปกติ") ? "ปริ้นใหม่" : (selectedSticker === "ปริ้นใหม่" ? "ปริ้นใหม่+แก้ข้อมูล" : "ปกติ");
+    selectSticker(next);
   }
 
   function setThumbButtonsLoading(loading, activeStatus) {
@@ -263,18 +565,16 @@ window.AuditController = (function() {
         btn.disabled = true;
         btn.classList.add("opacity-60");
         if (status === activeStatus) {
-          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...';
+          btn.setAttribute("data-prev-html", btn.innerHTML);
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Saving...';
         }
       } else {
         btn.disabled = false;
         btn.classList.remove("opacity-60");
-        // Restore default labels
-        if (status === "Good") {
-          btn.innerHTML = '<i class="fa-solid fa-circle-check text-lg mr-1.5"></i> GOOD';
-        } else if (status === "Damaged") {
-          btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-lg mr-1.5"></i> DAMAGED';
-        } else if (status === "Missing") {
-          btn.innerHTML = '<i class="fa-solid fa-circle-xmark text-lg mr-1.5"></i> MISSING';
+        var prev = btn.getAttribute("data-prev-html");
+        if (prev) {
+          btn.innerHTML = prev;
+          btn.removeAttribute("data-prev-html");
         }
       }
     });
@@ -301,58 +601,66 @@ window.AuditController = (function() {
     }
   }
 
+  function showRosterLoading() {
+    var container = document.getElementById("asset-list-container");
+    if (!container) return;
+    container.innerHTML = 
+      '<div class="p-8 text-center bg-slate-900/60 rounded-2xl border border-slate-800 space-y-3 animate-pulse">' +
+        '<div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-1">' +
+          '<i class="fa-solid fa-arrows-rotate fa-spin text-lg"></i>' +
+        '</div>' +
+        '<h4 class="text-sm sm:text-base font-bold text-white">กำลังโหลดข้อมูลครุภัณฑ์...</h4>' +
+        '<p class="text-xs sm:text-sm text-slate-400">Loading laboratory inventory from database...</p>' +
+        '<div class="space-y-2 max-w-sm mx-auto pt-2">' +
+          '<div class="h-12 bg-slate-800/80 rounded-xl"></div>' +
+          '<div class="h-12 bg-slate-800/60 rounded-xl"></div>' +
+          '<div class="h-12 bg-slate-800/40 rounded-xl"></div>' +
+        '</div>' +
+      '</div>';
+  }
+
   function renderAssetList() {
     var container = document.getElementById("asset-list-container");
     if (!container) return;
 
     var items = AppState.getFilteredItems();
-    var filter = AppState.get("statusFilter");
-    var query = AppState.get("searchQuery");
-
-    if (items.length === 0) {
-      if (filter === "UNVERIFIED" && !query) {
-        container.innerHTML = 
-          '<div class="py-12 px-4 text-center rounded-2xl bg-slate-900/60 border border-slate-800">' +
-            '<div class="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl">' +
-              '<i class="fa-solid fa-circle-check"></i>' +
-            '</div>' +
-            '<h3 class="text-base font-bold text-white mb-1">Room Fully Verified! 🎉</h3>' +
-            '<p class="text-xs text-slate-400 max-w-xs mx-auto">All assets in this laboratory have been audited and updated.</p>' +
-          '</div>';
-      } else {
-        container.innerHTML = 
-          '<div class="py-12 px-4 text-center rounded-2xl bg-slate-900/60 border border-slate-800">' +
-            '<i class="fa-solid fa-search text-slate-600 text-3xl mb-3"></i>' +
-            '<h3 class="text-sm font-semibold text-slate-300 mb-1">No matching assets found</h3>' +
-            '<p class="text-xs text-slate-500">Try adjusting your search query or status filter.</p>' +
-          '</div>';
-      }
+    if (!items || items.length === 0) {
+      container.innerHTML = 
+        '<div class="p-8 text-center bg-slate-900/50 rounded-2xl border border-slate-800 space-y-2">' +
+          '<i class="fa-solid fa-boxes-stacked text-3xl text-slate-600"></i>' +
+          '<p class="text-sm font-semibold text-slate-400">No assets matching current filter.</p>' +
+        '</div>';
       return;
     }
 
     var html = '';
     items.forEach(function(item) {
-      var isUnverified = (item.status !== "Good" && item.status !== "Damaged" && item.status !== "Missing");
-      var borderAccent = isUnverified ? "border-amber-500/40 hover:border-amber-400" : "border-slate-800 hover:border-slate-700";
-      
+      var isGood = (item.status === "Good" || item.status === "ใช้งานอยู่");
+      var isDamaged = (item.status === "Damaged" || item.status === "ใช้งานอยู่แต่ชำรุดนะ");
+      var isMissing = (item.status === "Missing" || item.status === "สูญหาย");
+
+      var borderAccent = "border-slate-800/80 hover:border-slate-700";
+      if (isGood) borderAccent = "border-emerald-500/30 bg-emerald-950/10";
+      if (isDamaged) borderAccent = "border-amber-500/30 bg-amber-950/10";
+      if (isMissing) borderAccent = "border-rose-500/30 bg-rose-950/10";
+
       html += 
         '<div class="p-3.5 rounded-xl bg-slate-900/80 border ' + borderAccent + ' transition cursor-pointer active:scale-[0.99] flex items-center justify-between gap-3 asset-row-card" data-asset-id="' + escapeHtml(item.assetId) + '">' +
           '<div class="flex-1 min-w-0">' +
-            '<div class="flex items-center gap-2 mb-1 flex-wrap">' +
-              (item.no ? '<span class="text-[10px] font-mono text-slate-500">#' + escapeHtml(item.no) + '</span>' : '') +
-              '<span class="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">' + escapeHtml(item.assetId) + '</span>' +
-              '<span class="text-[11px] font-medium text-slate-400">' + escapeHtml(item.registeredLocation) + '</span>' +
-              (item.roomType ? '<span class="text-[10px] text-teal-300 bg-teal-500/10 border border-teal-500/30 px-1.5 py-0.5 rounded">' + escapeHtml(item.roomType) + '</span>' : '') +
-              (item.procurementCondition ? '<span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">' + escapeHtml(item.procurementCondition) + '</span>' : '') +
+            '<!-- Title: Asset Name (Asset description1, Column D) -->' +
+            '<h4 class="text-[15px] sm:text-base font-bold text-white truncate leading-snug">' + escapeHtml(item.itemName) + '</h4>' +
+            '<!-- Subtitle: Inventory Number (Column B), Room (Column I), Sticker (Column O) -->' +
+            '<div class="flex items-center gap-2 mt-1 mb-1 flex-wrap">' +
+              '<span class="font-mono text-xs sm:text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">' + escapeHtml(item.assetId) + '</span>' +
+              '<span class="text-xs font-medium text-slate-400">' + escapeHtml(item.registeredLocation) + '</span>' +
+              (item.sticker ? '<span class="text-[11px] text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded"><i class="fa-solid fa-tag text-[10px] mr-1"></i>' + escapeHtml(item.sticker) + '</span>' : '') +
             '</div>' +
-            '<h4 class="text-sm font-semibold text-white truncate">' + escapeHtml(item.itemName) + '</h4>' +
-            '<p class="text-xs text-slate-400 truncate mt-0.5">' + escapeHtml(item.brandModel || "No specification") + '</p>' +
-            (item.auditResult69 ? '<p class="text-[11px] text-emerald-400/90 truncate mt-1"><i class="fa-solid fa-clipboard-check mr-1"></i>ปี 69: ' + escapeHtml(item.auditResult69) + '</p>' : '') +
-            (item.notes && !item.auditResult69 ? '<p class="text-[11px] text-amber-400/90 truncate mt-1"><i class="fa-regular fa-comment-dots mr-1"></i>' + escapeHtml(item.notes) + '</p>' : '') +
+            '<!-- Reference Note: Column N (หมายเหตุปี 69) ONLY -->' +
+            ((item.auditResult69 || item.notes) ? '<p class="text-xs sm:text-[13px] text-amber-300/90 truncate mt-1"><i class="fa-solid fa-note-sticky mr-1"></i>หมายเหตุ 69: ' + escapeHtml(item.auditResult69 || item.notes) + '</p>' : '') +
           '</div>' +
           '<div class="flex flex-col items-end shrink-0 gap-1.5">' +
-            renderStatusBadgeHtml(item.status) +
-            '<button class="touch-target text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800/80 border border-slate-700">' +
+            renderStatusBadgeHtml(item.scanned69 || "") +
+            '<button class="touch-target text-xs sm:text-sm text-slate-400 hover:text-white px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700 font-semibold">' +
               '<i class="fa-solid fa-pen-to-square mr-1"></i> Audit' +
             '</button>' +
           '</div>' +
@@ -374,17 +682,34 @@ window.AuditController = (function() {
   }
 
   function renderStatusBadgeHtml(status) {
-    if (status === "Good") {
-      return '<span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1"></i>Good</span>';
-    } else if (status === "Damaged") {
-      return '<span class="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Damaged</span>';
-    } else if (status === "Missing") {
-      return '<span class="text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-xmark mr-1"></i>Missing</span>';
+    if (!status || status === "Unverified" || status === "-" || status === "") {
+      return '';
     }
-    return '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full animate-pulse"><i class="fa-regular fa-clock mr-1"></i>Unverified</span>';
+    if (status === "Good" || status === "ใช้งานอยู่") {
+      return '<span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    if (status === "ใช้งานอยู่แต่ชำรุดนะ" || status === "Damaged") {
+      return '<span class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-screwdriver-wrench mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    if (status.indexOf("ใช้งานอยู่+") === 0) {
+      return '<span class="text-xs font-bold text-sky-400 bg-sky-500/10 border border-sky-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-arrows-rotate mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    if (status.indexOf("หมดความจำเป็น") === 0) {
+      return '<span class="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-ban mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    if (status === "Missing" || status === "สูญหาย") {
+      return '<span class="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-circle-xmark mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    if (status.indexOf("หาไม่เจอ") === 0 || status.indexOf("งง+") === 0) {
+      return '<span class="text-xs font-bold text-slate-300 bg-slate-800 border border-slate-600 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-clipboard-question mr-1"></i>' + escapeHtml(status) + '</span>';
+    }
+    return '';
   }
 
   function renderStatusBadge(element, status) {
+    if (arguments.length === 1) {
+      return renderStatusBadgeHtml(element);
+    }
     if (!element) return;
     element.innerHTML = renderStatusBadgeHtml(status);
   }
@@ -433,6 +758,19 @@ window.AuditController = (function() {
     }
   }
 
+  /**
+   * Filter roster table when an Audit Stat Card is clicked
+   * Supported criteria: 'ALL', 'Good', 'Damaged', 'Missing', 'UNVERIFIED'
+   */
+  function filterFromStatCard(criteria) {
+    if (!criteria) criteria = "ALL";
+    AppState.set("statusFilter", criteria);
+    switchTab("roster");
+    try {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {}
+  }
+
   function escapeHtml(str) {
     if (!str) return "";
     return String(str)
@@ -447,12 +785,24 @@ window.AuditController = (function() {
     init: init,
     displayScannedAsset: displayScannedAsset,
     displayUnrecognizedAsset: displayUnrecognizedAsset,
+    selectSticker: selectSticker,
+    openStickerInspectionSublayer: openStickerInspectionSublayer,
+    selectInspectionSticker: selectInspectionSticker,
+    confirmStickerInspectionAndSubmit: confirmStickerInspectionAndSubmit,
+    openMoveRoomSublayer: openMoveRoomSublayer,
+    confirmMoveToRoom: confirmMoveToRoom,
+    openRenameSublayer: openRenameSublayer,
+    confirmRenameAndSubmit: confirmRenameAndSubmit,
+    closeSublayers: closeSublayers,
     submitStatus: submitStatus,
     submitStatusFromModal: submitStatusFromModal,
+    submitNewUnlistedAsset: submitNewUnlistedAsset,
     toggleModalSticker: toggleModalSticker,
     renderStatusBadge: renderStatusBadge,
+    renderStatusBadgeHtml: renderStatusBadgeHtml,
     loadRoomData: loadRoomData,
-    switchTab: switchTab
+    switchTab: switchTab,
+    filterFromStatCard: filterFromStatCard
   };
 })();
 </script>

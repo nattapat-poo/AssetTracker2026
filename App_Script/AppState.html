@@ -1,7 +1,7 @@
 <script>
 /**
- * AppState.html — Central Reactive State Manager & PubSub Event Bus
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * AppState.html — Reactive Client State Management Store
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -11,7 +11,6 @@ window.AppState = (function() {
     config: {},
     rooms: [],
     currentRoom: "ALL",
-    roomTypeFilter: "ALL", // ALL, Lab, ChemicalLab, BioSafetyLab, Classroom, PrepRoom
     statusFilter: "ALL", // ALL, UNVERIFIED, Good, Damaged, Missing
     searchQuery: "",
     selectedAsset: null,
@@ -33,7 +32,9 @@ window.AppState = (function() {
     theme: "dark",
     recentScans: [],
     pendingSync: false,
-    activeTab: "scanner" // "scanner", "roster", "summary"
+    activeTab: "scanner", // "scanner", "roster", "summary"
+    isScanning: false,
+    cameraFacing: "environment" // environment (rear) or user (front)
   };
 
   var listeners = {};
@@ -84,34 +85,49 @@ window.AppState = (function() {
   function getFilteredItems() {
     var items = (state.summary && state.summary.items) ? state.summary.items : [];
     var statusFilter = state.statusFilter;
-    var roomTypeFilter = state.roomTypeFilter;
     var query = (state.searchQuery || "").trim().toLowerCase();
     
     return items.filter(function(item) {
-      // 1. Room Type Filter (Hybrid Master Table)
-      if (roomTypeFilter && roomTypeFilter !== "ALL") {
-        var itemType = item.roomType || "";
-        if (itemType.toLowerCase() !== roomTypeFilter.toLowerCase()) {
-          return false;
+      // 1. Status Filter
+      if (statusFilter === "UNVERIFIED" || statusFilter === "Unverified" || statusFilter === "Pending" || statusFilter === "ยังไม่ได้สำรวจ") {
+        var s = String(item.scanned69 || item.status || "").trim();
+        var isVer = (s !== "" && s !== "Unverified" && s !== "-");
+        if (isVer) return false;
+      } else if (statusFilter && statusFilter !== "ALL") {
+        var rawStatus = String(item.scanned69 || item.status || "").trim();
+        var rawRemark = String(item.auditResult69 || "").trim();
+        var combined = (rawStatus + " " + rawRemark).toLowerCase();
+
+        if (statusFilter === "Good") {
+          var isGood = (item.status === "Good" || rawStatus === "Good" || 
+                        (rawStatus.indexOf("ใช้งานอยู่") !== -1 && rawStatus.indexOf("ชำรุด") === -1) ||
+                        combined.indexOf("good") !== -1);
+          if (!isGood) return false;
+        } else if (statusFilter === "Damaged") {
+          var isDamaged = (item.status === "Damaged" || rawStatus === "Damaged" || 
+                           combined.indexOf("ชำรุด") !== -1 || combined.indexOf("damaged") !== -1);
+          if (!isDamaged) return false;
+        } else if (statusFilter === "Missing") {
+          var isMissing = (item.status === "Missing" || rawStatus === "Missing" || 
+                           combined.indexOf("สูญหาย") !== -1 || combined.indexOf("หาไม่เจอ") !== -1 ||
+                           combined.indexOf("ไม่พบ") !== -1 || combined.indexOf("งง+") !== -1 ||
+                           combined.indexOf("missing") !== -1);
+          if (!isMissing) return false;
+        } else {
+          var st = item.scanned69 || item.status;
+          if (st !== statusFilter) return false;
         }
       }
-
-      // 2. Status Filter
-      if (statusFilter === "UNVERIFIED") {
-        var isVer = (item.status === "Good" || item.status === "Damaged" || item.status === "Missing");
-        if (isVer) return false;
-      } else if (statusFilter === "Good" || statusFilter === "Damaged" || statusFilter === "Missing") {
-        if (item.status !== statusFilter) return false;
-      }
       
-      // 3. Search Query Filter
+      // 2. Search Query Filter (Strictly Cols B, D, I, M, N, O)
       if (query) {
-        var idMatch = String(item.assetId || "").toLowerCase().indexOf(query) !== -1;
-        var nameMatch = String(item.itemName || "").toLowerCase().indexOf(query) !== -1;
-        var modelMatch = String(item.brandModel || "").toLowerCase().indexOf(query) !== -1;
-        var locMatch = String(item.registeredLocation || "").toLowerCase().indexOf(query) !== -1;
-        var notesMatch = String(item.notes || "").toLowerCase().indexOf(query) !== -1;
-        if (!idMatch && !nameMatch && !modelMatch && !locMatch && !notesMatch) {
+        var idMatch = String(item.assetId || "").toLowerCase().indexOf(query) !== -1;         // Col B
+        var nameMatch = String(item.itemName || "").toLowerCase().indexOf(query) !== -1;     // Col D
+        var locMatch = String(item.registeredLocation || "").toLowerCase().indexOf(query) !== -1; // Col I
+        var statusMatch = String(item.scanned69 || item.status || "").toLowerCase().indexOf(query) !== -1; // Col M
+        var remMatch = String(item.auditResult69 || "").toLowerCase().indexOf(query) !== -1; // Col N
+        var stickerMatch = String(item.sticker || "").toLowerCase().indexOf(query) !== -1;   // Col O
+        if (!idMatch && !nameMatch && !locMatch && !statusMatch && !remMatch && !stickerMatch) {
           return false;
         }
       }

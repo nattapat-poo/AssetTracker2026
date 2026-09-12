@@ -1,16 +1,32 @@
 /**
  * TelemetryService.js — Operational Audit Logging & Performance Analytics
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
- * 
- * Non-invasive Mode: Never inserts 'Logs' or 'Stats' tabs into the procurement spreadsheet!
- * Only writes to Logs/Stats if tabs already exist; otherwise outputs to Cloud Logging.
  */
+
+function ensureStatsSheet(ss) {
+  if (!ss) ss = getSpreadsheet();
+  if (!ss) return null;
+  
+  var statsSheet = ss.getSheetByName("Stats");
+  if (!statsSheet) {
+    statsSheet = ss.insertSheet("Stats");
+    var headers = ["Timestamp", "UserEmail", "UserName", "Action", "Room", "AssetID", "DurationMs", "Metadata"];
+    statsSheet.getRange(1, 1, 1, headers.length)
+      .setValues([headers])
+      .setFontWeight("bold")
+      .setBackground("#0f172a")
+      .setFontColor("#38bdf8");
+    statsSheet.setFrozenRows(1);
+  }
+  return statsSheet;
+}
 
 function logEvent(action, status, durationMs, details, payload) {
   try {
     var timestamp = getBangkokTimestamp();
     var email = getActorEmailSafe();
+    var authUser = authenticateSession();
     var recordsAffected = (payload && payload.recordsAffected !== undefined) ? payload.recordsAffected : 1;
     
     var detailStr = details || "";
@@ -27,7 +43,6 @@ function logEvent(action, status, durationMs, details, payload) {
     var sheetName = config.LOGS_SHEET_NAME || "Logs";
     var sheet = ss.getSheetByName(sheetName);
     
-    // Only write if sheet already exists (strictly do NOT create it)
     if (sheet) {
       sheet.appendRow([
         timestamp,
@@ -35,6 +50,23 @@ function logEvent(action, status, durationMs, details, payload) {
         action,
         status || "SUCCESS",
         recordsAffected,
+        detailStr
+      ]);
+    }
+
+    // Auto-record to Stats sheet
+    var statsSheet = ensureStatsSheet(ss);
+    if (statsSheet) {
+      var roomVal = (payload && (payload.sheetName || payload.roomName || payload.room || payload.destinationRoom)) ? (payload.sheetName || payload.roomName || payload.room || payload.destinationRoom) : "";
+      var assetIdVal = (payload && (payload.assetId || payload.assetCode)) ? (payload.assetId || payload.assetCode) : "";
+      statsSheet.appendRow([
+        timestamp,
+        email,
+        (authUser && authUser.name) ? authUser.name : "System",
+        action,
+        roomVal,
+        assetIdVal,
+        durationMs || 0,
         detailStr
       ]);
     }
@@ -47,6 +79,7 @@ function logStat(metricName, dimension, numericValue, durationMs, metadata) {
   try {
     var timestamp = getBangkokTimestamp();
     var email = getActorEmailSafe();
+    var authUser = authenticateSession();
     
     var metaStr = "";
     if (metadata && typeof metadata === "object") {
@@ -60,20 +93,17 @@ function logStat(metricName, dimension, numericValue, durationMs, metadata) {
     var ss = getSpreadsheet();
     if (!ss) return;
     
-    var config = getLocalConfig();
-    var sheetName = config.STATS_SHEET_NAME || "Stats";
-    var sheet = ss.getSheetByName(sheetName);
-    
-    // Only write if sheet already exists (strictly do NOT create it)
-    if (sheet) {
-      sheet.appendRow([
+    var statsSheet = ensureStatsSheet(ss);
+    if (statsSheet) {
+      statsSheet.appendRow([
         timestamp,
         email,
+        (authUser && authUser.name) ? authUser.name : "System",
         metricName,
         dimension || "GENERAL",
-        numericValue || 1,
+        "",
         durationMs || 0,
-        metaStr
+        "Value: " + (numericValue || 1) + (metaStr ? " | " + metaStr : "")
       ]);
     }
   } catch (err) {

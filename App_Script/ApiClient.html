@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.0e)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -15,44 +15,101 @@ window.ApiClient = (function() {
     ))
   );
 
-  // High-fidelity mock database matching Project 00 Kernel Room Directory
-  var MOCK_ROOMS = [
-    "Chem1 (ChemLab1 - Floor 2)",
-    "Chem2 (ChemLab2 - Floor 2)",
-    "Physics1 (Physics Lab 1 - Floor 2)",
-    "Physics2 (Physics Lab 2 - Floor 2)",
-    "Bio1 (BioLab1 - Floor 3)",
-    "Bio2 (BioSafetyLab - Floor 3)",
-    "Lab 204 (General Science)",
-    "Lab 205 (Earth Science)",
-    "Physics Lab 314",
-    "Prep Room 1 (Floor 2)",
-    "Prep Room 2 (Floor 3)",
-    "Chem Store (Secured)"
+  // 15 Rooms Configuration (v1.1.4)
+  var ROOM_SHEETS_CONFIG = [
+    "Bio Prep",
+    "Bio1",
+    "Bio2",
+    "Chem Pre",
+    "Chem1",
+    "Chem2",
+    "Physics P",
+    "Physics1",
+    "Physics2",
+    "Mobile",
+    "Science",
+    "ปาณิษา",
+    "ชำรุด",
+    "ไม่ใช้งาน",
+    "Storage"
   ];
 
+  // 3 Color-Coded Status Option Groups (v1.1.2b)
+  var STATUS_GROUPS = {
+    GROUP_1: {
+      name: "ใช้งานอยู่",
+      color: "green",
+      options: [
+        "ใช้งานอยู่",
+        "ใช้งานอยู่แต่ชำรุดนะ",
+        "ใช้งานอยู่+ย้ายไป...",
+        "ใช้งานอยู่+แก้ไขชื่อเป็น..."
+      ]
+    },
+    GROUP_2: {
+      name: "หมดความจำเป็น",
+      color: "red",
+      options: [
+        "หมดความจำเป็นต้องใช้งาน",
+        "หมดความจำเป็นต้องใช้งานเพราะชำรุด"
+      ]
+    },
+    GROUP_3: {
+      name: "สูญหาย / ตรวจสอบ",
+      color: "grey",
+      options: [
+        "สูญหาย",
+        "หาไม่เจอ",
+        "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน",
+        "งง+ให้พัสดุมาตรวจสอบหน้างาน"
+      ]
+    }
+  };
+
+  var STATUS_OPTIONS = [
+    "ใช้งานอยู่",
+    "ใช้งานอยู่แต่ชำรุดนะ",
+    "ใช้งานอยู่+ย้ายไป...",
+    "ใช้งานอยู่+แก้ไขชื่อเป็น...",
+    "หมดความจำเป็นต้องใช้งาน",
+    "หมดความจำเป็นต้องใช้งานเพราะชำรุด",
+    "สูญหาย",
+    "หาไม่เจอ",
+    "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน",
+    "งง+ให้พัสดุมาตรวจสอบหน้างาน"
+  ];
+
+  var STICKER_OPTIONS = [
+    "ปกติ",
+    "ปริ้นใหม่",
+    "ปริ้นใหม่+แก้ข้อมูล"
+  ];
+
+  // High-fidelity mock database matching Project 00 Kernel Room Directory
+  var MOCK_ROOMS = ROOM_SHEETS_CONFIG;
+
   var MOCK_ASSETS = [
-    { no: 1, assetId: "MUIDS-SCI-204-001", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 2, status: "Good", auditResult69: "Good (Lenses clear)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
-    { no: 2, assetId: "MUIDS-SCI-204-002", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "" },
-    { no: 3, assetId: "MUIDS-SCI-204-003", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 4, status: "Good", auditResult69: "Good (Calibrated)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated" },
-    { no: 4, assetId: "MUIDS-SCI-204-004", itemName: "Corning Hotplate Stirrer", brandModel: "PC-420D Digital", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 5, status: "Damaged", auditResult69: "Damaged (Plate chipped)", sticker: "Yes", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุดเล็กน้อย" }, notes: "Heating plate surface chipped" },
-    { no: 5, assetId: "MUIDS-SCI-204-005", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 6, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 6, assetId: "MUIDS-SCI-204-006", itemName: "Fisherbrand Vortex Mixer", brandModel: "Analog Vortex 120V", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 7, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 1, assetId: "MUIDS-SCI-204-001", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
+    { no: 2, assetId: "MUIDS-SCI-204-002", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "" },
+    { no: 3, assetId: "MUIDS-SCI-204-003", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 4, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated" },
+    { no: 4, assetId: "MUIDS-SCI-204-004", itemName: "Corning Hotplate Stirrer", brandModel: "PC-420D Digital", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 5, status: "ใช้งานอยู่แต่ชำรุดนะ", scanned69: "ใช้งานอยู่แต่ชำรุดนะ", auditResult69: "ใช้งานอยู่แต่ชำรุดนะ", sticker: "ปกติ", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุดเล็กน้อย" }, notes: "Heating plate surface chipped" },
+    { no: 5, assetId: "MUIDS-SCI-204-005", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 6, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 6, assetId: "MUIDS-SCI-204-006", itemName: "Fisherbrand Vortex Mixer", brandModel: "Analog Vortex 120V", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
     
-    { no: 1, assetId: "MUIDS-CHM-301-010", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 2, status: "Good", auditResult69: "Good (Lamp tested OK)", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
-    { no: 2, assetId: "MUIDS-CHM-301-011", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 3, assetId: "MUIDS-CHM-301-012", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 4, assetId: "MUIDS-CHM-301-013", itemName: "Labconco Fume Hood Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 5, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
-    { no: 5, assetId: "MUIDS-CHM-301-014", itemName: "Eppendorf Research Plus Pipette Set", brandModel: "3-Pack (10, 100, 1000uL)", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 6, status: "Missing", auditResult69: "Missing (Missing 10uL)", sticker: "No", procurementCondition: "สูญหาย", historicalResults: {}, notes: "Missing 10uL pipette from carousel" },
+    { no: 1, assetId: "MUIDS-CHM-301-010", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
+    { no: 2, assetId: "MUIDS-CHM-301-011", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 3, assetId: "MUIDS-CHM-301-012", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 4, assetId: "MUIDS-CHM-301-013", itemName: "Labconco Fume Hood Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 5, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
+    { no: 5, assetId: "MUIDS-CHM-301-014", itemName: "Eppendorf Research Plus Pipette Set", brandModel: "3-Pack (10, 100, 1000uL)", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 6, status: "สูญหาย", scanned69: "สูญหาย", auditResult69: "สูญหาย", sticker: "ปกติ", procurementCondition: "สูญหาย", historicalResults: {}, notes: "Missing 10uL pipette from carousel" },
 
-    { no: 1, assetId: "MUIDS-BIO-308-020", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 2, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
-    { no: 2, assetId: "MUIDS-BIO-308-021", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 3, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 3, assetId: "MUIDS-BIO-308-022", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 4, assetId: "MUIDS-BIO-308-023", itemName: "Benchmark Autoclave 16L", brandModel: "BioClave 16 B4000-16", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 5, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Gasket inspected, passed seal test" },
+    { no: 1, assetId: "MUIDS-BIO-308-020", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
+    { no: 2, assetId: "MUIDS-BIO-308-021", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 3, assetId: "MUIDS-BIO-308-022", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 4, assetId: "MUIDS-BIO-308-023", itemName: "Benchmark Autoclave 16L", brandModel: "BioClave 16 B4000-16", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 5, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Gasket inspected, passed seal test" },
 
-    { no: 1, assetId: "MUIDS-PHY-314-030", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 2, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 2, assetId: "MUIDS-PHY-314-031", itemName: "Rigol Digital Oscilloscope", brandModel: "DS1054Z 50MHz 4CH", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 3, status: "Good", auditResult69: "Good", sticker: "Yes", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested with function gen" },
-    { no: 3, assetId: "MUIDS-PHY-314-032", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 4, status: "Unverified", auditResult69: "", sticker: "No", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" }
+    { no: 1, assetId: "MUIDS-PHY-314-030", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 2, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 2, assetId: "MUIDS-PHY-314-031", itemName: "Rigol Digital Oscilloscope", brandModel: "DS1054Z 50MHz 4CH", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 3, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested with function gen" },
+    { no: 3, assetId: "MUIDS-PHY-314-032", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" }
   ];
 
   function invoke(action, payload) {
@@ -116,7 +173,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.0e",
+          APP_VERSION: "v1.1.4",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -125,14 +182,17 @@ window.ApiClient = (function() {
         },
         rooms: MOCK_ROOMS,
         kernelRooms: [
-          { roomId: "room_06", roomName: "Chem1", sourceSystemCode: "ChemLab1", floor: 2, roomType: "Lab" },
-          { roomId: "room_07", roomName: "Chem2", sourceSystemCode: "ChemLab2", floor: 2, roomType: "ChemicalLab" },
-          { roomId: "room_08", roomName: "Physics1", sourceSystemCode: "Physics 1", floor: 2, roomType: "Lab" },
-          { roomId: "room_09", roomName: "Physics2", sourceSystemCode: "Physics 2", floor: 2, roomType: "Lab" },
-          { roomId: "room_13", roomName: "Bio1", sourceSystemCode: "BioLab1", floor: 3, roomType: "ChemicalLab" },
-          { roomId: "room_14", roomName: "Bio2", sourceSystemCode: "BioLab2", floor: 3, roomType: "BioSafetyLab" }
+          { roomId: "room_06", roomName: "Chem1", sourceSystemCode: "ChemLab1", floor: 2 },
+          { roomId: "room_07", roomName: "Chem2", sourceSystemCode: "ChemLab2", floor: 2 },
+          { roomId: "room_08", roomName: "Physics1", sourceSystemCode: "Physics 1", floor: 2 },
+          { roomId: "room_09", roomName: "Physics2", sourceSystemCode: "Physics 2", floor: 2 },
+          { roomId: "room_13", roomName: "Bio1", sourceSystemCode: "BioLab1", floor: 3 },
+          { roomId: "room_14", roomName: "Bio2", sourceSystemCode: "BioLab2", floor: 3 }
         ],
-        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"],
+        statusGroups: STATUS_GROUPS,
+        statusOptions: STATUS_OPTIONS,
+        stickerOptions: STICKER_OPTIONS,
+        roomSheetsConfig: ROOM_SHEETS_CONFIG,
         currentRoom: defaultRoom,
         summary: mockGetRoomSummary(defaultRoom),
         spreadsheetId: "18LGXn6JbjFeiVuKlrh0CvJ79M3mpsKTVbc0FJx8LuOk"
@@ -145,16 +205,17 @@ window.ApiClient = (function() {
         message: "Row 5 audit headers hardcoded to Column M across all rooms. Repaired Columns A-L.",
         sheetsConfigured: MOCK_ROOMS.length,
         startColumn: "M (Column 13)",
-        columns: ["หมายเหตุปี 69", "สติกเกอร์", "ปี68", "ปี67", "ปี66", "ปี64", "ปี63"]
+        columns: ["Scanned 69", "หมายเหตุปี 69", "สติกเกอร์", "ปี68", "ปี67", "ปี66", "ปี64", "ปี63"]
       };
     }
 
     if (action === "buildMasterTable") {
+      var selected = (payload && payload.sheetNames) ? payload.sheetNames : MOCK_ROOMS;
       return {
         success: true,
-        message: "Master Table built with " + MOCK_ASSETS.length + " assets across " + MOCK_ROOMS.length + " rooms.",
+        message: "Master Table built with " + MOCK_ASSETS.length + " assets across " + selected.length + " rooms.",
         totalAssets: MOCK_ASSETS.length,
-        roomsProcessed: MOCK_ROOMS.length
+        roomsProcessed: selected.length
       };
     }
 
@@ -179,21 +240,18 @@ window.ApiClient = (function() {
       if (filters.search) {
         var s = filters.search.toLowerCase();
         items = items.filter(function(a) {
-          return a.assetId.toLowerCase().indexOf(s) !== -1 ||
-                 a.itemName.toLowerCase().indexOf(s) !== -1 ||
-                 a.brandModel.toLowerCase().indexOf(s) !== -1;
+          return (a.assetId && a.assetId.toLowerCase().indexOf(s) !== -1) ||
+                 (a.itemName && a.itemName.toLowerCase().indexOf(s) !== -1) ||
+                 (a.registeredLocation && a.registeredLocation.toLowerCase().indexOf(s) !== -1) ||
+                 (a.scanned69 && a.scanned69.toLowerCase().indexOf(s) !== -1) ||
+                 (a.status && a.status.toLowerCase().indexOf(s) !== -1) ||
+                 (a.auditResult69 && a.auditResult69.toLowerCase().indexOf(s) !== -1) ||
+                 (a.sticker && a.sticker.toLowerCase().indexOf(s) !== -1);
         });
       }
       return {
         total: items.length,
-        items: items,
-        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"]
-      };
-    }
-
-    if (action === "getDynamicRoomTypes") {
-      return {
-        roomTypes: ["ALL", "Lab", "ChemicalLab", "BioSafetyLab", "Classroom", "PrepRoom"]
+        items: items
       };
     }
 
@@ -225,8 +283,16 @@ window.ApiClient = (function() {
 
       var ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
       asset.status = payload.status;
+      asset.scanned69 = payload.status;
+      asset.sticker = payload.sticker || "ปกติ";
       asset.auditedBy = "nattapat.poo@mahidol.ac.th";
       asset.auditDate = ts;
+      if (payload.destinationRoom) {
+        asset.registeredLocation = payload.destinationRoom;
+      }
+      if (payload.renameText) {
+        asset.itemName = payload.renameText;
+      }
       if (payload.notes) {
         asset.notes = asset.notes ? (asset.notes + " | " + payload.notes) : payload.notes;
       }
@@ -241,6 +307,8 @@ window.ApiClient = (function() {
         sheetName: asset.registeredLocation,
         rowIndex: asset.rowIndex,
         status: asset.status,
+        scanned69: asset.scanned69,
+        sticker: asset.sticker,
         auditedBy: asset.auditedBy,
         auditDate: asset.auditDate,
         notes: asset.notes,
@@ -253,21 +321,104 @@ window.ApiClient = (function() {
       return mockGetRoomSummary(payload.roomName);
     }
 
+    if (action === "addNewUnlistedAsset") {
+      var rawId = String(payload.assetId || "").trim();
+      var room = payload.targetRoom || payload.registeredLocation || "Bio Prep";
+      var name = payload.itemName || "ครุภัณฑ์ตรวจพบนอกฐานข้อมูล";
+      var st = payload.status || "ใช้งานอยู่";
+      var nt = payload.notes || "พบครุภัณฑ์ที่ไม่มีในฐานข้อมูลส่งสำรวจ";
+      var stk = payload.sticker || "ปกติ";
+      var newAsset = {
+        no: MOCK_ASSETS.length + 1,
+        assetId: rawId,
+        itemName: name,
+        brandModel: "",
+        registeredLocation: room,
+        sheetName: room,
+        rowIndex: MOCK_ASSETS.length + 2,
+        status: st,
+        scanned69: st,
+        auditResult69: nt,
+        sticker: stk,
+        procurementCondition: "ใช้งานได้",
+        historicalResults: {},
+        notes: nt
+      };
+      MOCK_ASSETS.push(newAsset);
+      var summ = mockGetRoomSummary(room);
+      return {
+        success: true,
+        message: "Successfully added and audited unlisted asset " + rawId,
+        assetId: rawId,
+        itemName: name,
+        sheetName: room,
+        registeredLocation: room,
+        status: st,
+        scanned69: st,
+        auditResult69: nt,
+        sticker: stk,
+        asset: newAsset,
+        roomSummary: summ
+      };
+    }
+
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.0e). Local mock simulation mode.",
-        appVersion: "v1.1.0e",
+        message: "Config sheet synchronized (v1.1.4). Local mock simulation mode.",
+        appVersion: "v1.1.4",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
       };
     }
 
-
+    if (action === "checkMasterContradictions") {
+      return {
+        success: true,
+        totalScanned: MOCK_ASSETS.length,
+        duplicatesCount: 0,
+        duplicateRowsCount: 0,
+        duplicatesList: [],
+        missingIdCount: 0,
+        missingIdRows: [],
+        message: "No contradictions found. All assets in Master Table have unique inventory numbers."
+      };
+    }
 
     if (action === "flushCache") {
       return { success: true, message: "Mock cache purged." };
+    }
+
+    if (action === "getAppUsageStats") {
+      var total = MOCK_ASSETS.length;
+      var audited = MOCK_ASSETS.filter(function(a) { return a.status || a.scanned69; }).length;
+      return {
+        success: true,
+        stats: {
+          totalAssets: total,
+          totalAudited: audited,
+          totalRemaining: total - audited,
+          percentComplete: total > 0 ? Math.round((audited / total) * 1000) / 10 : 0,
+          statusCounts: {
+            "ใช้งานอยู่": 4,
+            "ใช้งานอยู่แต่ชำรุดนะ": 1
+          },
+          stickerCounts: {
+            "ปกติ": 4,
+            "ปริ้นใหม่": 1
+          },
+          auditorLeaderboard: [
+            { name: "Nattapat Poolyam (Mek)", count: audited }
+          ],
+          roomBreakdown: [
+            { room: "Chem1", total: 3, audited: 2, percent: 66.7 },
+            { room: "Bio1", total: 2, audited: 1, percent: 50.0 },
+            { room: "Physics1", total: 1, audited: 0, percent: 0.0 }
+          ],
+          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        }
+      };
     }
 
     if (action === "logStat" || action === "logEvent") {
@@ -292,11 +443,11 @@ window.ApiClient = (function() {
     var missing = 0;
 
     items.forEach(function(a) {
-      if (a.status === "Good" || a.status === "Damaged" || a.status === "Missing") {
+      if (a.status === "Good" || a.status === "Damaged" || a.status === "Missing" || a.status === "ใช้งานอยู่" || a.status === "ใช้งานอยู่แต่ชำรุดนะ") {
         verified++;
-        if (a.status === "Good") good++;
-        else if (a.status === "Damaged") damaged++;
-        else if (a.status === "Missing") missing++;
+        if (a.status === "Good" || a.status === "ใช้งานอยู่") good++;
+        else if (a.status === "Damaged" || a.status === "ใช้งานอยู่แต่ชำรุดนะ") damaged++;
+        else if (a.status === "Missing" || a.status === "สูญหาย") missing++;
       }
     });
 
@@ -319,13 +470,15 @@ window.ApiClient = (function() {
     getInitialPayload: function() { return invoke("getInitialPayload", {}); },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },
     updateAssetStatus: function(payload) { return invoke("updateAssetStatus", payload); },
+    addNewUnlistedAsset: function(payload) { return invoke("addNewUnlistedAsset", payload); },
     getRoomAuditSummary: function(roomName) { return invoke("getRoomAuditSummary", { roomName: roomName }); },
+    getAppUsageStats: function() { return invoke("getAppUsageStats", {}); },
     setupRow5Headers: function() { return invoke("setupRow5Headers", {}); },
     syncConfigSheet: function() { return invoke("syncConfigSheet", {}); },
-    buildMasterTable: function() { return invoke("buildMasterTable", {}); },
+    buildMasterTable: function(sheetNames) { return invoke("buildMasterTable", { sheetNames: sheetNames }); },
     migrateMasterToRooms: function() { return invoke("migrateMasterToRooms", {}); },
+    checkMasterContradictions: function() { return invoke("checkMasterContradictions", {}); },
     queryMasterTable: function(filters) { return invoke("queryMasterTable", { filters: filters }); },
-    getDynamicRoomTypes: function() { return invoke("getDynamicRoomTypes", {}); },
     flushCache: function() { return invoke("flushCache", {}); }
   };
 })();
