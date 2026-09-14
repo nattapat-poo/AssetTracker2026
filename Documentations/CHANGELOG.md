@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
-## [1.1.5a] - 2026-09-14
+## [1.1.6b] - 2026-09-14
+
+### Added & Improved
+- **Bidirectional Live Google Sheets Bridge for Static GitHub Pages**:
+  - **GET & JSONP API Gateway in `Code.js`**: Enhanced `doGet(e)` to handle REST API actions via GET parameters and JSONP callbacks (`callback` query parameter). Bypasses CORS and cross-origin redirect blocks when hosted statically on GitHub Pages.
+  - **Dynamic Multi-Transport Fallback in `ApiClient.html`**:
+    1. Direct native GAS `google.script.run` when running inside Google Workspace.
+    2. HTTPS REST POST `fetch()` bridge for modern fetch-compatible web clients.
+    3. JSONP GET script injection bridge (`invokeJsonp()`) as automatic fallback when cross-origin fetch is redirected by Google authentication.
+    4. Offline 15-room mock store fallback if both network bridges fail.
+  - **Active Bridge Telemetry & Endpoint Diagnostics**:
+    - Added `ApiClient.getBridgeStatus()` reporting `isLiveConnected`, `bridgeType` (`GAS_NATIVE`, `GAS_REST_POST`, `GAS_JSONP`, `OFFLINE_MOCK`), and endpoint URLs.
+    - Added `ApiClient.setGasEndpointUrl()` to persist custom deployed Apps Script URLs in browser storage.
+- **Fixed Toast Notification Dynamic Version String**:
+  - Replaced legacy hardcoded toast string `(v1.1.2a)` in `ModalController.html` with reactive dynamic version binding `window.AppState.get("config").APP_VERSION`.
+- **Ecosystem-Wide Version Roll to `v1.1.6b`**:
+  - Rolled version numbers across `Code.js`, `Config.js`, `DatabaseService.js`, `TelemetryService.js`, `AuthService.js`, `AppState.html`, `ApiClient.html`, `AuditController.html`, `ModalController.html`, `styles.html`, `index.html`, and `Tools/test_core.js`.
+
 
 ### Added & Improved
 - **15-Room Comprehensive Mock Data Store**:

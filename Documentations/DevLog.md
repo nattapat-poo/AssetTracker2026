@@ -1,5 +1,21 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-14 — Release v1.1.6b: GitHub Pages Live Google Sheets Bridge & Full Version Roll
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 rolled to version `v1.1.6b`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`) and Git (`git push origin main`) + GitHub Pages build.
+* **Key Visual & Architectural Implementations:**
+  - **Bidirectional Live Google Sheets Bridge for Static GitHub Pages**:
+    - Enhanced `doGet(e)` in `Code.js` to dispatch API requests via GET query parameters (`action`, `payload`) with JSON and JSONP script injection (`callback`).
+    - Upgraded `ApiClient.html` with dynamic multi-transport failover (GAS Native `google.script.run` -> HTTPS REST POST `fetch` -> JSONP GET script tag -> Offline 15-room mock store).
+    - Exposed `ApiClient.getBridgeStatus()` and `ApiClient.setGasEndpointUrl()` for debugging and persistent endpoint management.
+  - **Dynamic Toast Notification Version**:
+    - Fixed legacy hardcoded `v1.1.2a` in `ModalController.html` to dynamically reflect current `APP_VERSION`.
+  - **Full Codebase Roll to `v1.1.6b`**:
+    - Updated all backend services, frontend controllers, HTML templates, and verification test suites.
+* **Verification**:
+  - 33/33 automated tests passing in `Tools/test_core.js`.
+
 ## 2026-09-14 — Release v1.1.5a: 15-Room Comprehensive Mock Data & Dynamic Live GAS Bridge
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 rolled to version `v1.1.5a`.

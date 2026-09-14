@@ -51,7 +51,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.5a') throw new Error(`Expected APP_VERSION to be v1.1.5a, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.6b') throw new Error(`Expected APP_VERSION to be v1.1.6b, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -78,10 +78,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.5a Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.6b Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.5a') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.6b') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -107,17 +107,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.5a
-  if (!configJs.includes('VERSION: "v1.1.5a"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.5a in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.6b
+  if (!configJs.includes('VERSION: "v1.1.6b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.6b in Config.js');
   }
-  if (!codeJs.includes('v1.1.5a')) {
-    throw new Error('Version must be v1.1.5a in Code.js');
+  if (!codeJs.includes('v1.1.6b')) {
+    throw new Error('Version must be v1.1.6b in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.5a')) {
-    throw new Error('Version must be v1.1.5a in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.6b')) {
+    throw new Error('Version must be v1.1.6b in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.5a in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.6b in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -730,7 +730,7 @@ async function runTests() {
   console.log('  Verified: Touch buttons (min-height 52px), inputs, pills, and cards properly proportioned.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 33 TEST SUITES PASSED FOR v1.1.5a RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 33 TEST SUITES PASSED FOR v1.1.6b RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

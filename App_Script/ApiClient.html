@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -28,7 +28,15 @@ window.ApiClient = (function() {
     return LIVE_GAS_WEBAPP_URL;
   }
 
-  // 15 Rooms Configuration (v1.1.5a)
+  function setGasEndpointUrl(url) {
+    if (!url || url.trim() === "") {
+      localStorage.removeItem("MUIDS_GAS_WEBAPP_URL");
+    } else {
+      localStorage.setItem("MUIDS_GAS_WEBAPP_URL", url.trim());
+    }
+  }
+
+  // 15 Rooms Configuration (v1.1.6b)
   var ROOM_SHEETS_CONFIG = [
     "Bio Prep",
     "Bio1",
@@ -167,9 +175,50 @@ window.ApiClient = (function() {
     { no: 3, assetId: "MUIDS-STR-003", itemName: "Anti-Vibration Granite Balance Table", brandModel: "Mettler Toledo VibraDamp", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 8, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heavy granite surface leveled" }
   ];
 
+  function invokeJsonp(url, action, payload) {
+    return new Promise(function(resolve, reject) {
+      var callbackName = "gas_cb_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+      var timeoutTimer = null;
+
+      window[callbackName] = function(data) {
+        cleanup();
+        resolve(data);
+      };
+
+      function cleanup() {
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        var el = document.getElementById(callbackName);
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }
+
+      timeoutTimer = setTimeout(function() {
+        cleanup();
+        reject(new Error("JSONP request timed out after 12s"));
+      }, 12000);
+
+      var script = document.createElement("script");
+      script.id = callbackName;
+      var params = new URLSearchParams();
+      params.set("action", action);
+      params.set("payload", JSON.stringify(payload || {}));
+      params.set("callback", callbackName);
+
+      script.src = url + (url.indexOf("?") === -1 ? "?" : "&") + params.toString();
+      script.onerror = function(err) {
+        cleanup();
+        reject(new Error("JSONP script load error: " + (err && err.message ? err.message : "Network error")));
+      };
+
+      document.body.appendChild(script);
+    });
+  }
+
   function invoke(action, payload) {
     return new Promise(function(resolve, reject) {
       if (isGasEnvironment) {
+        window.__ACTIVE_BRIDGE_TYPE = "GAS_NATIVE";
+        window.__IS_LIVE_CONNECTED = true;
         google.script.run
           .withSuccessHandler(function(res) {
             resolve(res);
@@ -181,7 +230,7 @@ window.ApiClient = (function() {
           .executeApiAction(action, payload);
       } else if (isRemoteLiveMode) {
         var targetUrl = getGasEndpointUrl();
-        // Direct HTTPS POST Bridge to Live Google Apps Script Endpoint
+        // 1. First attempt: HTTPS POST fetch bridge
         fetch(targetUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -193,17 +242,30 @@ window.ApiClient = (function() {
             console.warn("[ApiClient] Remote API returned error:", data.error);
           }
           window.__IS_LIVE_CONNECTED = true;
+          window.__ACTIVE_BRIDGE_TYPE = "GAS_REST_POST";
           resolve(data);
         })
-        .catch(function(err) {
-          console.warn("[ApiClient] Remote GAS bridge fetch failed (falling back to 15-room mock store):", err);
-          window.__IS_LIVE_CONNECTED = false;
-          window.__LAST_CONN_ERROR = err.message;
-          var res = mockExecute(action, payload);
-          resolve(res);
+        .catch(function(postErr) {
+          console.warn("[ApiClient] GAS POST fetch failed, attempting JSONP fallback bridge:", postErr);
+          // 2. Second attempt: JSONP GET script injection bridge (bypasses CORS/redirect blocks)
+          invokeJsonp(targetUrl, action, payload)
+            .then(function(jsonpData) {
+              window.__IS_LIVE_CONNECTED = true;
+              window.__ACTIVE_BRIDGE_TYPE = "GAS_JSONP";
+              resolve(jsonpData);
+            })
+            .catch(function(jsonpErr) {
+              console.warn("[ApiClient] Both POST & JSONP bridges failed. Falling back to local mock store:", jsonpErr);
+              window.__IS_LIVE_CONNECTED = false;
+              window.__ACTIVE_BRIDGE_TYPE = "OFFLINE_MOCK";
+              window.__LAST_CONN_ERROR = postErr.message || jsonpErr.message;
+              var res = mockExecute(action, payload);
+              resolve(res);
+            });
         });
       } else {
         // Mock offline execution
+        window.__ACTIVE_BRIDGE_TYPE = "OFFLINE_MOCK";
         setTimeout(function() {
           try {
             var res = mockExecute(action, payload);
@@ -232,7 +294,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.5a",
+          APP_VERSION: "v1.1.6b",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -424,8 +486,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.5a). Local mock simulation mode.",
-        appVersion: "v1.1.5a",
+        message: "Config sheet synchronized (v1.1.6b). Local mock simulation mode.",
+        appVersion: "v1.1.6b",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -525,6 +587,18 @@ window.ApiClient = (function() {
 
   return {
     isGasEnvironment: isGasEnvironment,
+    getGasEndpointUrl: getGasEndpointUrl,
+    setGasEndpointUrl: setGasEndpointUrl,
+    getBridgeStatus: function() {
+      return {
+        isGasEnvironment: isGasEnvironment,
+        isRemoteLiveMode: isRemoteLiveMode,
+        isLiveConnected: !!window.__IS_LIVE_CONNECTED,
+        bridgeType: window.__ACTIVE_BRIDGE_TYPE || (isGasEnvironment ? "GAS_NATIVE" : "OFFLINE_MOCK"),
+        endpointUrl: getGasEndpointUrl(),
+        lastError: window.__LAST_CONN_ERROR || null
+      };
+    },
     invoke: invoke,
     getInitialPayload: function() { return invoke("getInitialPayload", {}); },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },

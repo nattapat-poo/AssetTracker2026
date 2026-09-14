@@ -1,6 +1,6 @@
 /**
  * Code.js — Unified API Router & Native Web App Dispatcher
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -8,7 +8,7 @@ function onOpen() {
   try {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu("🚀 Lab Oops: Asset Tracker")
-      .addItem("⚙️ 0. Update / Sync Config Sheet (v1.1.5a)", "menuSyncConfigSheet")
+      .addItem("⚙️ 0. Update / Sync Config Sheet (v1.1.6b)", "menuSyncConfigSheet")
       .addSeparator()
       .addItem("🏷️ 1. Setup Row 5 Audit Columns on Room Sheets...", "menuSetupRow5Headers")
       .addItem("📥 2. Aggregate Rooms into Master Table...", "menuAggregateRoomsToMaster")
@@ -189,6 +189,41 @@ function menuFlushCache() {
 }
 
 function doGet(e) {
+  // If API action is requested via GET (e.g. from GitHub Pages CORS/JSONP bridge)
+  if (e && e.parameter && e.parameter.action) {
+    try {
+      var action = e.parameter.action;
+      var payload = {};
+      if (e.parameter.payload) {
+        payload = JSON.parse(e.parameter.payload);
+      } else if (e.parameter.data) {
+        payload = JSON.parse(e.parameter.data);
+      } else {
+        payload = e.parameter;
+      }
+      var result = executeApiAction(action, payload);
+      
+      if (e.parameter.callback) {
+        var callback = e.parameter.callback.replace(/[^a-zA-Z0-9_]/g, '');
+        return ContentService.createTextOutput(callback + '(' + JSON.stringify(result) + ');')
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    } catch (error) {
+      var errObj = { success: false, error: error.toString() };
+      if (e.parameter && e.parameter.callback) {
+        var cb = e.parameter.callback.replace(/[^a-zA-Z0-9_]/g, '');
+        return ContentService.createTextOutput(cb + '(' + JSON.stringify(errObj) + ');')
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      return ContentService.createTextOutput(JSON.stringify(errObj))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // Otherwise serve native HTML web app template
   var config = getLocalConfig();
   var appConfig = {
     TITLE: config.APP_TITLE || APP_CONFIG.TITLE,

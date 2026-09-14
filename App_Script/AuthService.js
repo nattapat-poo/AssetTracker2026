@@ -1,6 +1,6 @@
 /**
  * AuthService.js — Session Authentication & SuperAdmin Security Guard
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
  * MUIDS Lab Oops OS — Science Department
  */
 
