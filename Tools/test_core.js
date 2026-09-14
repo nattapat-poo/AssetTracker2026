@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.7d') throw new Error(`Expected APP_VERSION to be v1.1.7d, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.7e') throw new Error(`Expected APP_VERSION to be v1.1.7e, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.7d Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.7e Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7d') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7e') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.7d
-  if (!configJs.includes('VERSION: "v1.1.7d"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.7d in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.7e
+  if (!configJs.includes('VERSION: "v1.1.7e"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.7e in Config.js');
   }
-  if (!codeJs.includes('v1.1.7d')) {
-    throw new Error('Version must be v1.1.7d in Code.js');
+  if (!codeJs.includes('v1.1.7e')) {
+    throw new Error('Version must be v1.1.7e in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.7d')) {
-    throw new Error('Version must be v1.1.7d in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.7e')) {
+    throw new Error('Version must be v1.1.7e in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7d in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7e in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -819,22 +819,38 @@ async function runTests() {
   // Check ApiClient offline pre-seeding
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7d') ||
+      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7e') ||
       !apiClientV117.includes('MUIDS-BIO-101')) {
     throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS fallback cache for GitHub Pages');
   }
   console.log('  Verified: ApiClient offline asset cache pre-seeded with 34 assets to prevent 0/0 blank state.');
 
-  console.log('\n--- 36. Testing v1.1.7d Title Non-Truncation, Location Discrepancy Box Removal & Save Button Layout ---');
-  // 1. App Title non-truncation check
-  if (!idxHtml.includes('whitespace-nowrap select-none') ||
-      !idxHtml.includes('v1.1.7d') ||
-      idxHtml.includes('<h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5 truncate')) {
-    throw new Error('index.html header title must not be truncated and must feature whitespace-nowrap with v1.1.7d badge');
+  console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
+  // 1. App Title and Version Numbering Under App Title check
+  if (!idxHtml.includes('v1.1.7e') ||
+      !idxHtml.includes('Mobile Audit') ||
+      !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
+    throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Header app title and version badge fit without truncation (whitespace-nowrap & compact utilities).');
+  console.log('  Verified: Version numbering (v1.1.7e • Mobile Audit) placed neatly under the app title.');
 
-  // 2. Discrepancy banner removal check
+  // 2. Room Center Tab Default Landing Verification
+  const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
+  if (!appStateV117e.includes('activeTab: "roster"')) {
+    throw new Error('AppState.html must configure activeTab: "roster" as default landing tab');
+  }
+  if (!idxHtml.includes('id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab(\'roster\')" class="touch-target flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400')) {
+    throw new Error('index.html Room tab must be default active with emerald border and text');
+  }
+  if (!idxHtml.includes('id="view-scanner" class="space-y-4 hidden"')) {
+    throw new Error('index.html scanner view must be hidden by default on initial landing');
+  }
+  if (!idxHtml.includes('id="view-roster" class="space-y-3"')) {
+    throw new Error('index.html roster view must be visible by default on initial landing');
+  }
+  console.log('  Verified: Room tab in center position is default active landing view, immediately showing loaded sheet data.');
+
+  // 3. Discrepancy banner removal check
   const modalCtrl = fs.readFileSync('App_Script/ModalController.html', 'utf8');
   const auditCtrl = fs.readFileSync('App_Script/AuditController.html', 'utf8');
   if (modalCtrl.includes('discrepancyBanner.classList.remove("hidden")') ||
@@ -843,7 +859,7 @@ async function runTests() {
   }
   console.log('  Verified: "Registered to [x], but scanned in [y]" discrepancy banner permanently removed/suppressed.');
 
-  // 3. Save sticker button rearrangement check
+  // 4. Save sticker button rearrangement check
   if (!idxHtml.includes('Save &amp; Scan Next') ||
       !idxHtml.includes('fa-circle-check text-base shrink-0 text-slate-950') ||
       !idxHtml.includes('ยืนยันและบันทึก')) {
@@ -852,7 +868,7 @@ async function runTests() {
   console.log('  Verified: Save sticker button rearranged with left-aligned checkmark icon and stacked Thai/English text.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7d RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7e RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

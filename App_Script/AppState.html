@@ -1,7 +1,7 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -32,7 +32,7 @@ window.AppState = (function() {
     theme: "dark",
     recentScans: [],
     pendingSync: false,
-    activeTab: "scanner", // "scanner", "roster", "summary"
+    activeTab: "roster", // "roster" (default landing tab), "scanner", "summary"
     isScanning: false,
     cameraFacing: "environment" // environment (rear) or user (front)
   };

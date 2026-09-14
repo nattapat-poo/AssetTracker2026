@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🔍 QR Asset Survey v1.1.7d — Lab Oops OS</title>
+  <title>🔍 QR Asset Survey v1.1.7e — Lab Oops OS</title>
   
   <!-- Font Awesome 6.5.1 (Free Icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,7 +19,7 @@
   <!-- Modular Embedded Sub-views & Styles -->
   <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.7d Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.7e Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -43,7 +43,7 @@
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
-  /* Moderate Responsive Typography Hierarchy (v1.1.7d) */
+  /* Moderate Responsive Typography Hierarchy (v1.1.7e) */
   h1, .text-xl { font-size: 1.30rem; }
   h2, .text-lg { font-size: 1.15rem; }
   h3, .text-base { font-size: 1.02rem; }
@@ -53,7 +53,7 @@
   .text-\[10px\] { font-size: 0.74rem; }
   .text-\[9px\] { font-size: 0.70rem; }
 
-  /* Universal Modal Dialog Screen Containment (v1.1.7d) */
+  /* Universal Modal Dialog Screen Containment (v1.1.7e) */
   .app-modal-dialog {
     width: 100% !important;
     max-width: min(420px, calc(100vw - 1.5rem)) !important;
@@ -689,7 +689,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span class="text-slate-500">430px Canvas • v1.1.7d</span>
+    <span class="text-slate-500">430px Canvas • v1.1.7e</span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -699,25 +699,30 @@
   <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <!-- Left: Supertitle & Non-Truncated App Title -->
+      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.7e) -->
       <div class="flex flex-col min-w-0 flex-1">
-        <!-- Mandatory Ecosystem Supertitle / Subtitle (concise, never truncated) -->
-        <div class="flex items-center space-x-1 text-[10px] font-mono tracking-wider mb-0.5 whitespace-nowrap">
+        <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
+        <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
           <span class="text-emerald-400 font-bold">LAB OOPS</span>
           <span class="text-slate-600">•</span>
           <span class="text-slate-400 font-medium">MUIDS Science</span>
         </div>
         
-        <!-- Application Title with Canonical Version Badge (No Truncation) -->
-        <h1 class="text-[14.5px] sm:text-base font-extrabold text-white tracking-tight flex items-center gap-1.5 whitespace-nowrap select-none">
-          <span class="whitespace-nowrap">🔍 QR Asset Survey</span>
-          <span class="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full shrink-0">v1.1.7d</span>
+        <!-- Application Title (Clean, Never Truncated) -->
+        <h1 class="text-[15px] sm:text-base font-extrabold text-white tracking-tight leading-tight whitespace-nowrap select-none">
+          <span>🔍 QR Asset Survey</span>
         </h1>
+
+        <!-- Version numbering under the app title -->
+        <div class="flex items-center gap-1 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
+          <span class="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.7e</span>
+          <span class="text-slate-500 font-normal text-[9px]">• Mobile Audit</span>
+        </div>
       </div>
 
       <!-- Header Right Utilities (compact w-8 h-8 buttons with gap-1) -->
       <div class="flex items-center gap-1 shrink-0">
-        <!-- Usage Stats Dashboard Button (v1.1.7d) -->
+        <!-- Usage Stats Dashboard Button (v1.1.7e) -->
         <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="View Usage & Audit Stats">
           <i class="fa-solid fa-chart-pie text-sky-400 text-xs"></i>
         </button>
@@ -783,19 +788,23 @@
   </section>
 
   <!-- ==================== NAVIGATION TABS ==================== -->
+  <!-- ==================== NAVIGATION TABS (Room Center Tab is Default Landing) ==================== -->
   <nav class="bg-slate-950 border-b border-slate-800 px-3">
     <div class="w-full flex items-center justify-around gap-1 text-xs font-bold font-mono">
       
-      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-1.5">
+      <!-- 1. Scanner Tab (Left) -->
+      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-camera"></i>
         <span>Scan</span>
       </button>
 
-      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
+      <!-- 2. Room Tab (Center, Default Active Landing Tab) -->
+      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-list-check"></i>
         <span>Room</span>
       </button>
 
+      <!-- 3. Stat Tab (Right) -->
       <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-chart-pie"></i>
         <span>Stat</span>
@@ -807,8 +816,8 @@
   <!-- ==================== MAIN CONTENT ==================== -->
   <main class="w-full px-3 py-2.5 space-y-3 flex-1">
 
-    <!-- ==================== TAB 1: SCANNER VIEW ==================== -->
-    <div id="view-scanner" class="space-y-4">
+    <!-- ==================== TAB 1: SCANNER VIEW (Hidden on Default Landing) ==================== -->
+    <div id="view-scanner" class="space-y-4 hidden">
       
       <!-- Camera Card -->
       <div class="relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl p-3">
@@ -1144,8 +1153,8 @@
 
       </div>
 
-    <!-- ==================== TAB 2: ROSTER & CHECKLIST ==================== -->
-    <div id="view-roster" class="space-y-3 hidden">
+    <!-- ==================== TAB 2: ROSTER & CHECKLIST (Active Default Landing View) ==================== -->
+    <div id="view-roster" class="space-y-3">
       
       <!-- Filter Bar & Search Box -->
       <div class="flex flex-col gap-2">
@@ -1283,7 +1292,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.7d</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.7e</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1476,7 +1485,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.7d</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.7e</div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -1532,7 +1541,7 @@
     </div>
   </div>
 
-  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.7d) -->
+  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.7e) -->
   <div id="stats-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden">
     <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-sky-500/40 rounded-2xl w-full max-w-[420px] p-4 sm:p-5 space-y-3.5 shadow-2xl max-h-[90vh] flex flex-col mx-auto">
       
@@ -1866,7 +1875,7 @@
   <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -1897,7 +1906,7 @@ window.AppState = (function() {
     theme: "dark",
     recentScans: [],
     pendingSync: false,
-    activeTab: "scanner", // "scanner", "roster", "summary"
+    activeTab: "roster", // "roster" (default landing tab), "scanner", "summary"
     isScanning: false,
     cameraFacing: "environment" // environment (rear) or user (front)
   };
@@ -2024,7 +2033,7 @@ window.AppState = (function() {
   <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2059,7 +2068,7 @@ window.ApiClient = (function() {
     }
   }
 
-  // 15 Rooms Configuration (v1.1.7d)
+  // 15 Rooms Configuration (v1.1.7e)
   var ROOM_SHEETS_CONFIG = [
     "Bio Prep",
     "Bio1",
@@ -2198,11 +2207,11 @@ window.ApiClient = (function() {
     { no: 3, assetId: "MUIDS-STR-003", itemName: "Anti-Vibration Granite Balance Table", brandModel: "Mettler Toledo VibraDamp", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 8, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heavy granite surface leveled" }
   ];
 
-  // Persistent Local Storage & Fallback Real Assets (v1.1.7d)
+  // Persistent Local Storage & Fallback Real Assets (v1.1.7e)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7d");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7e");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2215,7 +2224,7 @@ window.ApiClient = (function() {
   function persistAssetsCache() {
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7d", JSON.stringify(MOCK_ASSETS));
+        localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7e", JSON.stringify(MOCK_ASSETS));
       }
     } catch (e) {}
   }
@@ -2340,7 +2349,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.7d",
+          APP_VERSION: "v1.1.7e",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2534,8 +2543,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.7d). Local mock simulation mode.",
-        appVersion: "v1.1.7d",
+        message: "Config sheet synchronized (v1.1.7e). Local mock simulation mode.",
+        appVersion: "v1.1.7e",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -2731,7 +2740,7 @@ window.ThemeController = (function() {
   <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2740,7 +2749,7 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.7d: 6.0s default, minimum 5.0s)
+    // Extended toast timer for mobile readability (v1.1.7e: 6.0s default, minimum 5.0s)
     if (typeof duration === "undefined" || !duration) duration = 6000;
     if (duration < 5000) duration = 5000;
 
@@ -2971,7 +2980,7 @@ window.ModalController = (function() {
     var currRoomElem = document.getElementById("modal-current-audit-room");
     if (currRoomElem) currRoomElem.innerText = (currentRoom === "ALL" ? "All Laboratories (Overview)" : currentRoom);
 
-    // Location discrepancy banner permanently suppressed per v1.1.7d request
+    // Location discrepancy banner permanently suppressed per v1.1.7e request
     var discrepancyBanner = document.getElementById("modal-location-discrepancy-banner");
     if (discrepancyBanner) {
       discrepancyBanner.classList.add("hidden");
@@ -3141,7 +3150,7 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7d";
+    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7e";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
@@ -3846,7 +3855,7 @@ window.ScannerController = (function() {
   <script>
 /**
  * Lab Oops OS - AuditController.html
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
  * Ecosystem Lead: Nattapat Poolyam (Mek)
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
@@ -4202,7 +4211,7 @@ window.AuditController = (function() {
       }
     }
 
-    // Location discrepancy banner suppressed per v1.1.7d request
+    // Location discrepancy banner suppressed per v1.1.7e request
     var discrepancyBanner = document.getElementById("location-discrepancy-banner");
     if (discrepancyBanner) {
       discrepancyBanner.classList.add("hidden");
