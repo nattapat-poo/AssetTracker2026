@@ -1,6 +1,6 @@
 /**
- * TelemetryService.js — Operational Audit Logging & Performance Analytics
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
+ * TelemetryService.js — Background Usage Metrics & Diagnostics Engine
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
  * MUIDS Lab Oops OS — Science Department
  */
 

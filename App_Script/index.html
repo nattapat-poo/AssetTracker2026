@@ -1,79 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🔍 QR Asset Survey v1.1.6b — Lab Oops OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>🔍 QR Asset Survey v1.1.7a — Lab Oops OS</title>
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- FontAwesome Icons -->
+  <!-- Font Awesome 6.5.1 (Free Icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- HTML5-QRCode Library CDN -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- HTML5 QR Code Library (Fast Canvas/WebGL Scanner) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-  <!-- Component Stylesheet -->
+  <!-- Modular Embedded Sub-views & Styles -->
   <?!= HtmlService.createHtmlOutputFromFile('styles').getContent(); ?>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+<body class="bg-slate-900 sm:bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start transition-colors duration-200 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Desktop Simulation Top Header (Developing/Inspect Mode from Desktop) -->
+  <aside class="hidden sm:flex items-center justify-between w-full max-w-[430px] px-4 py-2 mt-3 bg-slate-900/90 border border-slate-800 rounded-t-2xl text-[11px] text-slate-400 font-mono shadow-lg select-none">
+    <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
+      <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+      <span>Mobile Native Simulator</span>
+    </span>
+    <span class="text-slate-500">430px Canvas • v1.1.7a</span>
+  </aside>
+
+  <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
+  <div id="mobile-app-root" class="w-full max-w-[430px] min-h-screen sm:min-h-[88vh] sm:max-h-[92vh] sm:border-x sm:border-b sm:border-slate-800 sm:rounded-b-2xl sm:shadow-2xl sm:shadow-emerald-950/20 bg-slate-950 flex flex-col relative overflow-x-hidden overflow-y-auto">
 
   <!-- ==================== HEADER (Lab Oops OS Standard) ==================== -->
-  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-4 py-3 sm:px-6">
-    <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-3.5 py-2.5">
+    <div class="w-full flex items-center justify-between gap-2">
       
-      <div class="flex flex-col">
-        <!-- Mandatory Ecosystem Supertitle / Subtitle with highlighted acronym -->
-        <div class="flex items-center space-x-1.5 text-[10px] sm:text-xs font-mono tracking-wider mb-0.5">
+      <div class="flex flex-col min-w-0">
+        <!-- Mandatory Ecosystem Supertitle / Subtitle -->
+        <div class="flex items-center space-x-1 text-[10px] font-mono tracking-wider mb-0.5 truncate">
           <span class="text-emerald-400 font-bold">LAB OOPS OS</span>
           <span class="text-slate-600">•</span>
-          <span class="hidden sm:inline text-slate-400 font-medium">
-            Science <span class="text-emerald-400 font-extrabold">Lab</span>oratory 
-            <span class="text-emerald-400 font-extrabold">O</span>perations &amp; 
-            <span class="text-emerald-400 font-extrabold">O</span>ppositely-Organized 
-            <span class="text-emerald-400 font-extrabold">P</span>roblems 
-            <span class="text-emerald-400 font-extrabold">S</span>olved 
-            <span class="text-emerald-400 font-extrabold">O</span>perating 
-            <span class="text-emerald-400 font-extrabold">S</span>ystem
-          </span>
-          <span class="sm:hidden text-slate-400 font-medium">MUIDS — Science Department</span>
+          <span class="text-slate-400 font-medium truncate">MUIDS — Science Dept</span>
         </div>
         
         <!-- Application Title with Canonical Version Badge -->
-        <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-          <span>🔍 QR Asset Survey</span>
-          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.6b</span>
+        <h1 class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
+          <span class="truncate">🔍 QR Asset Survey</span>
+          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full shrink-0">v1.1.7a</span>
         </h1>
       </div>
 
       <!-- Header Right Utilities -->
-      <div class="flex items-center gap-2">
-        <!-- Usage Stats Dashboard Button (v1.1.5a) -->
-        <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="View Usage & Audit Stats">
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Usage Stats Dashboard Button (v1.1.7a) -->
+        <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="View Usage & Audit Stats">
           <i class="fa-solid fa-chart-pie text-sky-400"></i>
-          <span class="hidden sm:inline">Stats</span>
         </button>
 
         <!-- Force Sync / Refresh from Sheet Button -->
-        <button id="btn-force-refresh" onclick="ModalController.triggerForceSync()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="Force Refresh & Sync with Google Sheet">
+        <button id="btn-force-refresh" onclick="ModalController.triggerForceSync()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="Force Refresh & Sync with Google Sheet">
           <i id="btn-force-refresh-icon" class="fa-solid fa-arrows-rotate text-emerald-400 sync-refresh-icon"></i>
-          <span class="hidden sm:inline">Sync</span>
         </button>
 
         <!-- Manual Asset ID Lookup Button -->
-        <button onclick="ModalController.openManualLookupModal()" class="touch-target px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5" title="Type Asset ID Manually">
+        <button onclick="ModalController.openManualLookupModal()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center" title="Type Asset ID Manually">
           <i class="fa-solid fa-keyboard text-emerald-400"></i>
-          <span class="hidden sm:inline">Type ID</span>
         </button>
 
         <!-- Light/Dark Mode Toggle -->
-        <button id="btn-theme-toggle" class="touch-target w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" title="Toggle Theme">
+        <button id="btn-theme-toggle" class="touch-target p-2 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white flex items-center justify-center" title="Toggle Theme">
           <i id="theme-toggle-icon" class="fa-solid fa-sun text-amber-400"></i>
         </button>
       </div>
@@ -82,11 +80,11 @@
   </header>
 
   <!-- ==================== ROOM SELECTOR & METRIC BAR ==================== -->
-  <section class="bg-slate-900/60 border-b border-slate-800/80 px-4 py-3 sm:px-6">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+  <section class="bg-slate-900/60 border-b border-slate-800/80 px-3.5 py-2.5">
+    <div class="w-full flex flex-col gap-2.5">
       
       <!-- Room Dropdown Selector -->
-      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+      <div class="flex items-center gap-2 w-full">
         <span class="text-xs font-medium text-slate-400 shrink-0"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Lab Room:</span>
         <select id="room-selector" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-emerald-400">
           <option value="Master_Asset">Master Table (Master_Asset)</option>
@@ -94,15 +92,15 @@
       </div>
 
       <!-- Remaining Items Tracker Metric Chips -->
-      <div class="flex items-center gap-2 shrink-0 flex-wrap justify-between sm:justify-end">
-        <div class="flex items-center gap-1.5 text-xs bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
+      <div class="flex items-center gap-2 justify-between">
+        <div class="flex items-center gap-1.5 text-xs bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-800">
           <span class="text-slate-400">Verified:</span>
           <span id="metric-verified" class="font-mono font-bold text-emerald-400">0</span>
           <span class="text-slate-600">/</span>
           <span id="metric-total" class="font-mono font-semibold text-slate-300">0</span>
         </div>
 
-        <div class="flex items-center gap-1.5 text-xs bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 animate-badge-pulse">
+        <div class="flex items-center gap-1.5 text-xs bg-amber-500/10 px-2.5 py-1.5 rounded-xl border border-amber-500/30 animate-badge-pulse">
           <span class="text-amber-400 font-semibold"><i class="fa-regular fa-clock mr-1"></i>Unverified:</span>
           <span id="metric-unverified" class="font-mono font-extrabold text-amber-400">0</span>
         </div>
@@ -115,7 +113,7 @@
     </div>
 
     <!-- Progress Bar -->
-    <div class="max-w-4xl mx-auto mt-2">
+    <div class="w-full mt-2">
       <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
         <div id="metric-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
@@ -123,20 +121,20 @@
   </section>
 
   <!-- ==================== NAVIGATION TABS ==================== -->
-  <nav class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6">
-    <div class="max-w-4xl mx-auto flex items-center justify-around gap-2 text-xs font-bold font-mono">
+  <nav class="bg-slate-950 border-b border-slate-800 px-3.5">
+    <div class="w-full flex items-center justify-around gap-1 text-xs font-bold font-mono">
       
-      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-3 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-2">
+      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-3 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-camera"></i>
         <span>QR SCANNER</span>
       </button>
 
-      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2">
+      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-list-check"></i>
         <span>ROOM ROSTER</span>
       </button>
 
-      <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2">
+      <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-chart-pie"></i>
         <span>AUDIT STATS</span>
       </button>
@@ -145,7 +143,7 @@
   </nav>
 
   <!-- ==================== MAIN CONTENT ==================== -->
-  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-4 sm:px-6">
+  <main class="w-full px-3.5 py-3 space-y-3.5 flex-1">
 
     <!-- ==================== TAB 1: SCANNER VIEW ==================== -->
     <div id="view-scanner" class="space-y-4">
@@ -494,24 +492,24 @@
           <input type="text" id="roster-search-input" placeholder="Search by Asset ID, Name, Model, or Spec..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400">
         </div>
 
-        <!-- Filter Chips -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          <button data-filter="ALL" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold whitespace-nowrap">
+        <!-- Filter Chips (Horizontally Scrollable, Never Overlapping) -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 pt-1 w-full min-w-0 no-scrollbar select-none">
+          <button data-filter="ALL" class="filter-chip touch-target shrink-0 px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold whitespace-nowrap shadow-sm">
             All Items
           </button>
-          <button data-filter="UNVERIFIED" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap border border-amber-500/30">
+          <button data-filter="UNVERIFIED" class="filter-chip touch-target shrink-0 px-3.5 py-1.5 rounded-xl bg-slate-800/90 text-slate-300 text-xs font-bold whitespace-nowrap border border-amber-500/40">
             <i class="fa-regular fa-clock text-amber-400 mr-1"></i>Unverified Only
           </button>
-          <button data-filter="Good" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+          <button data-filter="Good" class="filter-chip touch-target shrink-0 px-3.5 py-1.5 rounded-xl bg-slate-800/90 text-slate-300 text-xs font-bold whitespace-nowrap border border-slate-700">
             Good
           </button>
-          <button data-filter="Damaged" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+          <button data-filter="Damaged" class="filter-chip touch-target shrink-0 px-3.5 py-1.5 rounded-xl bg-slate-800/90 text-slate-300 text-xs font-bold whitespace-nowrap border border-slate-700">
             Damaged
           </button>
-          <button data-filter="Missing" class="filter-chip touch-target px-3 py-1.5 rounded-xl bg-slate-800/80 text-slate-300 text-xs font-bold whitespace-nowrap">
+          <button data-filter="Missing" class="filter-chip touch-target shrink-0 px-3.5 py-1.5 rounded-xl bg-slate-800/90 text-slate-300 text-xs font-bold whitespace-nowrap border border-slate-700">
             Missing
           </button>
-          <button onclick="ModalController.triggerForceSync()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 text-xs font-bold whitespace-nowrap border border-emerald-500/30 flex items-center gap-1 transition active:scale-95 ml-auto" title="Force Sync & Refresh from Google Sheets">
+          <button onclick="ModalController.triggerForceSync()" class="touch-target shrink-0 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 text-xs font-bold whitespace-nowrap border border-emerald-500/40 flex items-center gap-1.5 transition active:scale-95" title="Force Sync & Refresh from Google Sheets">
             <i class="fa-solid fa-arrows-rotate sync-refresh-icon"></i>
             <span>Sync</span>
           </button>
@@ -621,7 +619,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.6b</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.7a</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -641,6 +639,8 @@
 
     </div>
   </footer>
+
+  </div> <!-- /#mobile-app-root (Mobile Native Viewport Root) -->
 
   <!-- ==================== MODALS & DRAWERS ==================== -->
 
@@ -812,7 +812,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.6b</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.7a</div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>

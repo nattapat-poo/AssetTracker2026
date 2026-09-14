@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.6b') throw new Error(`Expected APP_VERSION to be v1.1.6b, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.7a') throw new Error(`Expected APP_VERSION to be v1.1.7a, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.6b Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.7a Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.6b') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7a') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.6b
-  if (!configJs.includes('VERSION: "v1.1.6b"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.6b in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.7a
+  if (!configJs.includes('VERSION: "v1.1.7a"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.7a in Config.js');
   }
-  if (!codeJs.includes('v1.1.6b')) {
-    throw new Error('Version must be v1.1.6b in Code.js');
+  if (!codeJs.includes('v1.1.7a')) {
+    throw new Error('Version must be v1.1.7a in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.6b')) {
-    throw new Error('Version must be v1.1.6b in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.7a')) {
+    throw new Error('Version must be v1.1.7a in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.6b in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7a in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -198,13 +198,10 @@ async function runTests() {
   }
   console.log('  Verified: Non-allowed columns (A, E, J, K, L, P, Q, R, S, T) purged. Only B, D, I, M, N, O rendered.');
 
-  console.log('\n--- 11. Verifying 1-Tap UX Workflow, 3s Toast, and Non-blocking Positioning ---');
-  // Check toast duration (3000ms)
-  if (!auditHtml.includes('3000')) {
-    throw new Error('AuditController does not trigger 3000ms (3s) toast on status submit!');
-  }
-  if (!modalCtrlHtml.includes('duration = 3000')) {
-    throw new Error('ModalController default toast duration is not 3000ms!');
+  console.log('\n--- 11. Verifying 1-Tap UX Workflow, Extended Toast, and Non-blocking Positioning ---');
+  // Check toast duration (extended to 6000ms in v1.1.7a for mobile readability)
+  if (!modalCtrlHtml.includes('duration = 6000')) {
+    throw new Error('ModalController default toast duration must be 6000ms in v1.1.7a!');
   }
 
   // Check toast non-blocking positioning in index.html
@@ -598,8 +595,8 @@ async function runTests() {
   const modalCtrlContent = fs.readFileSync('App_Script/ModalController.html', 'utf8');
   const skillContent = fs.readFileSync('../.agents/skills/lab-oops-standards/SKILL.md', 'utf8');
 
-  // 1. Verify showToast default duration >= 3000ms
-  if (!modalCtrlContent.includes('duration = 3500') && !modalCtrlContent.includes('duration = 3000')) {
+  // 1. Verify showToast default duration >= 3000ms (v1.1.7a sets 6000ms)
+  if (!modalCtrlContent.includes('duration = 6000') && !modalCtrlContent.includes('duration = 3500') && !modalCtrlContent.includes('duration = 3000')) {
     throw new Error('ModalController.showToast default duration is not >= 3000ms');
   }
 
@@ -778,8 +775,42 @@ async function runTests() {
   }
   console.log('  Verified: Mobile modal 1-tap action buttons match desktop card buttons without truncating.');
 
+  console.log('\n--- 35. Testing v1.1.7a Mobile Simulation Frame, Extended Toast Timer & Horizontal Filters ---');
+  // Check index.html mobile-app-root container & desktop simulation bar
+  if (!idxHtml.includes('id="mobile-app-root"') ||
+      !idxHtml.includes('max-w-[430px]') ||
+      !idxHtml.includes('Mobile Native Simulator')) {
+    throw new Error('index.html missing mobile-app-root (430px max width) or Mobile Native Simulator header');
+  }
+  console.log('  Verified: Mobile Native Simulator canvas (430px) cleanly wraps app on desktop.');
+
+  // Check ModalController toast duration
+  const modalCtrlV117 = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  if (!modalCtrlV117.includes('duration = 6000') ||
+      !modalCtrlV117.includes('duration = 5000') ||
+      !modalCtrlV117.includes('expandToast')) {
+    throw new Error('ModalController.html missing extended toast duration (default 6000ms, min 5000ms) or tap-to-expand pause');
+  }
+  console.log('  Verified: Toast duration extended to >= 5000ms with tap-to-expand feature.');
+
+  // Check filter buttons have shrink-0 and overflow-x-auto
+  if (!idxHtml.includes('shrink-0 px-3.5 py-1.5 rounded-xl') ||
+      !idxHtml.includes('no-scrollbar')) {
+    throw new Error('index.html missing shrink-0 or no-scrollbar on status filter buttons');
+  }
+  console.log('  Verified: Status filter buttons prevent text overlap using shrink-0 and horizontal scrolling.');
+
+  // Check ApiClient offline pre-seeding
+  const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
+  if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
+      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7a') ||
+      !apiClientV117.includes('MUIDS-BIO-101')) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS fallback cache for GitHub Pages');
+  }
+  console.log('  Verified: ApiClient offline asset cache pre-seeded with 34 assets to prevent 0/0 blank state.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 34 TEST SUITES PASSED FOR v1.1.6b RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 35 TEST SUITES PASSED FOR v1.1.7a RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

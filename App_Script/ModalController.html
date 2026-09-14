@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -10,8 +10,9 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    if (typeof duration === "undefined" || !duration) duration = 3500; // Standard 3.5s duration
-    if (duration < 3000) duration = 3000; // Minimum 3s per UX standard
+    // Extended toast timer for mobile readability (v1.1.7a: 6.0s default, minimum 5.0s)
+    if (typeof duration === "undefined" || !duration) duration = 6000;
+    if (duration < 5000) duration = 5000;
 
     var container = document.getElementById("toast-container");
     if (!container) return;
@@ -415,7 +416,7 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.6b";
+    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7a";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {

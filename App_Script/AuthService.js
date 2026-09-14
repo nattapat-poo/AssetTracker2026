@@ -1,6 +1,6 @@
 /**
- * AuthService.js — Session Authentication & SuperAdmin Security Guard
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.6b)
+ * AuthService.js — Enterprise Identity & Multi-Role RBAC Authorization Engine
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
  * MUIDS Lab Oops OS — Science Department
  */
 
