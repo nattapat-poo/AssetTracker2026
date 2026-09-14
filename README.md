@@ -92,6 +92,7 @@ Project08_AssetTracker/
 │   ├── DevLog.md
 │   ├── CHANGELOG.md
 │   ├── Architectural_Safety_Guide.md
+│   ├── GAS_Continuous_Scanning_Limitations.md # In-depth technical analysis on GAS camera constraints
 │   └── Handover_Guide.md         # Technicians Guide & Row 5 / Master Table Guide
 ├── Input/                        # Raw sample templates & inventory schemas
 ├── Output/                       # Standalone previews & export reports

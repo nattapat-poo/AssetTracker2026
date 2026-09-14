@@ -6,8 +6,8 @@
 ## 1. Quick Start for Technicians (How to Conduct the Audit)
 1. **Launch App**: Open the Web App URL on your mobile phone, tablet, or desktop browser.
 2. **Camera Scanning (Live Feed Primary)**:
-   - **Primary Mode (Live Continuous Scanner)**: Tap **📹 START LIVE SCANNER** to stream live video at 60 FPS through the front/back camera. Point your phone at any school asset QR code—it instantly detects, plays an audible confirmation beep, and loads the item.
-   - **Secondary Mode (Native Camera Snapshot)**: Tap **📸 Snap Photo with Camera** to open your phone's native camera hardware. This operates via direct file capture and 100% bypasses any sandbox permission restrictions.
+    - **Primary Mode (Live Continuous Scanner)**: Tap **📹 START LIVE SCANNER** to stream live video at 60 FPS through the front/back camera. Point your phone at any school asset QR code—it instantly detects, plays an audible confirmation beep, and loads the item. *(Best experienced via [GitHub Pages Live App](https://nattapat-poo.github.io/AssetTracker2026/); see [GAS Camera Limitations Whitepaper](file:///c:/Users/MUIDS/Documents/Projects/Lab%20Oops/Project08_AssetTracker/Documentations/GAS_Continuous_Scanning_Limitations.md) for technical background).*
+    - **Secondary Mode (Native Camera Snapshot)**: Tap **📸 Snap Photo with Camera** to open your phone's native camera hardware. This operates via direct file capture and 100% bypasses any sandbox permission restrictions across all embedded GAS iframes, iOS Safari, and in-app browsers.
    - **Gallery Upload**: Tap **🖼️ Gallery** to scan an asset photo directly from device storage.
    - **Manual Search**: Type an inventory number into the search bar for instant keyboard-based retrieval.
 3. **Automatic Matched Asset Modal**:
