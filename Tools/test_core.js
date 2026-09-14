@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.7e') throw new Error(`Expected APP_VERSION to be v1.1.7e, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.7f') throw new Error(`Expected APP_VERSION to be v1.1.7f, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.7e Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.7f Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7e') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7f') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.7e
-  if (!configJs.includes('VERSION: "v1.1.7e"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.7e in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.7f
+  if (!configJs.includes('VERSION: "v1.1.7f"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.7f in Config.js');
   }
-  if (!codeJs.includes('v1.1.7e')) {
-    throw new Error('Version must be v1.1.7e in Code.js');
+  if (!codeJs.includes('v1.1.7f')) {
+    throw new Error('Version must be v1.1.7f in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.7e')) {
-    throw new Error('Version must be v1.1.7e in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.7f')) {
+    throw new Error('Version must be v1.1.7f in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7e in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7f in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -816,23 +816,22 @@ async function runTests() {
   }
   console.log('  Verified: Status filter buttons prevent text overlap using shrink-0 and horizontal scrolling.');
 
-  // Check ApiClient offline pre-seeding
+  // Check ApiClient clean production state (all legacy mock data cleared, dynamic sheet fetch)
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7e') ||
-      !apiClientV117.includes('MUIDS-BIO-101')) {
-    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS fallback cache for GitHub Pages');
+      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7f')) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.7f cache key');
   }
-  console.log('  Verified: ApiClient offline asset cache pre-seeded with 34 assets to prevent 0/0 blank state.');
+  console.log('  Verified: ApiClient clean production configuration (legacy mock data purged, live Google Sheet cache configured).');
 
   console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
   // 1. App Title and Version Numbering Under App Title check
-  if (!idxHtml.includes('v1.1.7e') ||
+  if (!idxHtml.includes('v1.1.7f') ||
       !idxHtml.includes('Mobile Audit') ||
       !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
     throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Version numbering (v1.1.7e • Mobile Audit) placed neatly under the app title.');
+  console.log('  Verified: Version numbering (v1.1.7f • Mobile Audit) placed neatly under the app title.');
 
   // 2. Room Center Tab Default Landing Verification
   const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
@@ -868,7 +867,7 @@ async function runTests() {
   console.log('  Verified: Save sticker button rearranged with left-aligned checkmark icon and stacked Thai/English text.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7e RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7f RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

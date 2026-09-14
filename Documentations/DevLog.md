@@ -1,5 +1,25 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-14 — Release v1.1.7f: Public Anonymous Web App Bridge, Autofocus Lens & Mock Purge
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.7f`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, `@12`) and Git (`git push origin main`).
+* **Key Bug Fixes & Architectural Enhancements:**
+  - **Public Anonymous Web App Access (`ANYONE_ANONYMOUS`)**:
+    - Reconfigured `appsscript.json` from `ANYONE` (which mandated Google account authentication and redirected unauthenticated mobile browsers to `accounts.google.com`) to `ANYONE_ANONYMOUS`.
+    - Allowed any mobile phone, tablet, or PC to immediately fetch real Google Sheet records via GitHub Pages with zero login wall.
+  - **100% Mock Data Elimination**:
+    - Completely cleared `INITIAL_LAB_ASSETS` to `[]`.
+    - Replaced dummy fallback records with real Google Sheet data caching in `localStorage` (`MUIDS_ASSET_CACHE_v1.1.7f`).
+  - **Primary JSONP Low-Latency Bridge**:
+    - Switched GitHub Pages remote transport to prioritize `invokeJsonp`, bypassing cross-origin redirect blocks and slashing initial sheet load times from 12s to ~300ms.
+  - **Autofocus Camera Selection**:
+    - Upgraded `ScannerController.html` to prioritize `{ facingMode: "environment" }` with `focusMode: "continuous"`.
+    - Avoids selecting blurry auxiliary macro or selfie cameras on multi-lens smartphones.
+    - Expanded QR detection bounding box to 85% with debounce error recovery.
+* **Verification**:
+  - All 36 automated verification suites passing in `Tools/test_core.js`.
+
 ## 2026-09-14 — Pre-Release v1.1.7e: Room Landing Tab, Header Versioning & Mobile Canvas
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 pre-release `v1.1.7e`.

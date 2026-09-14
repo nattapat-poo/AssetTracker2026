@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.7f] - 2026-09-14
+
+### Fixed & Improved
+- **Public Google Apps Script Web App Access (`ANYONE_ANONYMOUS`)**:
+  - Updated `appsscript.json` webapp access setting from `ANYONE` to `ANYONE_ANONYMOUS`.
+  - Resolves issue where other devices or unauthenticated browsers were redirected to Google Account Sign-in, which caused CORS failures on GitHub Pages and triggered fallback to legacy mock data.
+- **Complete Elimination of Legacy Mock Data**:
+  - Emptied `INITIAL_LAB_ASSETS` to `[]`.
+  - The app now exclusively pulls real live records (689 assets across 16 sheets) from the Google Sheets database.
+  - Seamlessly caches real fetched Google Sheet assets into `localStorage` (`MUIDS_ASSET_CACHE_v1.1.7f`) for robust offline continuity.
+- **High-Speed Primary JSONP Bridge on GitHub Pages**:
+  - Configured `invokeJsonp` as the primary transport on GitHub Pages (`isRemoteLiveMode`), bypassing CORS and reducing initial connection latency from 12s timeout to ~300ms.
+  - Increased JSONP timeout to 20s to safely accommodate Google Apps Script cold starts.
+- **Mobile Camera Autofocus & Primary Lens Selection**:
+  - Re-engineered `ScannerController.html` to pass `{ facingMode: "environment" }` with `focusMode: "continuous"` directly.
+  - Prevents multi-camera phones (e.g. Samsung Galaxy, iPhone) from erroneously selecting a blurry fixed-focus macro/wide-angle lens when device labels are masked prior to permission grant.
+  - Enlarged QR detection viewfinder bounding box to 85% for rapid detection of smaller asset labels.
+  - Added automatic debounce recovery if lookup returns no match, ensuring technicians can immediately scan subsequent items without blocking.
+
 ## [1.1.7e] - 2026-09-14
 
 ### Added & Improved

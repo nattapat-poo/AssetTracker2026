@@ -1,7 +1,7 @@
 <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.1g)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.1g)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -137,13 +137,17 @@ window.ScannerController = (function() {
     }
 
     var qrConfig = {
-      fps: 15,
+      fps: 20,
       qrbox: function(viewfinderWidth, viewfinderHeight) {
         var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-        var qrboxSize = Math.floor(minEdge * 0.75);
+        var qrboxSize = Math.floor(minEdge * 0.85);
         return { width: qrboxSize, height: qrboxSize };
       },
       aspectRatio: 1.0,
+      videoConstraints: {
+        facingMode: { ideal: currentFacingMode },
+        focusMode: { ideal: "continuous" }
+      },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
       }
@@ -151,73 +155,62 @@ window.ScannerController = (function() {
 
     ModalController.showToast("Initializing camera stream...", "info", 1500);
 
-    // Enumerate cameras first to prevent OverconstrainedError on laptops
-    Html5Qrcode.getCameras().then(function(cameras) {
-      var cameraSelection;
-      if (cameras && cameras.length > 0) {
-        if (currentFacingMode === "environment") {
-          // Look for rear camera
-          var backCam = cameras.find(function(c) {
-            var label = (c.label || "").toLowerCase();
-            return label.indexOf("back") !== -1 || label.indexOf("rear") !== -1 || label.indexOf("environment") !== -1;
-          });
-          cameraSelection = backCam ? backCam.id : cameras[0].id;
-        } else {
-          // Front camera or laptop webcam
-          var frontCam = cameras.find(function(c) {
-            var label = (c.label || "").toLowerCase();
-            return label.indexOf("front") !== -1 || label.indexOf("user") !== -1;
-          });
-          cameraSelection = frontCam ? frontCam.id : cameras[0].id;
-        }
-      } else {
-        cameraSelection = { facingMode: currentFacingMode };
-      }
+    // Primary constraint: Use standard facingMode directly so mobile browsers select the true autofocus rear camera
+    var primaryConstraint = (currentFacingMode === "environment")
+      ? { facingMode: "environment" }
+      : { facingMode: "user" };
 
+    function runStart(constraint) {
       return html5QrCode.start(
-        cameraSelection,
+        constraint,
         qrConfig,
         onScanSuccess,
         onScanProgress
       );
-    }).then(function() {
-      isScanning = true;
-      AppState.set("isScannerRunning", true);
-      updateScannerControlsUI();
-      showScanLaser(true);
-      ModalController.showToast("Camera active. Align QR in frame.", "success", 2000);
-    }).catch(function(err) {
-      console.warn("Live stream start failed:", err);
-      isScanning = false;
-      AppState.set("isScannerRunning", false);
-      updateScannerControlsUI();
-      showScanLaser(false);
+    }
 
-      var errStr = String(err || "").toLowerCase();
-      var isPermIssue = errStr.indexOf("notallowed") !== -1 ||
-                        errStr.indexOf("permission") !== -1 ||
-                        errStr.indexOf("securityerror") !== -1 ||
-                        errStr.indexOf("policy") !== -1;
-
-      if (isPermIssue) {
-        ModalController.showToast("⚠️ Live video stream blocked by browser iframe policy. Please tap '📸 SNAP WITH CAMERA' to scan directly!", "warning", 5000);
-      } else {
-        // Fallback retry with generic facingMode constraint
-        html5QrCode.start(
-          { facingMode: "user" },
-          qrConfig,
-          onScanSuccess,
-          onScanProgress
-        ).then(function() {
+    runStart(primaryConstraint)
+      .then(function() {
+        isScanning = true;
+        AppState.set("isScannerRunning", true);
+        updateScannerControlsUI();
+        showScanLaser(true);
+        ModalController.showToast("Camera active. Align QR in frame.", "success", 2000);
+      })
+      .catch(function(primaryErr) {
+        console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
+        // Fallback for laptops/webcams without rear camera
+        Html5Qrcode.getCameras().then(function(cameras) {
+          var fallbackChoice = { facingMode: "user" };
+          if (cameras && cameras.length > 0) {
+            fallbackChoice = cameras[0].id;
+          }
+          return runStart(fallbackChoice);
+        }).then(function() {
           isScanning = true;
           AppState.set("isScannerRunning", true);
           updateScannerControlsUI();
           showScanLaser(true);
-        }).catch(function(retryErr) {
-          ModalController.showToast("Live video unavailable. Tap '📸 SNAP WITH CAMERA' to scan.", "warning", 5000);
+        }).catch(function(finalErr) {
+          console.warn("Live stream start failed:", finalErr);
+          isScanning = false;
+          AppState.set("isScannerRunning", false);
+          updateScannerControlsUI();
+          showScanLaser(false);
+
+          var errStr = String(finalErr || "").toLowerCase();
+          var isPermIssue = errStr.indexOf("notallowed") !== -1 ||
+                            errStr.indexOf("permission") !== -1 ||
+                            errStr.indexOf("securityerror") !== -1 ||
+                            errStr.indexOf("policy") !== -1;
+
+          if (isPermIssue) {
+            ModalController.showToast("⚠️ Camera permission blocked. Please allow camera access or tap '📸 Snap Photo with Camera'!", "warning", 5000);
+          } else {
+            ModalController.showToast("Live video unavailable. Tap '📸 Snap Photo with Camera' to scan directly!", "warning", 5000);
+          }
         });
-      }
-    });
+      });
   }
 
   function stopScanner() {
@@ -398,13 +391,15 @@ window.ScannerController = (function() {
 
     ApiClient.lookupAsset(cleanCode)
       .then(function(res) {
-        if (res.found && res.asset) {
+        if (res && res.found && res.asset) {
           AuditController.displayScannedAsset(res.asset);
         } else {
+          setTimeout(function() { lastScannedCode = null; }, 1800);
           AuditController.displayUnrecognizedAsset(cleanCode);
         }
       })
       .catch(function(err) {
+        lastScannedCode = null;
         ModalController.showToast("Lookup error: " + err.toString(), "error");
       });
   }

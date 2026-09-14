@@ -1,6 +1,6 @@
 /**
  * AuthService.js — Enterprise Identity & Multi-Role RBAC Authorization Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7e)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
  * MUIDS Lab Oops OS — Science Department
  */
 
