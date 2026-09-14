@@ -51,17 +51,17 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.4') throw new Error(`Expected APP_VERSION to be v1.1.4, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.5a') throw new Error(`Expected APP_VERSION to be v1.1.5a, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
-  console.log('\n--- 2. Testing ApiClient.lookupAsset("MUIDS-SCI-204-001") ---');
-  const found = await ApiClient.lookupAsset('MUIDS-SCI-204-001');
-  console.log('  Found item:', found.asset.itemName, '| Status:', found.asset.status);
+  console.log('\n--- 2. Testing ApiClient.lookupAsset("MUIDS-BIO-101") ---');
+  const found = await ApiClient.lookupAsset('MUIDS-BIO-101');
+  console.log('  Found item:', found.asset.itemName, '| Status:', found.asset.status, '| Room:', found.asset.registeredLocation);
 
   console.log('\n--- 3. Testing ApiClient.updateAssetStatus with v1.1.3f Thai Status & Sticker ---');
   const updated = await ApiClient.updateAssetStatus({
-    assetId: 'MUIDS-SCI-204-001',
+    assetId: 'MUIDS-BIO-101',
     status: 'ใช้งานอยู่แต่ชำรุดนะ',
     sticker: 'ปริ้นใหม่',
     notes: 'Power cord loose'
@@ -78,10 +78,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.4 Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.5a Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.4') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.5a') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -107,17 +107,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.4
-  if (!configJs.includes('VERSION: "v1.1.4"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.4 in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.5a
+  if (!configJs.includes('VERSION: "v1.1.5a"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.5a in Config.js');
   }
-  if (!codeJs.includes('v1.1.4')) {
-    throw new Error('Version must be v1.1.4 in Code.js');
+  if (!codeJs.includes('v1.1.5a')) {
+    throw new Error('Version must be v1.1.5a in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.4')) {
-    throw new Error('Version must be v1.1.4 in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.5a')) {
+    throw new Error('Version must be v1.1.5a in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.4 in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.5a in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -616,7 +616,7 @@ async function runTests() {
   console.log('  Verified: Interactive expand-on-hover/tap reveals full untruncated message and pauses auto-dismiss.');
   console.log('  Verified: Toast Notification UX Standard documented in lab-oops-standards/SKILL.md.');
 
-  console.log('\n--- 31. Running Full System Audit & Codebase Cleanup Verification (v1.1.4) ---');
+  console.log('\n--- 31. Running Full System Audit & Codebase Cleanup Verification (v1.1.5a) ---');
   // 1. Verify JSON syntax of appsscript.json
   const appsscriptJson = JSON.parse(fs.readFileSync('App_Script/appsscript.json', 'utf8'));
   if (appsscriptJson.runtimeVersion !== 'V8' || appsscriptJson.timeZone !== 'Asia/Bangkok') {
@@ -647,6 +647,7 @@ async function runTests() {
     'Documentations/Planning.md',
     'Documentations/Project_Profile.md',
     'Documentations/Architectural_Safety_Guide.md',
+    'Documentations/GAS_Continuous_Scanning_Limitations.md',
     'Documentations/Handover_Guide.md',
     'README.md'
   ];
@@ -664,7 +665,7 @@ async function runTests() {
   console.log('  Verified: All dead code, legacy modal artifacts, and unused CSS classes removed.');
   console.log('  Verified: Zero console errors, clean modern DOM tree structure.');
 
-  console.log('\n--- 32. Testing v1.1.4 Auditor Column, Layer 2 onEdit Trigger, & Usage Stats Engine ---');
+  console.log('\n--- 32. Testing v1.1.5a Auditor Column, Layer 2 onEdit Trigger, & Usage Stats Engine ---');
   const dbsContent = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const cfgContent = fs.readFileSync('App_Script/Config.js', 'utf8');
   const codeContent = fs.readFileSync('App_Script/Code.js', 'utf8');
@@ -714,10 +715,10 @@ async function runTests() {
   console.log('  Verified: Stats sheet auto-provisioning & getAppUsageStats() API operational.');
   console.log('  Verified: Web App UI Usage Stats modal and live telemetry rendering verified.');
 
-  console.log('\n--- 33. Testing v1.1.4 Moderate Typography Scaling & Balanced Mobile Fit ---');
+  console.log('\n--- 33. Testing v1.1.5a Moderate Typography Scaling & Balanced Mobile Fit ---');
   const updatedStylesContent = fs.readFileSync('App_Script/styles.html', 'utf8');
   if (!updatedStylesContent.includes('font-size: 16.5px;') || !updatedStylesContent.includes('font-size: 17px;')) {
-    throw new Error('styles.html missing balanced 16.5px/17px root scale for v1.1.4');
+    throw new Error('styles.html missing balanced 16.5px/17px root scale for v1.1.5a');
   }
   if (!updatedStylesContent.includes('h1, .text-xl { font-size: 1.30rem; }') ||
       !updatedStylesContent.includes('.thumb-btn {') ||
@@ -729,7 +730,7 @@ async function runTests() {
   console.log('  Verified: Touch buttons (min-height 52px), inputs, pills, and cards properly proportioned.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 33 TEST SUITES PASSED FOR v1.1.4 RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 33 TEST SUITES PASSED FOR v1.1.5a RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

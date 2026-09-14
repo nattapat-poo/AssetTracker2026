@@ -1,5 +1,16 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-14 — Release v1.1.5a: 15-Room Comprehensive Mock Data & Dynamic Live GAS Bridge
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 rolled to version `v1.1.5a`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`) and Git (`git push origin main`).
+* **Key Visual & Architectural Implementations:**
+  - **15-Room Realistic Mock Data**: Distributed real lab equipment across all 15 rooms (`Bio Prep`, `Bio1`, `Bio2`, `Chem Pre`, `Chem1`, `Chem2`, `Physics P`, `Physics1`, `Physics2`, `Mobile`, `Science`, `ปาณิษา`, `ชำรุด`, `ไม่ใช้งาน`, `Storage`), purging legacy "Lab 204" assets.
+  - **Dynamic GAS Endpoint URL Bridge**: Added `getGasEndpointUrl()` supporting query string parameter `?gas_url=` and `localStorage` overrides with live connection flag.
+  - **GAS Continuous Camera Scanning Whitepaper**: Published comprehensive architectural guide at `Documentations/GAS_Continuous_Scanning_Limitations.md`.
+* **Verification**:
+  - All test suites passing in `Tools/test_core.js`.
+
 ## 2026-09-12 — Production Release v1.1.4: Dual Deployment to Google Apps Script & Git
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 official production release `v1.1.4`.

@@ -1,4 +1,4 @@
-# 🔍 Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
+# 🔍 Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
 ### MUIDS Lab Oops OS — Science Department
 
 > **Zero-install multi-modal camera QR scanner with a Hybrid Master Table Architecture & dynamic multi-sheet migration to inspect, query, and update science laboratory procurement assets in real-time.**
@@ -9,7 +9,7 @@
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Organization:** MUIDS — Science Department
 * **Ecosystem:** [Lab Oops OS](file:///c:/Users/MUIDS/Documents/Projects/Lab%20Oops/Master_Architecture_Nexus_DB.md)
-* **Version:** `v1.1.4`
+* **Version:** `v1.1.5a`
 * **Target Spreadsheet ID:** `18LGXn6JbjFeiVuKlrh0CvJ79M3mpsKTVbc0FJx8LuOk`
 * **Target Audience:** Science Laboratory Technicians (`LabTech`) & Teaching Assistants (`TA`)
 * **Target Window:** Annual September Procurement Inventory Survey (AY 2569 / 2026)
@@ -18,7 +18,7 @@
 
 ---
 
-## ⚡ Core Features (v1.1.4)
+## ⚡ Core Features (v1.1.5a)
 1. **Moderate Responsive Typography & Snug Mobile Fit**: Harmonized root font size (16.5px mobile / 17px desktop) and calibrated typography scale (`h1` 1.30rem, `h2` 1.15rem, `h3` 1.02rem, `.text-sm` 0.92rem, `.text-xs` 0.82rem) ensuring clear readability without visual bloat or mobile container overflow.
 2. **Auditor Column (`Col 16 / Col P`) on Individual Room Sheets**: Menu 1 (`setupRow5AuditHeaders`) provisions the `Auditor` column right after Col O (`สติกเกอร์`) at Column P, recording the display name of the auditor on every 1-tap scan action without aggregating Auditor into `Master_Asset`.
 3. **Layer 1, 2 & 3 Data Consistency Protection**: Layer 2 `onEdit(e)` trigger automatically syncs manual cell edits made in room sheets into `Master_Asset` in real-time, backed by Layer 1 Ground Truth and Layer 3 Contradiction detection.

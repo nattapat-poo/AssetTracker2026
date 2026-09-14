@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.5a] - 2026-09-14
+
+### Added & Improved
+- **15-Room Comprehensive Mock Data Store**:
+  - Overhauled mock database in `App_Script/ApiClient.html` to distribute realistic science laboratory equipment across all 15 active rooms: `Bio Prep`, `Bio1`, `Bio2`, `Chem Pre`, `Chem1`, `Chem2`, `Physics P`, `Physics1`, `Physics2`, `Mobile`, `Science`, `ปาณิษา`, `ชำรุด`, `ไม่ใช้งาน`, `Storage`.
+  - Replaced legacy dummy "Lab 204" assets with authentic department procurement models.
+- **Dynamic Live GAS Endpoint Configuration**:
+  - Added `getGasEndpointUrl()` to support custom GAS Web App deployment URLs via URL parameter (`?gas_url=...`) or `localStorage.getItem("MUIDS_GAS_WEBAPP_URL")`.
+  - Added live connection status tracking (`window.__IS_LIVE_CONNECTED`) to clearly distinguish live Google Sheet sync vs. fallback mock mode.
+- **GAS Continuous Camera Scanning Whitepaper**:
+  - Added comprehensive technical engineering whitepaper `Documentations/GAS_Continuous_Scanning_Limitations.md` explaining iframe sandboxing, permissions policy headers, mobile WebKit stream blocking, and RPC latency.
+
 ## [1.1.4] - 2026-09-12
 
 ### Milestone Release Summary

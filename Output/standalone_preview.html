@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🔍 QR Asset Survey v1.1.4 — Lab Oops OS</title>
+  <title>🔍 QR Asset Survey v1.1.5a — Lab Oops OS</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
   <!-- Component Stylesheet -->
   <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.4 Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.5a Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -46,7 +46,7 @@
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
-  /* Moderate Responsive Typography Hierarchy (v1.1.4) */
+  /* Moderate Responsive Typography Hierarchy (v1.1.5a) */
   h1, .text-xl { font-size: 1.30rem; }
   h2, .text-lg { font-size: 1.15rem; }
   h3, .text-base { font-size: 1.02rem; }
@@ -688,13 +688,13 @@
         <!-- Application Title with Canonical Version Badge -->
         <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
           <span>🔍 QR Asset Survey</span>
-          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.4</span>
+          <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.5a</span>
         </h1>
       </div>
 
       <!-- Header Right Utilities -->
       <div class="flex items-center gap-2">
-        <!-- Usage Stats Dashboard Button (v1.1.4) -->
+        <!-- Usage Stats Dashboard Button (v1.1.5a) -->
         <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95" title="View Usage & Audit Stats">
           <i class="fa-solid fa-chart-pie text-sky-400"></i>
           <span class="hidden sm:inline">Stats</span>
@@ -1261,7 +1261,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.4</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.5a</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1452,7 +1452,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.4</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.5a</div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -1508,7 +1508,7 @@
     </div>
   </div>
 
-  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.4) -->
+  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.5a) -->
   <div id="stats-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div onclick="event.stopPropagation()" class="bg-slate-900 border border-sky-500/40 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
       
@@ -1838,7 +1838,7 @@
   <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -1996,7 +1996,7 @@ window.AppState = (function() {
   <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2010,7 +2010,20 @@ window.ApiClient = (function() {
     ))
   );
 
-  // 15 Rooms Configuration (v1.1.4)
+  function getGasEndpointUrl() {
+    try {
+      if (typeof window !== "undefined" && window.location) {
+        var params = new URLSearchParams(window.location.search);
+        var qUrl = params.get("gas_url");
+        if (qUrl && qUrl.trim() !== "") return qUrl.trim();
+      }
+      var stored = localStorage.getItem("MUIDS_GAS_WEBAPP_URL");
+      if (stored && stored.trim() !== "") return stored.trim();
+    } catch (e) {}
+    return LIVE_GAS_WEBAPP_URL;
+  }
+
+  // 15 Rooms Configuration (v1.1.5a)
   var ROOM_SHEETS_CONFIG = [
     "Bio Prep",
     "Bio1",
@@ -2080,31 +2093,73 @@ window.ApiClient = (function() {
     "ปริ้นใหม่+แก้ข้อมูล"
   ];
 
-  // High-fidelity mock database matching Project 00 Kernel Room Directory
+  // High-fidelity mock database matching all 15 actual room worksheets
   var MOCK_ROOMS = ROOM_SHEETS_CONFIG;
 
   var MOCK_ASSETS = [
-    { no: 1, assetId: "MUIDS-SCI-204-001", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
-    { no: 2, assetId: "MUIDS-SCI-204-002", itemName: "Olympus CX23 Binocular Microscope", brandModel: "Olympus CX23-LEDRFS2", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "" },
-    { no: 3, assetId: "MUIDS-SCI-204-003", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 4, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated" },
-    { no: 4, assetId: "MUIDS-SCI-204-004", itemName: "Corning Hotplate Stirrer", brandModel: "PC-420D Digital", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 5, status: "ใช้งานอยู่แต่ชำรุดนะ", scanned69: "ใช้งานอยู่แต่ชำรุดนะ", auditResult69: "ใช้งานอยู่แต่ชำรุดนะ", sticker: "ปกติ", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุดเล็กน้อย" }, notes: "Heating plate surface chipped" },
-    { no: 5, assetId: "MUIDS-SCI-204-005", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 6, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 6, assetId: "MUIDS-SCI-204-006", itemName: "Fisherbrand Vortex Mixer", brandModel: "Analog Vortex 120V", registeredLocation: "Lab 204 (General Science)", sheetName: "Lab 204 (General Science)", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    
-    { no: 1, assetId: "MUIDS-CHM-301-010", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
-    { no: 2, assetId: "MUIDS-CHM-301-011", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 3, assetId: "MUIDS-CHM-301-012", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 4, assetId: "MUIDS-CHM-301-013", itemName: "Labconco Fume Hood Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 5, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
-    { no: 5, assetId: "MUIDS-CHM-301-014", itemName: "Eppendorf Research Plus Pipette Set", brandModel: "3-Pack (10, 100, 1000uL)", registeredLocation: "Chem1 (ChemLab1 - Floor 2)", sheetName: "Chem1 (ChemLab1 - Floor 2)", rowIndex: 6, status: "สูญหาย", scanned69: "สูญหาย", auditResult69: "สูญหาย", sticker: "ปกติ", procurementCondition: "สูญหาย", historicalResults: {}, notes: "Missing 10uL pipette from carousel" },
+    // 1. Bio Prep
+    { no: 1, assetId: "MUIDS-BPR-001", itemName: "Autoclave Sterilization Basket 20L", brandModel: "Hirayama Stainless Mesh", registeredLocation: "Bio Prep", sheetName: "Bio Prep", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Clean, handles secure" },
+    { no: 2, assetId: "MUIDS-BPR-002", itemName: "Digital Hotplate Stirrer 2L", brandModel: "IKA Topolino", registeredLocation: "Bio Prep", sheetName: "Bio Prep", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
 
-    { no: 1, assetId: "MUIDS-BIO-308-020", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 2, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
-    { no: 2, assetId: "MUIDS-BIO-308-021", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 3, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 3, assetId: "MUIDS-BIO-308-022", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 4, assetId: "MUIDS-BIO-308-023", itemName: "Benchmark Autoclave 16L", brandModel: "BioClave 16 B4000-16", registeredLocation: "Bio1 (BioLab1 - Floor 3)", sheetName: "Bio1 (BioLab1 - Floor 3)", rowIndex: 5, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Gasket inspected, passed seal test" },
+    // 2. Bio1
+    { no: 1, assetId: "MUIDS-BIO-101", itemName: "Olympus CX23 Binocular Microscope", brandModel: "CX23-LEDRFS2", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
+    { no: 2, assetId: "MUIDS-BIO-102", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
+    { no: 3, assetId: "MUIDS-BIO-103", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
 
-    { no: 1, assetId: "MUIDS-PHY-314-030", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 2, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 2, assetId: "MUIDS-PHY-314-031", itemName: "Rigol Digital Oscilloscope", brandModel: "DS1054Z 50MHz 4CH", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 3, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested with function gen" },
-    { no: 3, assetId: "MUIDS-PHY-314-032", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1 (Physics Lab 1 - Floor 2)", sheetName: "Physics1 (Physics Lab 1 - Floor 2)", rowIndex: 4, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" }
+    // 3. Bio2
+    { no: 1, assetId: "MUIDS-BIO-201", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio2", sheetName: "Bio2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heated lid calibrated" },
+    { no: 2, assetId: "MUIDS-BIO-202", itemName: "Shaking Incubator 25L Benchtop", brandModel: "Benchmark Incu-Shaker Mini", registeredLocation: "Bio2", sheetName: "Bio2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 4. Chem Pre
+    { no: 1, assetId: "MUIDS-CPR-001", itemName: "Chemical Spill Mobile Response Cart", brandModel: "Justrite Safety Stand", registeredLocation: "Chem Pre", sheetName: "Chem Pre", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Full neutralizer stock verified" },
+    { no: 2, assetId: "MUIDS-CPR-002", itemName: "Adjustable Pipette Calibration Station", brandModel: "Sartorius Pipette Tracker", registeredLocation: "Chem Pre", sheetName: "Chem Pre", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 5. Chem1
+    { no: 1, assetId: "MUIDS-CHM-101", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
+    { no: 2, assetId: "MUIDS-CHM-102", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Speed knob responsive" },
+    { no: 3, assetId: "MUIDS-CHM-103", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 6. Chem2
+    { no: 1, assetId: "MUIDS-CHM-201", itemName: "Labconco Fume Hood Airflow Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem2", sheetName: "Chem2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
+    { no: 2, assetId: "MUIDS-CHM-202", itemName: "Buchi Rotary Evaporator System", brandModel: "Rotavapor R-100", registeredLocation: "Chem2", sheetName: "Chem2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 7. Physics P
+    { no: 1, assetId: "MUIDS-PPR-001", itemName: "Precision Optics Bench Rail (2.0m)", brandModel: "Pasco OS-8515C", registeredLocation: "Physics P", sheetName: "Physics P", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Carriers intact" },
+    { no: 2, assetId: "MUIDS-PPR-002", itemName: "Electrostatic Van de Graaff Generator", brandModel: "Leybold 54101", registeredLocation: "Physics P", sheetName: "Physics P", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 8. Physics1
+    { no: 1, assetId: "MUIDS-PHY-101", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "USB & Bluetooth OK" },
+    { no: 2, assetId: "MUIDS-PHY-102", itemName: "Rigol Digital Oscilloscope 50MHz", brandModel: "DS1054Z 4CH", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested" },
+    { no: 3, assetId: "MUIDS-PHY-103", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 9. Physics2
+    { no: 1, assetId: "MUIDS-PHY-201", itemName: "Keithley 6.5-Digit Precision Multimeter", brandModel: "DMM6500 Touchscreen", registeredLocation: "Physics2", sheetName: "Physics2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated 2026" },
+    { no: 2, assetId: "MUIDS-PHY-202", itemName: "Helium-Neon Laser Optics Module", brandModel: "Melles Griot 05-LHR", registeredLocation: "Physics2", sheetName: "Physics2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 10. Mobile
+    { no: 1, assetId: "MUIDS-MOB-001", itemName: "Mobile Laboratory Experiment Cart #1", brandModel: "Heavy Duty Stainless Steel", registeredLocation: "Mobile", sheetName: "Mobile", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Wheels lock securely" },
+    { no: 2, assetId: "MUIDS-MOB-002", itemName: "Mobile iPad Charging Cart (30 units)", brandModel: "Bretford PowerSync+", registeredLocation: "Mobile", sheetName: "Mobile", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 11. Science
+    { no: 1, assetId: "MUIDS-SCI-001", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Science", sheetName: "Science", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Draft shield intact" },
+    { no: 2, assetId: "MUIDS-SCI-002", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Science", sheetName: "Science", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 12. ปาณิษา
+    { no: 1, assetId: "MUIDS-PAN-001", itemName: "Research Fluorescence Microscope", brandModel: "Olympus BX53 DIC", registeredLocation: "ปาณิษา", sheetName: "ปาณิษา", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Filter cubes inspected" },
+    { no: 2, assetId: "MUIDS-PAN-002", itemName: "High-Speed Micro-Centrifuge 15000 RPM", brandModel: "Thermo Heraeus Pico 17", registeredLocation: "ปาณิษา", sheetName: "ปาณิษา", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+
+    // 13. ชำรุด
+    { no: 1, assetId: "MUIDS-DMG-001", itemName: "Corning Hotplate Stirrer (Defective Heating)", brandModel: "PC-420D Digital", registeredLocation: "ชำรุด", sheetName: "ชำรุด", rowIndex: 6, status: "ใช้งานอยู่แต่ชำรุดนะ", scanned69: "ใช้งานอยู่แต่ชำรุดนะ", auditResult69: "ใช้งานอยู่แต่ชำรุดนะ", sticker: "ปริ้นใหม่", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุด" }, notes: "Heating element open circuit - awaiting parts" },
+    { no: 2, assetId: "MUIDS-DMG-002", itemName: "Micropipette 100-1000uL (Stuck Piston)", brandModel: "Eppendorf Research Plus", registeredLocation: "ชำรุด", sheetName: "ชำรุด", rowIndex: 7, status: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", scanned69: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", auditResult69: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", sticker: "ปกติ", procurementCondition: "ชำรุด", historicalResults: {}, notes: "Piston seized" },
+
+    // 14. ไม่ใช้งาน
+    { no: 1, assetId: "MUIDS-RET-001", itemName: "Legacy Analog Demonstration Galvanometer", brandModel: "Cenco Precision 1985", registeredLocation: "ไม่ใช้งาน", sheetName: "ไม่ใช้งาน", rowIndex: 6, status: "หมดความจำเป็นต้องใช้งาน", scanned69: "หมดความจำเป็นต้องใช้งาน", auditResult69: "หมดความจำเป็นต้องใช้งาน", sticker: "ปกติ", procurementCondition: "ไม่ใช้งาน", historicalResults: { "68": "ไม่ใช้งาน" }, notes: "Stored in archive shelf" },
+    { no: 2, assetId: "MUIDS-RET-002", itemName: "CRT Analog Dual-Trace Oscilloscope 20MHz", brandModel: "GW Instek GOS-622G", registeredLocation: "ไม่ใช้งาน", sheetName: "ไม่ใช้งาน", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ไม่ใช้งาน", historicalResults: {}, notes: "" },
+
+    // 15. Storage
+    { no: 1, assetId: "MUIDS-STR-001", itemName: "Chemical Resistant Heavy-Duty Storage Rack", brandModel: "Justrite 4-Tier Epoxy", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Located in Central Storage Bay A" },
+    { no: 2, assetId: "MUIDS-STR-002", itemName: "Stainless Steel Glassware Drying Cabinet", brandModel: "Memmert UF55", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
+    { no: 3, assetId: "MUIDS-STR-003", itemName: "Anti-Vibration Granite Balance Table", brandModel: "Mettler Toledo VibraDamp", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 8, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heavy granite surface leveled" }
   ];
 
   function invoke(action, payload) {
@@ -2119,9 +2174,10 @@ window.ApiClient = (function() {
             reject(err);
           })
           .executeApiAction(action, payload);
-      } else if (isRemoteLiveMode && LIVE_GAS_WEBAPP_URL) {
+      } else if (isRemoteLiveMode) {
+        var targetUrl = getGasEndpointUrl();
         // Direct HTTPS POST Bridge to Live Google Apps Script Endpoint
-        fetch(LIVE_GAS_WEBAPP_URL, {
+        fetch(targetUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: action, payload: payload })
@@ -2131,10 +2187,13 @@ window.ApiClient = (function() {
           if (data && data.error && !data.success && data.found === undefined) {
             console.warn("[ApiClient] Remote API returned error:", data.error);
           }
+          window.__IS_LIVE_CONNECTED = true;
           resolve(data);
         })
         .catch(function(err) {
-          console.warn("[ApiClient] Remote bridge fetch error, falling back to mock:", err);
+          console.warn("[ApiClient] Remote GAS bridge fetch failed (falling back to 15-room mock store):", err);
+          window.__IS_LIVE_CONNECTED = false;
+          window.__LAST_CONN_ERROR = err.message;
           var res = mockExecute(action, payload);
           resolve(res);
         });
@@ -2168,7 +2227,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.4",
+          APP_VERSION: "v1.1.5a",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2360,8 +2419,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.4). Local mock simulation mode.",
-        appVersion: "v1.1.4",
+        message: "Config sheet synchronized (v1.1.5a). Local mock simulation mode.",
+        appVersion: "v1.1.5a",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -2541,7 +2600,7 @@ window.ThemeController = (function() {
   <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -3642,7 +3701,7 @@ window.ScannerController = (function() {
   <script>
 /**
  * AuditController.html — QR Camera Scanner, In-Place Row Mutation & Roster Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.4)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.5a)
  * MUIDS Lab Oops OS — Science Department
  */
 
