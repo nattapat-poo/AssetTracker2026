@@ -46,6 +46,12 @@ while ((match = scriptRegex.exec(html)) !== null) {
   }
 }
 
+// Seed mock assets for unit test validation (production codebase starts empty)
+if (fs.existsSync('Tools/test_fixtures.json') && ApiClient.seedMockAssetsForTesting) {
+  const fixtures = JSON.parse(fs.readFileSync('Tools/test_fixtures.json', 'utf8'));
+  ApiClient.seedMockAssetsForTesting(fixtures);
+}
+
 async function runTests() {
   console.log('\n--- 1. Testing ApiClient.getInitialPayload() ---');
   const payload = await ApiClient.getInitialPayload();
@@ -729,8 +735,51 @@ async function runTests() {
   console.log('  Verified: Balanced headings (h1 1.30rem, h2 1.15rem, h3 1.02rem) and clean body text.');
   console.log('  Verified: Touch buttons (min-height 52px), inputs, pills, and cards properly proportioned.');
 
+  console.log('\n--- 34. Testing v1.1.6b QR Inventory Format Validation, Master_Asset Default & Aligned Mobile Buttons ---');
+  const scannerCtrlContent = fs.readFileSync('App_Script/ScannerController.html', 'utf8');
+  if (!scannerCtrlContent.includes('isValidAssetInventoryFormat') ||
+      !scannerCtrlContent.includes('400, 150, 400') ||
+      !scannerCtrlContent.includes('60, 40, 60') ||
+      !scannerCtrlContent.includes('^\\d{7}-\\d{12}[-_]\\d+$')) {
+    throw new Error('ScannerController.html missing isValidAssetInventoryFormat or dual vibration pattern');
+  }
+
+  // Load scanner script to test validation directly
+  const scannerScriptMatch = scannerCtrlContent.match(/<script[\s\S]*?>([\s\S]*?)<\/script>/i);
+  if (scannerScriptMatch) {
+    const scannerModule = new Function('window', 'AppState', 'ApiClient', 'ModalController', 'AuditController', 'Html5Qrcode',
+      scannerScriptMatch[1] + '; return window.ScannerController;'
+    )({}, { get: () => true, set: () => {} }, ApiClient, {}, {}, {});
+
+    if (!scannerModule.isValidAssetInventoryFormat('4356000-401000049664-0')) {
+      throw new Error('ScannerController.isValidAssetInventoryFormat failed to validate standard sheet format');
+    }
+    if (!scannerModule.isValidAssetInventoryFormat('1234567-123456789012_1')) {
+      throw new Error('ScannerController.isValidAssetInventoryFormat failed to validate underscore format');
+    }
+    if (scannerModule.isValidAssetInventoryFormat('RANDOM-BARCODE-123')) {
+      throw new Error('ScannerController.isValidAssetInventoryFormat should reject non-matching barcodes');
+    }
+    console.log('  Verified: QR format regex (/^\\d{7}-\\d{12}[-_]\\d+$/) successfully validates inventory codes.');
+  }
+
+  // Verify default room in index.html, AppState, and DatabaseService
+  const idxHtml = fs.readFileSync('App_Script/index.html', 'utf8');
+  if (!idxHtml.includes('<option value="Master_Asset">Master Table (Master_Asset)</option>') ||
+      !idxHtml.includes('AppState.set("currentRoom", payload.currentRoom || "Master_Asset");')) {
+    throw new Error('index.html missing Master_Asset as default room in room-selector or initial state');
+  }
+  console.log('  Verified: Default room configured to Master Table (Master_Asset) across app startup.');
+
+  // Verify modal status buttons do not truncate labels and match desktop
+  const modalPanelMatch = idxHtml.match(/<div id="modal-status-main-panel"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*<\/div>/i);
+  if (modalPanelMatch && modalPanelMatch[0].includes('class="truncate"')) {
+    throw new Error('index.html modal-status-main-panel still contains truncate class on action button spans');
+  }
+  console.log('  Verified: Mobile modal 1-tap action buttons match desktop card buttons without truncating.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 33 TEST SUITES PASSED FOR v1.1.6b RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 34 TEST SUITES PASSED FOR v1.1.6b RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

@@ -71,12 +71,26 @@ window.ScannerController = (function() {
     }
   }
 
-  // Haptic feedback for mobile phones
-  function triggerHaptic() {
+  // Asset inventory number format validator (e.g. 4356000-401000049664-0 or #######-############_#)
+  function isValidAssetInventoryFormat(code) {
+    if (!code) return false;
+    var clean = String(code).trim();
+    var assetCodeRegex = /^\d{7}-\d{12}[-_]\d+$/;
+    return assetCodeRegex.test(clean);
+  }
+
+  // Haptic feedback for mobile phones (short for valid asset QR, longer for mismatch)
+  function triggerHaptic(isMismatch) {
     if (!AppState.get("hapticEnabled")) return;
     if ("vibrate" in navigator) {
       try {
-        navigator.vibrate([40, 30, 40]);
+        if (isMismatch) {
+          // Scanned QR does NOT match standard inventory format: longer vibration pattern
+          navigator.vibrate([400, 150, 400]);
+        } else {
+          // Standard successful scan vibration
+          navigator.vibrate([60, 40, 60]);
+        }
       } catch (e) {}
     }
   }
@@ -371,8 +385,10 @@ window.ScannerController = (function() {
     lastScannedCode = cleanCode;
     lastScanTimestamp = now;
 
+    // Check if scanned QR matches standard asset inventory format (e.g. 4356000-401000049664-0)
+    var isStandardFormat = isValidAssetInventoryFormat(cleanCode);
     playSuccessChime();
-    triggerHaptic();
+    triggerHaptic(!isStandardFormat);
 
     // Visual pulse feedback on viewfinder
     flashViewfinder();
@@ -444,6 +460,7 @@ window.ScannerController = (function() {
     scanUploadedFile: scanUploadedFile,
     playSuccessChime: playSuccessChime,
     triggerHaptic: triggerHaptic,
+    isValidAssetInventoryFormat: isValidAssetInventoryFormat,
     initAudioContext: initAudioContext,
     resetLastScannedCode: resetLastScannedCode
   };

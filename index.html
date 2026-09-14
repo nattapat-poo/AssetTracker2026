@@ -729,7 +729,7 @@
       <div class="flex items-center gap-2 flex-1 min-w-[200px]">
         <span class="text-xs font-medium text-slate-400 shrink-0"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Lab Room:</span>
         <select id="room-selector" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-emerald-400">
-          <option value="ALL">Master Table (All Rooms)</option>
+          <option value="Master_Asset">Master Table (Master_Asset)</option>
         </select>
       </div>
 
@@ -1681,21 +1681,21 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">1. ใช้งานอยู่ (IN USE)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'modal')" data-modal-status="ใช้งานอยู่" class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'modal')" data-modal-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-check text-xs"></i>
                 <span>ใช้งานอยู่</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'modal')" data-modal-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'modal')" data-modal-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-screwdriver-wrench text-xs text-amber-300"></i>
-                <span class="truncate">ใช้งานอยู่แต่ชำรุดนะ</span>
+                <span>ใช้งานอยู่แต่ชำรุดนะ</span>
               </button>
-              <button onclick="AuditController.openMoveRoomSublayer('modal')" data-modal-status="ใช้งานอยู่+ย้ายไป..." class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openMoveRoomSublayer('modal')" data-modal-status="ใช้งานอยู่+ย้ายไป..." class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-arrow-right-arrow-left text-xs text-sky-300"></i>
-                <span class="truncate">ใช้งานอยู่+ย้ายไป...</span>
+                <span>ใช้งานอยู่+ย้ายไป...</span>
               </button>
-              <button onclick="AuditController.openRenameSublayer('modal')" data-modal-status="ใช้งานอยู่+แก้ไขชื่อเป็น..." class="thumb-btn py-1.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openRenameSublayer('modal')" data-modal-status="ใช้งานอยู่+แก้ไขชื่อเป็น..." class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/90 text-emerald-100 border border-emerald-600/50 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-pen-to-square text-xs text-amber-300"></i>
-                <span class="truncate">ใช้งานอยู่+แก้ไขชื่อเป็น...</span>
+                <span>ใช้งานอยู่+แก้ไขชื่อเป็น...</span>
               </button>
             </div>
           </div>
@@ -1704,13 +1704,13 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">2. หมดความจำเป็น (NO LONGER NEEDED)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-1.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-ban text-xs"></i>
-                <span class="truncate">หมดความจำเป็นต้องใช้</span>
+                <span>หมดความจำเป็นต้องใช้</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
-                <span class="truncate">หมดความจำเป็นฯ(ชำรุด)</span>
+                <span>หมดความจำเป็นฯ(ชำรุด)</span>
               </button>
             </div>
           </div>
@@ -1719,21 +1719,21 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. สูญหาย / ให้พัสดุตรวจ (MISSING / VERIFY)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'modal')" data-modal-status="สูญหาย" class="thumb-btn py-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'modal')" data-modal-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-xmark text-xs text-rose-400"></i>
                 <span>สูญหาย</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'modal')" data-modal-status="หาไม่เจอ" class="thumb-btn py-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'modal')" data-modal-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-magnifying-glass text-xs text-amber-400"></i>
                 <span>หาไม่เจอ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-clipboard-question text-xs text-sky-400"></i>
-                <span class="truncate">หาไม่เจอ+ให้พัสดุตรวจ</span>
+                <span>หาไม่เจอ+ให้พัสดุตรวจ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-1.5 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-circle-question text-xs text-purple-400"></i>
-                <span class="truncate">งง+ให้พัสดุตรวจ</span>
+                <span>งง+ให้พัสดุตรวจ</span>
               </button>
             </div>
           </div>
@@ -1847,12 +1847,12 @@ window.AppState = (function() {
     user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true },
     config: {},
     rooms: [],
-    currentRoom: "ALL",
+    currentRoom: "Master_Asset",
     statusFilter: "ALL", // ALL, UNVERIFIED, Good, Damaged, Missing
     searchQuery: "",
     selectedAsset: null,
     summary: {
-      roomName: "ALL",
+      roomName: "Master_Asset",
       total: 0,
       verified: 0,
       unverified: 0,
@@ -2001,7 +2001,7 @@ window.AppState = (function() {
  */
 
 window.ApiClient = (function() {
-  var LIVE_GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyX7q6-CSO0JeueXXg9OcNpnNL21DOLS3klvkPjxTs/exec";
+  var LIVE_GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwzSmezsUDHYURO6cwYmexAdp-hWsXjVqpss0DDWOWJOu39CSwky5Y_nY24nKIHFUvO/exec";
   var isGasEnvironment = (typeof google !== "undefined" && google.script && google.script.run);
   var isRemoteLiveMode = !isGasEnvironment && (
     (typeof window !== "undefined" && window.location && (
@@ -2101,74 +2101,10 @@ window.ApiClient = (function() {
     "ปริ้นใหม่+แก้ข้อมูล"
   ];
 
-  // High-fidelity mock database matching all 15 actual room worksheets
   var MOCK_ROOMS = ROOM_SHEETS_CONFIG;
 
-  var MOCK_ASSETS = [
-    // 1. Bio Prep
-    { no: 1, assetId: "MUIDS-BPR-001", itemName: "Autoclave Sterilization Basket 20L", brandModel: "Hirayama Stainless Mesh", registeredLocation: "Bio Prep", sheetName: "Bio Prep", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Clean, handles secure" },
-    { no: 2, assetId: "MUIDS-BPR-002", itemName: "Digital Hotplate Stirrer 2L", brandModel: "IKA Topolino", registeredLocation: "Bio Prep", sheetName: "Bio Prep", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 2. Bio1
-    { no: 1, assetId: "MUIDS-BIO-101", itemName: "Olympus CX23 Binocular Microscope", brandModel: "CX23-LEDRFS2", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ", "67": "ปกติ" }, notes: "Lenses clear, stage smooth" },
-    { no: 2, assetId: "MUIDS-BIO-102", itemName: "Eppendorf Centrifuge 5425", brandModel: "24-place FA-24x2", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Rotor inspected" },
-    { no: 3, assetId: "MUIDS-BIO-103", itemName: "Bio-Rad Gel Doc EZ System", brandModel: "EZ Imaging Darkroom", registeredLocation: "Bio1", sheetName: "Bio1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 3. Bio2
-    { no: 1, assetId: "MUIDS-BIO-201", itemName: "Bio-Rad T100 Thermal Cycler", brandModel: "96-Well PCR", registeredLocation: "Bio2", sheetName: "Bio2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heated lid calibrated" },
-    { no: 2, assetId: "MUIDS-BIO-202", itemName: "Shaking Incubator 25L Benchtop", brandModel: "Benchmark Incu-Shaker Mini", registeredLocation: "Bio2", sheetName: "Bio2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 4. Chem Pre
-    { no: 1, assetId: "MUIDS-CPR-001", itemName: "Chemical Spill Mobile Response Cart", brandModel: "Justrite Safety Stand", registeredLocation: "Chem Pre", sheetName: "Chem Pre", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Full neutralizer stock verified" },
-    { no: 2, assetId: "MUIDS-CPR-002", itemName: "Adjustable Pipette Calibration Station", brandModel: "Sartorius Pipette Tracker", registeredLocation: "Chem Pre", sheetName: "Chem Pre", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 5. Chem1
-    { no: 1, assetId: "MUIDS-CHM-101", itemName: "Thermo Scientific UV-Vis Spectrophotometer", brandModel: "GENESYS 50", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Lamp tested OK" },
-    { no: 2, assetId: "MUIDS-CHM-102", itemName: "IKA Magnetic Stirrer", brandModel: "C-MAG HS 7", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Speed knob responsive" },
-    { no: 3, assetId: "MUIDS-CHM-103", itemName: "Ohaus Pioneer Analytical Balance", brandModel: "PX224 / 220g x 0.1mg", registeredLocation: "Chem1", sheetName: "Chem1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 6. Chem2
-    { no: 1, assetId: "MUIDS-CHM-201", itemName: "Labconco Fume Hood Airflow Monitor", brandModel: "Protector Echo 4ft", registeredLocation: "Chem2", sheetName: "Chem2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Airflow verified 100 fpm" },
-    { no: 2, assetId: "MUIDS-CHM-202", itemName: "Buchi Rotary Evaporator System", brandModel: "Rotavapor R-100", registeredLocation: "Chem2", sheetName: "Chem2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 7. Physics P
-    { no: 1, assetId: "MUIDS-PPR-001", itemName: "Precision Optics Bench Rail (2.0m)", brandModel: "Pasco OS-8515C", registeredLocation: "Physics P", sheetName: "Physics P", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Carriers intact" },
-    { no: 2, assetId: "MUIDS-PPR-002", itemName: "Electrostatic Van de Graaff Generator", brandModel: "Leybold 54101", registeredLocation: "Physics P", sheetName: "Physics P", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 8. Physics1
-    { no: 1, assetId: "MUIDS-PHY-101", itemName: "Pasco Capstone Universal Interface", brandModel: "UI-5000 USB/BT", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "USB & Bluetooth OK" },
-    { no: 2, assetId: "MUIDS-PHY-102", itemName: "Rigol Digital Oscilloscope 50MHz", brandModel: "DS1054Z 4CH", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 7, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Channels tested" },
-    { no: 3, assetId: "MUIDS-PHY-103", itemName: "Pasco Air Track & Photogate Kit", brandModel: "2.0m Precision Track", registeredLocation: "Physics1", sheetName: "Physics1", rowIndex: 8, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 9. Physics2
-    { no: 1, assetId: "MUIDS-PHY-201", itemName: "Keithley 6.5-Digit Precision Multimeter", brandModel: "DMM6500 Touchscreen", registeredLocation: "Physics2", sheetName: "Physics2", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Calibrated 2026" },
-    { no: 2, assetId: "MUIDS-PHY-202", itemName: "Helium-Neon Laser Optics Module", brandModel: "Melles Griot 05-LHR", registeredLocation: "Physics2", sheetName: "Physics2", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 10. Mobile
-    { no: 1, assetId: "MUIDS-MOB-001", itemName: "Mobile Laboratory Experiment Cart #1", brandModel: "Heavy Duty Stainless Steel", registeredLocation: "Mobile", sheetName: "Mobile", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Wheels lock securely" },
-    { no: 2, assetId: "MUIDS-MOB-002", itemName: "Mobile iPad Charging Cart (30 units)", brandModel: "Bretford PowerSync+", registeredLocation: "Mobile", sheetName: "Mobile", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 11. Science
-    { no: 1, assetId: "MUIDS-SCI-001", itemName: "Mettler Toledo Precision Balance", brandModel: "ME204T / 0.1mg", registeredLocation: "Science", sheetName: "Science", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Draft shield intact" },
-    { no: 2, assetId: "MUIDS-SCI-002", itemName: "Vernier LabQuest 3 Interface", brandModel: "LQ3-BT Touch", registeredLocation: "Science", sheetName: "Science", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 12. ปาณิษา
-    { no: 1, assetId: "MUIDS-PAN-001", itemName: "Research Fluorescence Microscope", brandModel: "Olympus BX53 DIC", registeredLocation: "ปาณิษา", sheetName: "ปาณิษา", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Filter cubes inspected" },
-    { no: 2, assetId: "MUIDS-PAN-002", itemName: "High-Speed Micro-Centrifuge 15000 RPM", brandModel: "Thermo Heraeus Pico 17", registeredLocation: "ปาณิษา", sheetName: "ปาณิษา", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-
-    // 13. ชำรุด
-    { no: 1, assetId: "MUIDS-DMG-001", itemName: "Corning Hotplate Stirrer (Defective Heating)", brandModel: "PC-420D Digital", registeredLocation: "ชำรุด", sheetName: "ชำรุด", rowIndex: 6, status: "ใช้งานอยู่แต่ชำรุดนะ", scanned69: "ใช้งานอยู่แต่ชำรุดนะ", auditResult69: "ใช้งานอยู่แต่ชำรุดนะ", sticker: "ปริ้นใหม่", procurementCondition: "ชำรุด", historicalResults: { "68": "ชำรุด" }, notes: "Heating element open circuit - awaiting parts" },
-    { no: 2, assetId: "MUIDS-DMG-002", itemName: "Micropipette 100-1000uL (Stuck Piston)", brandModel: "Eppendorf Research Plus", registeredLocation: "ชำรุด", sheetName: "ชำรุด", rowIndex: 7, status: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", scanned69: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", auditResult69: "หมดความจำเป็นต้องใช้งานเพราะชำรุด", sticker: "ปกติ", procurementCondition: "ชำรุด", historicalResults: {}, notes: "Piston seized" },
-
-    // 14. ไม่ใช้งาน
-    { no: 1, assetId: "MUIDS-RET-001", itemName: "Legacy Analog Demonstration Galvanometer", brandModel: "Cenco Precision 1985", registeredLocation: "ไม่ใช้งาน", sheetName: "ไม่ใช้งาน", rowIndex: 6, status: "หมดความจำเป็นต้องใช้งาน", scanned69: "หมดความจำเป็นต้องใช้งาน", auditResult69: "หมดความจำเป็นต้องใช้งาน", sticker: "ปกติ", procurementCondition: "ไม่ใช้งาน", historicalResults: { "68": "ไม่ใช้งาน" }, notes: "Stored in archive shelf" },
-    { no: 2, assetId: "MUIDS-RET-002", itemName: "CRT Analog Dual-Trace Oscilloscope 20MHz", brandModel: "GW Instek GOS-622G", registeredLocation: "ไม่ใช้งาน", sheetName: "ไม่ใช้งาน", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ไม่ใช้งาน", historicalResults: {}, notes: "" },
-
-    // 15. Storage
-    { no: 1, assetId: "MUIDS-STR-001", itemName: "Chemical Resistant Heavy-Duty Storage Rack", brandModel: "Justrite 4-Tier Epoxy", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 6, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Located in Central Storage Bay A" },
-    { no: 2, assetId: "MUIDS-STR-002", itemName: "Stainless Steel Glassware Drying Cabinet", brandModel: "Memmert UF55", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 7, status: "", scanned69: "", auditResult69: "", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: {}, notes: "" },
-    { no: 3, assetId: "MUIDS-STR-003", itemName: "Anti-Vibration Granite Balance Table", brandModel: "Mettler Toledo VibraDamp", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 8, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heavy granite surface leveled" }
-  ];
+  // Real production store starts empty — all assets dynamically fetched from Google Sheets database
+  var MOCK_ASSETS = [];
 
   function invokeJsonp(url, action, payload) {
     return new Promise(function(resolve, reject) {
@@ -2277,7 +2213,7 @@ window.ApiClient = (function() {
     if (!payload) payload = {};
 
     if (action === "getInitialPayload") {
-      var defaultRoom = MOCK_ROOMS[0];
+      var defaultRoom = "Master_Asset";
       return {
         user: {
           email: "nattapat.poo@mahidol.ac.th",
@@ -2546,7 +2482,7 @@ window.ApiClient = (function() {
 
   function mockGetRoomSummary(roomName) {
     var items = [];
-    if (!roomName || roomName === "ALL") {
+    if (!roomName || roomName === "ALL" || roomName === "Master_Asset" || roomName === "Master" || roomName === "Master Table") {
       items = MOCK_ASSETS.slice();
     } else {
       items = MOCK_ASSETS.filter(function(a) { return a.registeredLocation === roomName; });
@@ -2568,7 +2504,7 @@ window.ApiClient = (function() {
     });
 
     return {
-      roomName: roomName || "ALL",
+      roomName: roomName || "Master_Asset",
       total: total,
       verified: verified,
       unverified: total - verified,
@@ -2593,6 +2529,10 @@ window.ApiClient = (function() {
         endpointUrl: getGasEndpointUrl(),
         lastError: window.__LAST_CONN_ERROR || null
       };
+    },
+    seedMockAssetsForTesting: function(assets) {
+      MOCK_ASSETS = Array.isArray(assets) ? assets.slice() : [];
+      return MOCK_ASSETS.length;
     },
     invoke: invoke,
     getInitialPayload: function() { return invoke("getInitialPayload", {}); },
@@ -3394,12 +3334,26 @@ window.ScannerController = (function() {
     }
   }
 
-  // Haptic feedback for mobile phones
-  function triggerHaptic() {
+  // Asset inventory number format validator (e.g. 4356000-401000049664-0 or #######-############_#)
+  function isValidAssetInventoryFormat(code) {
+    if (!code) return false;
+    var clean = String(code).trim();
+    var assetCodeRegex = /^\d{7}-\d{12}[-_]\d+$/;
+    return assetCodeRegex.test(clean);
+  }
+
+  // Haptic feedback for mobile phones (short for valid asset QR, longer for mismatch)
+  function triggerHaptic(isMismatch) {
     if (!AppState.get("hapticEnabled")) return;
     if ("vibrate" in navigator) {
       try {
-        navigator.vibrate([40, 30, 40]);
+        if (isMismatch) {
+          // Scanned QR does NOT match standard inventory format: longer vibration pattern
+          navigator.vibrate([400, 150, 400]);
+        } else {
+          // Standard successful scan vibration
+          navigator.vibrate([60, 40, 60]);
+        }
       } catch (e) {}
     }
   }
@@ -3694,8 +3648,10 @@ window.ScannerController = (function() {
     lastScannedCode = cleanCode;
     lastScanTimestamp = now;
 
+    // Check if scanned QR matches standard asset inventory format (e.g. 4356000-401000049664-0)
+    var isStandardFormat = isValidAssetInventoryFormat(cleanCode);
     playSuccessChime();
-    triggerHaptic();
+    triggerHaptic(!isStandardFormat);
 
     // Visual pulse feedback on viewfinder
     flashViewfinder();
@@ -3767,6 +3723,7 @@ window.ScannerController = (function() {
     scanUploadedFile: scanUploadedFile,
     playSuccessChime: playSuccessChime,
     triggerHaptic: triggerHaptic,
+    isValidAssetInventoryFormat: isValidAssetInventoryFormat,
     initAudioContext: initAudioContext,
     resetLastScannedCode: resetLastScannedCode
   };
@@ -4655,12 +4612,12 @@ window.AuditController = (function() {
           AppState.set("user", payload.user);
           AppState.set("config", payload.config);
           AppState.set("rooms", payload.rooms);
-          AppState.set("currentRoom", payload.currentRoom || "ALL");
+          AppState.set("currentRoom", payload.currentRoom || "Master_Asset");
           AppState.set("summary", payload.summary);
 
           // Populate Room Dropdown with Master Table & All Room Sheets
           if (roomSel) {
-            roomSel.innerHTML = '<option value="ALL">Master Table (All Rooms)</option>';
+            roomSel.innerHTML = '<option value="Master_Asset">Master Table (Master_Asset)</option>';
             var roomList = (Array.isArray(payload.rooms) && payload.rooms.length > 0) ? payload.rooms : (payload.roomSheetsConfig || []);
             roomList.forEach(function(r) {
               if (r === "Master_Asset" || r === "Master" || r === "ALL") return;

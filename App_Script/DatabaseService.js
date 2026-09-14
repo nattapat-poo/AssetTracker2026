@@ -1158,7 +1158,7 @@ function getMasterAuditSummary(masterSheet, roomName) {
   var stickerIdx = headers.indexOf("สติกเกอร์");
   if (stickerIdx === -1 && headers.length > 5) stickerIdx = 5;
 
-  var targetRoom = (roomName && roomName.toUpperCase() !== "ALL") ? roomName.trim().toLowerCase() : null;
+  var targetRoom = (roomName && roomName.toUpperCase() !== "ALL" && roomName !== "Master_Asset" && roomName !== "Master" && roomName !== "Master Table") ? roomName.trim().toLowerCase() : null;
 
   var total = 0;
   var verified = 0;
@@ -1350,7 +1350,7 @@ function getInitialPayload() {
   }
   var kernelRooms = getNexusRoomDirectory();
   
-  var defaultRoom = "ALL";
+  var defaultRoom = "Master_Asset";
   var initialSummary = getRoomAuditSummary(defaultRoom);
   
   return {
