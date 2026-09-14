@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.7e] - 2026-09-14
+
+### Added & Improved
+- **Version Numbering Under App Title**:
+  - Relocated version indicator (`v1.1.7e • Mobile Audit`) directly underneath `🔍 QR Asset Survey`, eliminating title horizontal crowding and preventing truncation on narrow mobile devices.
+- **Room Tab as Default Landing Tab (Center Position Preserved)**:
+  - Configured `Room` as the default landing view (`activeTab: "roster"`) so users immediately see if sheet data has loaded upon opening the app.
+  - Retained navigation tab structure: `Scan` (left) | `Room` (center, active) | `Stat` (right).
+  - Avoids premature camera permission prompts on initial app launch.
+- **Removed Discrepancy Box**:
+  - Removed "Registered to [x], but scanned in [y]" room discrepancy notification banner.
+- **Refined Action & Save Buttons**:
+  - Rearranged Save Sticker button layout with left-aligned checkmark icon and stacked Thai/English text.
+- **Mobile Native Canvas & Layout Tightening**:
+  - 430px centered mobile canvas simulator on desktop for pixel-perfect mobile-first parity.
+  - Eliminated vertical whitespace gap between tabs and filter bar.
+  - Applied universal `.app-modal-dialog` containment preventing card boundary overflow.
+  - Extended toast duration (>=5s) with tap/hover to expand.
+
 ## [1.1.6b] - 2026-09-14
 
 ### Added & Improved

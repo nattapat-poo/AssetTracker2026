@@ -1,5 +1,28 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-14 — Pre-Release v1.1.7e: Room Landing Tab, Header Versioning & Mobile Canvas
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 pre-release `v1.1.7e`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, `@9`) and Git (`git push origin main`, commit `9d2e808`).
+* **Key Visual & Architectural Implementations:**
+  - **Version Numbering Under App Title**:
+    - Moved version string (`v1.1.7e • Mobile Audit`) directly underneath `🔍 QR Asset Survey`, guaranteeing zero horizontal truncation on compact smartphone screens.
+  - **Room Tab as Default Landing Tab (Center Tab Preserved)**:
+    - Updated `AppState.html` default `activeTab: "roster"`, ensuring technicians immediately see loaded Google Sheet database items upon launch.
+    - Maintained exact 3-tab layout: `Scan` (left) | `Room` (center, active) | `Stat` (right).
+    - Prevents immediate hardware camera permission triggers on app boot.
+  - **Discrepancy Banner Removed**:
+    - Purged the location mismatch notification box from the matched asset modal.
+  - **Save Sticker Button Layout Refinement**:
+    - Left-aligned checkmark icon with stacked Thai and English text labels.
+  - **Mobile Canvas Simulator & UI Hardening**:
+    - 430px centered mobile canvas on desktop browsers.
+    - Tightened spacing between navigation tabs and room filter bar.
+    - Full modal boundary containment (`.app-modal-dialog`) preventing viewport overflow.
+    - Linger toast duration extended (>=5s) with tap/hover expandability.
+* **Verification**:
+  - 36/36 automated test suites passing in `Tools/test_core.js`.
+
 ## 2026-09-14 — Release v1.1.6b: GitHub Pages Live Google Sheets Bridge & Full Version Roll
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 rolled to version `v1.1.6b`.
