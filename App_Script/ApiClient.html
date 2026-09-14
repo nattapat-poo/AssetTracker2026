@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -36,7 +36,7 @@ window.ApiClient = (function() {
     }
   }
 
-  // 15 Rooms Configuration (v1.1.7a)
+  // 15 Rooms Configuration (v1.1.7d)
   var ROOM_SHEETS_CONFIG = [
     "Bio Prep",
     "Bio1",
@@ -175,11 +175,11 @@ window.ApiClient = (function() {
     { no: 3, assetId: "MUIDS-STR-003", itemName: "Anti-Vibration Granite Balance Table", brandModel: "Mettler Toledo VibraDamp", registeredLocation: "Storage", sheetName: "Storage", rowIndex: 8, status: "ใช้งานอยู่", scanned69: "ใช้งานอยู่", auditResult69: "ใช้งานอยู่", sticker: "ปกติ", procurementCondition: "ใช้งานได้", historicalResults: { "68": "ปกติ" }, notes: "Heavy granite surface leveled" }
   ];
 
-  // Persistent Local Storage & Fallback Real Assets (v1.1.7a)
+  // Persistent Local Storage & Fallback Real Assets (v1.1.7d)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7a");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7d");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -192,7 +192,7 @@ window.ApiClient = (function() {
   function persistAssetsCache() {
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7a", JSON.stringify(MOCK_ASSETS));
+        localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7d", JSON.stringify(MOCK_ASSETS));
       }
     } catch (e) {}
   }
@@ -317,7 +317,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.7a",
+          APP_VERSION: "v1.1.7d",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -511,8 +511,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.7a). Local mock simulation mode.",
-        appVersion: "v1.1.7a",
+        message: "Config sheet synchronized (v1.1.7d). Local mock simulation mode.",
+        appVersion: "v1.1.7d",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1

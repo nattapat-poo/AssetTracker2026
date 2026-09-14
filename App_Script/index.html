@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🔍 QR Asset Survey v1.1.7a — Lab Oops OS</title>
+  <title>🔍 QR Asset Survey v1.1.7d — Lab Oops OS</title>
   
   <!-- Font Awesome 6.5.1 (Free Icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,51 +28,52 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span class="text-slate-500">430px Canvas • v1.1.7a</span>
+    <span class="text-slate-500">430px Canvas • v1.1.7d</span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
   <div id="mobile-app-root" class="w-full max-w-[430px] min-h-screen sm:min-h-[88vh] sm:max-h-[92vh] sm:border-x sm:border-b sm:border-slate-800 sm:rounded-b-2xl sm:shadow-2xl sm:shadow-emerald-950/20 bg-slate-950 flex flex-col relative overflow-x-hidden overflow-y-auto">
 
   <!-- ==================== HEADER (Lab Oops OS Standard) ==================== -->
-  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-3.5 py-2.5">
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <div class="flex flex-col min-w-0">
-        <!-- Mandatory Ecosystem Supertitle / Subtitle -->
-        <div class="flex items-center space-x-1 text-[10px] font-mono tracking-wider mb-0.5 truncate">
-          <span class="text-emerald-400 font-bold">LAB OOPS OS</span>
+      <!-- Left: Supertitle & Non-Truncated App Title -->
+      <div class="flex flex-col min-w-0 flex-1">
+        <!-- Mandatory Ecosystem Supertitle / Subtitle (concise, never truncated) -->
+        <div class="flex items-center space-x-1 text-[10px] font-mono tracking-wider mb-0.5 whitespace-nowrap">
+          <span class="text-emerald-400 font-bold">LAB OOPS</span>
           <span class="text-slate-600">•</span>
-          <span class="text-slate-400 font-medium truncate">MUIDS — Science Dept</span>
+          <span class="text-slate-400 font-medium">MUIDS Science</span>
         </div>
         
-        <!-- Application Title with Canonical Version Badge -->
-        <h1 class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
-          <span class="truncate">🔍 QR Asset Survey</span>
-          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full shrink-0">v1.1.7a</span>
+        <!-- Application Title with Canonical Version Badge (No Truncation) -->
+        <h1 class="text-[14.5px] sm:text-base font-extrabold text-white tracking-tight flex items-center gap-1.5 whitespace-nowrap select-none">
+          <span class="whitespace-nowrap">🔍 QR Asset Survey</span>
+          <span class="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full shrink-0">v1.1.7d</span>
         </h1>
       </div>
 
-      <!-- Header Right Utilities -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <!-- Usage Stats Dashboard Button (v1.1.7a) -->
-        <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="View Usage & Audit Stats">
-          <i class="fa-solid fa-chart-pie text-sky-400"></i>
+      <!-- Header Right Utilities (compact w-8 h-8 buttons with gap-1) -->
+      <div class="flex items-center gap-1 shrink-0">
+        <!-- Usage Stats Dashboard Button (v1.1.7d) -->
+        <button id="btn-stats-modal" onclick="ModalController.openStatsModal()" class="touch-target w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="View Usage & Audit Stats">
+          <i class="fa-solid fa-chart-pie text-sky-400 text-xs"></i>
         </button>
 
         <!-- Force Sync / Refresh from Sheet Button -->
-        <button id="btn-force-refresh" onclick="ModalController.triggerForceSync()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="Force Refresh & Sync with Google Sheet">
-          <i id="btn-force-refresh-icon" class="fa-solid fa-arrows-rotate text-emerald-400 sync-refresh-icon"></i>
+        <button id="btn-force-refresh" onclick="ModalController.triggerForceSync()" class="touch-target w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="Force Refresh & Sync with Google Sheet">
+          <i id="btn-force-refresh-icon" class="fa-solid fa-arrows-rotate text-emerald-400 text-xs sync-refresh-icon"></i>
         </button>
 
         <!-- Manual Asset ID Lookup Button -->
-        <button onclick="ModalController.openManualLookupModal()" class="touch-target p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center" title="Type Asset ID Manually">
-          <i class="fa-solid fa-keyboard text-emerald-400"></i>
+        <button onclick="ModalController.openManualLookupModal()" class="touch-target w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center transition active:scale-95" title="Type Asset ID Manually">
+          <i class="fa-solid fa-keyboard text-emerald-400 text-xs"></i>
         </button>
 
         <!-- Light/Dark Mode Toggle -->
-        <button id="btn-theme-toggle" class="touch-target p-2 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white flex items-center justify-center" title="Toggle Theme">
-          <i id="theme-toggle-icon" class="fa-solid fa-sun text-amber-400"></i>
+        <button id="btn-theme-toggle" class="touch-target w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs flex items-center justify-center transition active:scale-95" title="Toggle Theme">
+          <i id="theme-toggle-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
         </button>
       </div>
 
@@ -121,29 +122,29 @@
   </section>
 
   <!-- ==================== NAVIGATION TABS ==================== -->
-  <nav class="bg-slate-950 border-b border-slate-800 px-3.5">
+  <nav class="bg-slate-950 border-b border-slate-800 px-3">
     <div class="w-full flex items-center justify-around gap-1 text-xs font-bold font-mono">
       
-      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-3 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-1.5">
+      <button id="nav-tab-scanner" data-tab="scanner" onclick="AuditController.switchTab('scanner')" class="touch-target flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-camera"></i>
-        <span>QR SCANNER</span>
+        <span>Scan</span>
       </button>
 
-      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
+      <button id="nav-tab-roster" data-tab="roster" onclick="AuditController.switchTab('roster')" class="touch-target flex-1 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-list-check"></i>
-        <span>ROOM ROSTER</span>
+        <span>Room</span>
       </button>
 
-      <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
+      <button id="nav-tab-summary" data-tab="summary" onclick="AuditController.switchTab('summary')" class="touch-target flex-1 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-chart-pie"></i>
-        <span>AUDIT STATS</span>
+        <span>Stat</span>
       </button>
 
     </div>
   </nav>
 
   <!-- ==================== MAIN CONTENT ==================== -->
-  <main class="w-full px-3.5 py-3 space-y-3.5 flex-1">
+  <main class="w-full px-3 py-2.5 space-y-3 flex-1">
 
     <!-- ==================== TAB 1: SCANNER VIEW ==================== -->
     <div id="view-scanner" class="space-y-4">
@@ -464,12 +465,16 @@
 
           <!-- Action Buttons -->
           <div class="flex gap-2">
-            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
-              ย้อนกลับ
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-arrow-left text-[11px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
-            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('card')" class="touch-target flex-1 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-sky-950/50 active:scale-[0.98] transition">
-              <i class="fa-solid fa-check"></i>
-              <span>ยืนยันและบันทึก (Save &amp; Next)</span>
+            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('card')" class="touch-target flex-1 py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-sky-950/50 active:scale-[0.98] transition select-none">
+              <i class="fa-solid fa-circle-check text-base shrink-0 text-slate-950"></i>
+              <div class="flex flex-col items-start text-left leading-tight">
+                <span class="text-xs font-extrabold tracking-tight">ยืนยันและบันทึก</span>
+                <span class="text-[10px] font-semibold text-slate-800">Save &amp; Scan Next</span>
+              </div>
             </button>
           </div>
         </div>
@@ -478,13 +483,11 @@
 
       </div>
 
-    </div>
-
     <!-- ==================== TAB 2: ROSTER & CHECKLIST ==================== -->
-    <div id="view-roster" class="space-y-4 hidden">
+    <div id="view-roster" class="space-y-3 hidden">
       
       <!-- Filter Bar & Search Box -->
-      <div class="flex flex-col sm:flex-row gap-2">
+      <div class="flex flex-col gap-2">
         
         <!-- Search Input -->
         <div class="relative flex-1">
@@ -612,14 +615,14 @@
   </main>
 
   <!-- ==================== 2-COLUMN SPLIT FOOTER (Lab Oops OS Standard) ==================== -->
-  <footer class="py-6 px-4 sm:px-6 text-xs text-slate-500 font-mono border-t border-slate-800/80 bg-slate-950 mt-12">
+  <footer class="py-5 px-4 text-xs text-slate-500 font-mono border-t border-slate-800/80 bg-slate-950 mt-6">
     <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 leading-relaxed">
       
       <!-- Left Column: App Title + Version Badge + Ecosystem & Org Credit -->
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.7a</span>
+          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.7d</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -645,8 +648,8 @@
   <!-- ==================== MODALS & DRAWERS ==================== -->
 
   <!-- 1. MANUAL ASSET ID LOOKUP MODAL -->
-  <div id="manual-lookup-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+  <div id="manual-lookup-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
+    <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-[390px] p-4 sm:p-5 space-y-4 shadow-2xl mx-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-keyboard text-emerald-400"></i>
@@ -670,8 +673,8 @@
   </div>
 
   <!-- 2. UNRECOGNIZED / UNLISTED ASSET REGISTRATION & 1-TAP AUDIT MODAL (v1.1.2a) -->
-  <div id="unrecognized-asset-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+  <div id="unrecognized-asset-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden">
+    <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-amber-500/40 rounded-2xl w-full max-w-[420px] p-4 sm:p-5 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto mx-auto">
       
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -798,8 +801,8 @@
   </div>
 
   <!-- 3. STEALTH DEVELOPER GATEWAY MODAL (Ctrl + Shift + Q / PIN: 2026) -->
-  <div id="dev-gateway-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+  <div id="dev-gateway-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden">
+    <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-[420px] p-4 sm:p-5 space-y-3.5 shadow-2xl max-h-[90vh] flex flex-col mx-auto">
       <div class="flex items-center justify-between shrink-0">
         <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
           <i class="fa-solid fa-terminal text-emerald-400"></i>
@@ -812,7 +815,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.7a</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.7d</div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -868,9 +871,9 @@
     </div>
   </div>
 
-  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.6b) -->
-  <div id="stats-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-sky-500/40 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
+  <!-- 3b. USAGE ANALYTICS & AUDIT STATS MODAL (v1.1.7d) -->
+  <div id="stats-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden">
+    <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-sky-500/40 rounded-2xl w-full max-w-[420px] p-4 sm:p-5 space-y-3.5 shadow-2xl max-h-[90vh] flex flex-col mx-auto">
       
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
@@ -974,8 +977,8 @@
   </div>
 
   <!-- 4. MATCHED ASSET DETAILS MODAL (Pop-up on QR Scan) -->
-  <div id="asset-details-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden transition-all duration-300">
-    <div onclick="event.stopPropagation()" class="bg-slate-900 border border-slate-700 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-3.5 sm:p-4 space-y-2 shadow-2xl max-h-[92vh] overflow-y-auto transform transition-transform duration-300">
+  <div id="asset-details-modal" onclick="ModalController.handleBackdropClick(event, this)" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-3 hidden transition-all duration-300">
+    <div onclick="event.stopPropagation()" class="app-modal-dialog bg-slate-900 border border-slate-700 w-full max-w-[420px] rounded-t-3xl sm:rounded-2xl p-3.5 sm:p-4 space-y-2 shadow-2xl max-h-[92vh] overflow-y-auto transform transition-transform duration-300 mx-auto">
       
       <!-- Mobile Pull-down Bar -->
       <div class="w-10 h-1 bg-slate-700 rounded-full mx-auto sm:hidden -mt-1 mb-0.5"></div>
@@ -1175,13 +1178,17 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-2 pt-0.5">
-            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
-              ย้อนกลับ
+          <div class="flex gap-2 pt-1">
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-arrow-left text-[11px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
-            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-sky-950/50 active:scale-[0.98] transition">
-              <i class="fa-solid fa-check"></i>
-              <span>ยืนยันและบันทึก (Save &amp; Scan Next)</span>
+            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('modal')" class="touch-target flex-1 py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-sky-950/50 active:scale-[0.98] transition select-none">
+              <i class="fa-solid fa-circle-check text-base shrink-0 text-slate-950"></i>
+              <div class="flex flex-col items-start text-left leading-tight">
+                <span class="text-xs font-extrabold tracking-tight">ยืนยันและบันทึก</span>
+                <span class="text-[10px] font-semibold text-slate-800">Save &amp; Scan Next</span>
+              </div>
             </button>
           </div>
         </div>

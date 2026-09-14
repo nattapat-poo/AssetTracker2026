@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.7a') throw new Error(`Expected APP_VERSION to be v1.1.7a, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.7d') throw new Error(`Expected APP_VERSION to be v1.1.7d, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.7a Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.7d Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7a') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7d') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.7a
-  if (!configJs.includes('VERSION: "v1.1.7a"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.7a in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.7d
+  if (!configJs.includes('VERSION: "v1.1.7d"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.7d in Config.js');
   }
-  if (!codeJs.includes('v1.1.7a')) {
-    throw new Error('Version must be v1.1.7a in Code.js');
+  if (!codeJs.includes('v1.1.7d')) {
+    throw new Error('Version must be v1.1.7d in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.7a')) {
-    throw new Error('Version must be v1.1.7a in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.7d')) {
+    throw new Error('Version must be v1.1.7d in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7a in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7d in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -199,9 +199,9 @@ async function runTests() {
   console.log('  Verified: Non-allowed columns (A, E, J, K, L, P, Q, R, S, T) purged. Only B, D, I, M, N, O rendered.');
 
   console.log('\n--- 11. Verifying 1-Tap UX Workflow, Extended Toast, and Non-blocking Positioning ---');
-  // Check toast duration (extended to 6000ms in v1.1.7a for mobile readability)
+  // Check toast duration (extended to 6000ms in v1.1.7b for mobile readability)
   if (!modalCtrlHtml.includes('duration = 6000')) {
-    throw new Error('ModalController default toast duration must be 6000ms in v1.1.7a!');
+    throw new Error('ModalController default toast duration must be 6000ms in v1.1.7b!');
   }
 
   // Check toast non-blocking positioning in index.html
@@ -595,7 +595,7 @@ async function runTests() {
   const modalCtrlContent = fs.readFileSync('App_Script/ModalController.html', 'utf8');
   const skillContent = fs.readFileSync('../.agents/skills/lab-oops-standards/SKILL.md', 'utf8');
 
-  // 1. Verify showToast default duration >= 3000ms (v1.1.7a sets 6000ms)
+  // 1. Verify showToast default duration >= 3000ms (v1.1.7b sets 6000ms)
   if (!modalCtrlContent.includes('duration = 6000') && !modalCtrlContent.includes('duration = 3500') && !modalCtrlContent.includes('duration = 3000')) {
     throw new Error('ModalController.showToast default duration is not >= 3000ms');
   }
@@ -775,7 +775,7 @@ async function runTests() {
   }
   console.log('  Verified: Mobile modal 1-tap action buttons match desktop card buttons without truncating.');
 
-  console.log('\n--- 35. Testing v1.1.7a Mobile Simulation Frame, Extended Toast Timer & Horizontal Filters ---');
+  console.log('\n--- 35. Testing v1.1.7b Mobile Simulator Canvas, Renamed Tabs, Modal Containment & Tightened Layout ---');
   // Check index.html mobile-app-root container & desktop simulation bar
   if (!idxHtml.includes('id="mobile-app-root"') ||
       !idxHtml.includes('max-w-[430px]') ||
@@ -783,6 +783,22 @@ async function runTests() {
     throw new Error('index.html missing mobile-app-root (430px max width) or Mobile Native Simulator header');
   }
   console.log('  Verified: Mobile Native Simulator canvas (430px) cleanly wraps app on desktop.');
+
+  // Check renamed navigation tab titles (v1.1.7d)
+  if (!idxHtml.includes('<span>Scan</span>') ||
+      !idxHtml.includes('<span>Room</span>') ||
+      !idxHtml.includes('<span>Stat</span>')) {
+    throw new Error('index.html missing renamed tabs: Scan, Room, Stat');
+  }
+  console.log('  Verified: Navigation tabs successfully renamed: "Scan", "Room", "Stat".');
+
+  // Check universal modal dialog screen containment (.app-modal-dialog)
+  const stylesHtmlV117 = fs.readFileSync('App_Script/styles.html', 'utf8');
+  if (!stylesHtmlV117.includes('.app-modal-dialog') ||
+      !idxHtml.includes('app-modal-dialog')) {
+    throw new Error('styles.html or index.html missing .app-modal-dialog containment class');
+  }
+  console.log('  Verified: Universal modal containment (.app-modal-dialog) applied to keep modals within screen bounds.');
 
   // Check ModalController toast duration
   const modalCtrlV117 = fs.readFileSync('App_Script/ModalController.html', 'utf8');
@@ -803,14 +819,40 @@ async function runTests() {
   // Check ApiClient offline pre-seeding
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7a') ||
+      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7d') ||
       !apiClientV117.includes('MUIDS-BIO-101')) {
     throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS fallback cache for GitHub Pages');
   }
   console.log('  Verified: ApiClient offline asset cache pre-seeded with 34 assets to prevent 0/0 blank state.');
 
+  console.log('\n--- 36. Testing v1.1.7d Title Non-Truncation, Location Discrepancy Box Removal & Save Button Layout ---');
+  // 1. App Title non-truncation check
+  if (!idxHtml.includes('whitespace-nowrap select-none') ||
+      !idxHtml.includes('v1.1.7d') ||
+      idxHtml.includes('<h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5 truncate')) {
+    throw new Error('index.html header title must not be truncated and must feature whitespace-nowrap with v1.1.7d badge');
+  }
+  console.log('  Verified: Header app title and version badge fit without truncation (whitespace-nowrap & compact utilities).');
+
+  // 2. Discrepancy banner removal check
+  const modalCtrl = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  const auditCtrl = fs.readFileSync('App_Script/AuditController.html', 'utf8');
+  if (modalCtrl.includes('discrepancyBanner.classList.remove("hidden")') ||
+      auditCtrl.includes('discrepancyBanner.classList.remove("hidden")')) {
+    throw new Error('Location discrepancy banner must be permanently suppressed in ModalController and AuditController');
+  }
+  console.log('  Verified: "Registered to [x], but scanned in [y]" discrepancy banner permanently removed/suppressed.');
+
+  // 3. Save sticker button rearrangement check
+  if (!idxHtml.includes('Save &amp; Scan Next') ||
+      !idxHtml.includes('fa-circle-check text-base shrink-0 text-slate-950') ||
+      !idxHtml.includes('ยืนยันและบันทึก')) {
+    throw new Error('index.html save sticker buttons must have rearranged icon (fa-circle-check) and stacked label');
+  }
+  console.log('  Verified: Save sticker button rearranged with left-aligned checkmark icon and stacked Thai/English text.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 35 TEST SUITES PASSED FOR v1.1.7a RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7d RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

@@ -1,10 +1,10 @@
 <script>
 /**
- * AuditController.html — Mobile Card, Modal Interactions, Thai Status Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
- * MUIDS Lab Oops OS — Science Department
+ * Lab Oops OS - AuditController.html
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
+ * Ecosystem Lead: Nattapat Poolyam (Mek)
+ * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
-
 window.AuditController = (function() {
   var activeAsset = null;
   var isSubmitting = false;
@@ -357,15 +357,9 @@ window.AuditController = (function() {
       }
     }
 
-    // Check location discrepancy
-    var currentRoom = AppState.get("currentRoom");
+    // Location discrepancy banner suppressed per v1.1.7d request
     var discrepancyBanner = document.getElementById("location-discrepancy-banner");
-    var discrepancyText = document.getElementById("location-discrepancy-text");
-
-    if (currentRoom && currentRoom !== "ALL" && asset.registeredLocation && asset.registeredLocation !== currentRoom) {
-      discrepancyBanner.classList.remove("hidden");
-      discrepancyText.innerText = "Registered to [" + asset.registeredLocation + "], but scanned in [" + currentRoom + "]. Found location will be recorded!";
-    } else {
+    if (discrepancyBanner) {
       discrepancyBanner.classList.add("hidden");
     }
 

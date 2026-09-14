@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.7d)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -10,7 +10,7 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.7a: 6.0s default, minimum 5.0s)
+    // Extended toast timer for mobile readability (v1.1.7d: 6.0s default, minimum 5.0s)
     if (typeof duration === "undefined" || !duration) duration = 6000;
     if (duration < 5000) duration = 5000;
 
@@ -241,15 +241,10 @@ window.ModalController = (function() {
     var currRoomElem = document.getElementById("modal-current-audit-room");
     if (currRoomElem) currRoomElem.innerText = (currentRoom === "ALL" ? "All Laboratories (Overview)" : currentRoom);
 
+    // Location discrepancy banner permanently suppressed per v1.1.7d request
     var discrepancyBanner = document.getElementById("modal-location-discrepancy-banner");
-    var discrepancyText = document.getElementById("modal-location-discrepancy-text");
-    if (discrepancyBanner && discrepancyText) {
-      if (currentRoom && currentRoom !== "ALL" && regRoom !== "Unassigned" && regRoom !== currentRoom) {
-        discrepancyBanner.classList.remove("hidden");
-        discrepancyText.innerText = "Registered to [" + regRoom + "], but scanned in [" + currentRoom + "]. Found location will be recorded!";
-      } else {
-        discrepancyBanner.classList.add("hidden");
-      }
+    if (discrepancyBanner) {
+      discrepancyBanner.classList.add("hidden");
     }
 
     // Sticker Status: Column O (สติกเกอร์)
@@ -416,7 +411,7 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7a";
+    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7d";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
