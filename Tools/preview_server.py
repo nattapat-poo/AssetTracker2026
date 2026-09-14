@@ -64,9 +64,9 @@ def run_server(port=8088):
     server_address = ("", port)
     httpd = HTTPServer(server_address, PreviewHandler)
     print(f"\n=======================================================")
-    print(f"🚀 QR Asset Survey v1.1.7e Local Preview Server Active")
-    print(f"🔗 URL: http://localhost:{port}/")
-    print(f"📂 Serving from: {APP_SCRIPT_DIR}")
+    print(f">> QR Asset Survey v1.1.7e Local Preview Server Active")
+    print(f"   URL: http://localhost:{port}/")
+    print(f"   Serving from: {APP_SCRIPT_DIR}")
     print(f"=======================================================\n")
     try:
         httpd.serve_forever()
