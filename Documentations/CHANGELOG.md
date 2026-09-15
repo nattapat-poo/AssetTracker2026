@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8l] - 2026-09-16
+
+### Added & Improved
+- **Uncapped / Non-Truncated Toasts & Activity Logs (`ModalController.html`, `AuditController.html`)**:
+  - **Zero Truncation Guarantee**: Removed all `truncate` CSS classes (`overflow: hidden; text-overflow: ellipsis; white-space: nowrap`) from toast messages and activity log entries. Replaced with `break-words whitespace-normal leading-snug`, ensuring long asset IDs, item names, error descriptions, and audit remarks are fully displayed without truncation or ellipsis.
+  - **Dynamic Card & Toast Widths**: Expanded toast containers (`rounded-2xl max-w-sm sm:max-w-md w-auto`) and activity log cards to adapt fluidly to multi-line text and long identifiers.
+  - **Dismiss Controls**: Upgraded toast notification pill with a touch-friendly dismiss button (`fa-xmark`) for immediate manual dismissal.
+- **End-to-End Audit Telemetry & Lifecycle Logging (`AuditController.html`)**:
+  - **Instant In-Flight Logging**: Submitting an audit now immediately appends an in-flight status entry to `AppState.logActivity("audit", "⏳ กำลังส่งบันทึก: " + targetAsset.assetId, ...)` before the network request leaves, providing instant visual confirmation.
+  - **Confirmed Success & Failure Logs**: Explicitly logs confirmed success (`✅ บันทึกสำเร็จ: [status]`) upon receiving `res.success === true`, or explicit failure (`❌ บันทึกไม่สำเร็จ: [error]`) on server rejection or network exception.
+  - **Extended Safety Watchdog (45s)**: Extended client submission watchdog timer from 12s to 45s (matching `ApiClient.html` 45s JSONP timeout), preventing false-positive unlocks while heavy Google Sheets row flushes are in flight, and logging a watchdog warning if reached.
+- **In-Place Master Table Summary Sync (`AuditController.html`)**:
+  - Auditing an item while viewing the Master Table (`activeRoom === "Master_Asset"`) now mutates `AppState.summary` directly in RAM (recomputing `verified`, `unverified`, and `percentComplete`), eliminating the sluggish 25-second `loadRoomData("Master_Asset")` re-fetch.
+- **Automated Test Suite (47/47 Passing)**:
+  - Added Suite 47 to `Tools/test_core.js` covering non-truncated toast and log CSS rules, 45-second watchdog alignment, full audit lifecycle logging, and in-place summary mutations.
+
 ## [1.1.8k] - 2026-09-16
 
 ### Added & Improved

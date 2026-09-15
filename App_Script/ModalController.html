@@ -48,20 +48,21 @@ window.ModalController = (function() {
       borderClass = "border-sky-500/60 bg-slate-900/95 text-slate-200 toast-info";
     }
 
-    // Floating, interactive, expand-on-hover/tap notification pill
-    toast.className = "app-toast flex items-start gap-2.5 px-4 py-2.5 rounded-full border " + borderClass + " shadow-2xl backdrop-blur-md text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md pointer-events-auto cursor-pointer select-text";
-    toast.title = "Tap to read full message / hold";
+    // Full non-truncated toast notification card (v1.1.8l)
+    toast.className = "app-toast flex items-start gap-2.5 px-4 py-3 rounded-2xl border " + borderClass + " shadow-2xl backdrop-blur-md text-xs sm:text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md w-auto pointer-events-auto cursor-pointer select-text";
+    toast.title = "Tap to dismiss / hold";
     
     var textSpan = document.createElement("span");
-    textSpan.className = "toast-message-text truncate flex-1 leading-snug";
+    textSpan.className = "toast-message-text break-words whitespace-normal flex-1 leading-snug";
     textSpan.textContent = message;
 
-    var expandIndicator = document.createElement("i");
-    expandIndicator.className = "fa-solid fa-up-right-and-down-left-from-center text-[10px] opacity-40 shrink-0 mt-0.5";
+    var dismissIndicator = document.createElement("i");
+    dismissIndicator.className = "fa-solid fa-xmark text-xs opacity-50 hover:opacity-100 shrink-0 mt-0.5 p-1 cursor-pointer transition";
+    dismissIndicator.title = "ปิดการแจ้งเตือน (Dismiss)";
 
     toast.innerHTML = iconHtml;
     toast.appendChild(textSpan);
-    toast.appendChild(expandIndicator);
+    toast.appendChild(dismissIndicator);
 
     container.appendChild(toast);
 
@@ -93,37 +94,27 @@ window.ModalController = (function() {
     var collapseOrDismiss = dismissToastNow;
 
     function expandToast() {
-      if (!isExpanded) {
-        isExpanded = true;
-        textSpan.classList.remove("truncate");
-        textSpan.classList.add("break-words", "whitespace-normal");
-        toast.classList.remove("rounded-full", "max-w-sm", "sm:max-w-md");
-        toast.classList.add("rounded-2xl", "max-w-lg", "w-full", "sm:w-auto");
-        expandIndicator.className = "fa-solid fa-xmark text-xs opacity-70 shrink-0 mt-0.5 hover:opacity-100 p-1 cursor-pointer";
-        expandIndicator.title = "ปิดการแจ้งเตือน (Dismiss)";
-      }
-      // v1.1.8b: Tapping expands and stays for 15 seconds so technician can read comfortably
+      // v1.1.8l: Always fully displayed with break-words. Tapping stays for 15s.
       startDismissTimer(15000);
     }
 
     // Explicit dismiss button
-    expandIndicator.addEventListener("click", function(e) {
+    dismissIndicator.addEventListener("click", function(e) {
       e.stopPropagation();
       dismissToastNow();
     });
 
     // Hover interactions (desktop)
     toast.addEventListener("mouseenter", function() {
-      expandToast();
+      if (dismissTimer) clearTimeout(dismissTimer);
     });
 
     toast.addEventListener("mouseleave", function() {
       startDismissTimer(6000); // 6s grace period after mouse leaves
     });
 
-    // Tap/Click interactions: Expands and prolongs timer (never disappears suddenly)
+    // Tap/Click interactions: prolongs timer (never disappears suddenly)
     toast.addEventListener("click", function(e) {
-      e.stopPropagation();
       expandToast();
     });
 

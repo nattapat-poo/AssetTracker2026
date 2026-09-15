@@ -1,12 +1,12 @@
 /**
  * Code.js — Unified API Router & Native Web App Dispatcher
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8k)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8l)
  * MUIDS Lab Oops OS — Science Department
  */
 
 function onOpen() {
   try {
-    var ver = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.VERSION) ? APP_CONFIG.VERSION : "v1.1.8k";
+    var ver = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.VERSION) ? APP_CONFIG.VERSION : "v1.1.8l";
     var ui = SpreadsheetApp.getUi();
     ui.createMenu("🚀 Lab Oops: Asset Tracker")
       .addItem("⚙️ 0. Update / Sync Config Sheet (" + ver + ")", "menuSyncConfigSheet")

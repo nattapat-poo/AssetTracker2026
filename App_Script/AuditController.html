@@ -513,7 +513,19 @@ window.AuditController = (function() {
       ScannerController.triggerHaptic();
     }
     var icon = (newStatus.indexOf("ใช้งานอยู่") === 0) ? "✅" : (newStatus.indexOf("หมดความจำเป็น") === 0 ? "⚠️" : "📋");
-    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + "...", "info", 2000);
+    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + " (" + newStatus + ")", "info", 4000);
+
+    // Immediate in-flight audit log so user sees immediate progress
+    if (AppState.logActivity) {
+      AppState.logActivity("audit", "⏳ กำลังส่งบันทึก: " + targetAsset.assetId, {
+        assetId: targetAsset.assetId,
+        itemName: extraData.renameText || targetAsset.itemName,
+        status: newStatus,
+        sticker: extraData.sticker || selectedSticker,
+        room: extraData.destinationRoom || targetAsset.registeredLocation,
+        notes: notes ? ("กำลังส่งข้อมูล: " + notes) : "กำลังส่งข้อมูลไปยัง Google Sheets"
+      });
+    }
 
     // Switch to scanner tab & resume live camera feed immediately for next scan
     if (AppState.get("activeTab") !== "scanner") {
@@ -527,14 +539,21 @@ window.AuditController = (function() {
       ScannerController.resetLastScannedCode();
     }
 
-    // Safety watchdog: reset UI locks if server call hangs or takes >12s
+    // Safety watchdog: reset UI locks if server call hangs or takes >45s
     var watchdogTimer = setTimeout(function() {
       if (isSubmitting) {
-        console.warn("[AuditController] Network request watchdog: restoring button states after 12s");
+        console.warn("[AuditController] Network request watchdog: timeout reached (45s)");
         resetSubmissionState();
-        ModalController.showToast("⚠️ การส่งข้อมูลไปยังเซิร์ฟเวอร์ใช้เวลานานกว่าปกติ ได้ปลดล็อกปุ่มแล้ว", "warning", 4000);
+        ModalController.showToast("⚠️ การส่งข้อมูลใช้เวลานานผิดปกติ กรุณาตรวจสอบการเชื่อมต่อ", "warning", 8000);
+        if (AppState.logActivity) {
+          AppState.logActivity("audit", "⚠️ ส่งข้อมูลล่าช้า: " + targetAsset.assetId, {
+            assetId: targetAsset.assetId,
+            status: "warning",
+            notes: "การส่งข้อมูลใช้เวลานานเกิน 45 วินาที กรุณาตรวจสอบการเชื่อมต่อ"
+          });
+        }
       }
-    }, 12000);
+    }, 45000);
 
     ApiClient.updateAssetStatus(payload)
       .then(function(res) {
@@ -543,12 +562,20 @@ window.AuditController = (function() {
         activeAsset = null;
 
         if (res && res.success === false) {
-          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 8000);
+          var errMsg = res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต";
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + errMsg, "error", 10000);
+          if (AppState.logActivity) {
+            AppState.logActivity("audit", "❌ บันทึกไม่สำเร็จ: " + targetAsset.assetId, {
+              assetId: targetAsset.assetId,
+              status: "error",
+              notes: errMsg
+            });
+          }
           return;
         }
 
-        // Live confirmation toast upon verified persistence
-        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 3000);
+        // Live confirmation toast upon verified persistence (full non-truncated message)
+        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 4000);
 
         // Record recent scan
         AppState.addRecentScan({
@@ -558,17 +585,17 @@ window.AuditController = (function() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
         });
 
-        // Record User Activity Log
+        // Record User Activity Log for successful save
         if (AppState.logActivity) {
           var actType = extraData.destinationRoom ? "move" : (extraData.renameText ? "rename" : "audit");
-          var actTitle = extraData.destinationRoom ? ("ย้ายห้อง ➔ " + extraData.destinationRoom) : (extraData.renameText ? "แก้ไขชื่อครุภัณฑ์" : ("บันทึก: " + newStatus));
+          var actTitle = extraData.destinationRoom ? ("ย้ายห้อง ➔ " + extraData.destinationRoom) : (extraData.renameText ? "แก้ไขชื่อครุภัณฑ์" : ("✅ บันทึกสำเร็จ: " + newStatus));
           AppState.logActivity(actType, actTitle, {
             assetId: targetAsset.assetId,
             itemName: extraData.renameText || targetAsset.itemName,
             status: newStatus,
             sticker: extraData.sticker || selectedSticker,
             room: extraData.destinationRoom || targetAsset.registeredLocation,
-            notes: notes
+            notes: notes || "บันทึกข้อมูลเรียบร้อยแล้ว"
           });
         }
 
@@ -585,9 +612,36 @@ window.AuditController = (function() {
         // Update AppState room summary only if returned summary matches active view
         var activeRoom = AppState.get("currentRoom");
         if (res && res.roomSummary && res.roomSummary.roomName === activeRoom) {
-          AppState.set("summary", res.roomSummary);
+          var curSummary = AppState.get("summary") || {};
+          var updatedSummary = Object.assign({}, curSummary, res.roomSummary);
+          if ((!res.roomSummary.items || res.roomSummary.items.length === 0) && curSummary.items) {
+            updatedSummary.items = curSummary.items;
+          }
+          AppState.set("summary", updatedSummary);
+        } else if (activeRoom === "Master_Asset") {
+          // In-place Master Table checklist summary mutation: avoids heavy 25s re-download
+          var curSummary = AppState.get("summary") || {};
+          if (curSummary && curSummary.items && curSummary.items.length > 0) {
+            var foundIdx = curSummary.items.findIndex(function(it) {
+              return it.assetId === targetAsset.assetId;
+            });
+            if (foundIdx !== -1) {
+              var oldItem = curSummary.items[foundIdx];
+              var wasVerified = oldItem.scanned69 && oldItem.scanned69 !== "-" && oldItem.scanned69 !== "Unverified";
+              var nowVerified = newStatus && newStatus !== "-" && newStatus !== "Unverified";
+              curSummary.items[foundIdx] = Object.assign({}, oldItem, targetAsset);
+              if (!wasVerified && nowVerified) {
+                curSummary.verified = (curSummary.verified || 0) + 1;
+                curSummary.unverified = Math.max(0, (curSummary.unverified || curSummary.total || 0) - 1);
+              }
+              if (curSummary.total > 0) {
+                curSummary.percentComplete = Math.round((curSummary.verified / curSummary.total) * 100);
+              }
+              AppState.set("summary", Object.assign({}, curSummary));
+            }
+          }
         } else {
-          // Re-fetch active room summary so full Master_Asset checklist is preserved
+          // Re-fetch active room summary so full room checklist is refreshed
           loadRoomData(activeRoom);
         }
       })
@@ -595,7 +649,15 @@ window.AuditController = (function() {
         clearTimeout(watchdogTimer);
         resetSubmissionState();
         activeAsset = null;
-        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + err.toString(), "error", 8000);
+        var errStr = err ? (err.message || err.toString()) : "Network error";
+        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + errStr, "error", 10000);
+        if (AppState.logActivity) {
+          AppState.logActivity("audit", "❌ บันทึกไม่สำเร็จ: " + targetAsset.assetId, {
+            assetId: targetAsset.assetId,
+            status: "error",
+            notes: errStr
+          });
+        }
       });
   }
 
@@ -968,10 +1030,10 @@ window.AuditController = (function() {
                 statusBadgeHtml +
                 stickerBadgeHtml +
               '</div>' +
-              (entry.itemName ? '<p class="text-[11px] text-slate-400 truncate mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
-              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 flex-wrap">' +
-                (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-600 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
-                (entry.notes ? '<span class="break-words text-amber-400/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
+              (entry.itemName ? '<p class="text-[11px] text-slate-300 break-words whitespace-normal leading-snug mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
+              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-400 flex-wrap">' +
+                (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-500 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
+                (entry.notes ? '<span class="break-words whitespace-normal text-amber-300/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
               '</div>' +
             '</div>' +
           '</div>' +

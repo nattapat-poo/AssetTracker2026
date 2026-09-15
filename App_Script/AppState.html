@@ -6,8 +6,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8k";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8j";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8l";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8k";
 
   var initialLogs = (function() {
     try {
@@ -84,14 +84,14 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8k";
+    var CURRENT_RELEASE = "v1.1.8l";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
       // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
           cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1 &&
-          cfgVer.indexOf("1.1.8i") === -1 && cfgVer.indexOf("1.1.8j") === -1) {
+          cfgVer.indexOf("1.1.8i") === -1 && cfgVer.indexOf("1.1.8j") === -1 && cfgVer.indexOf("1.1.8k") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }

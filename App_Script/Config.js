@@ -6,7 +6,7 @@
  */
 
 var APP_CONFIG = {
-  VERSION: "v1.1.8k",
+  VERSION: "v1.1.8l",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };

@@ -1,4 +1,4 @@
-# 🔍 Project 08: QR-Based Mobile Asset Survey App (v1.1.8k)
+# 🔍 Project 08: QR-Based Mobile Asset Survey App (v1.1.8l)
 ### MUIDS Lab Oops OS — Science Department
 
 > **Zero-install multi-modal camera QR scanner with a Hybrid Master Table Architecture & dynamic multi-sheet migration to inspect, query, and update science laboratory procurement assets in real-time.**
@@ -9,7 +9,7 @@
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Organization:** MUIDS — Science Department
 * **Ecosystem:** [Lab Oops OS](file:///c:/Users/MUIDS/Documents/Projects/Lab%20Oops/Master_Architecture_Nexus_DB.md)
-* **Version:** `v1.1.8k`
+* **Version:** `v1.1.8l`
 * **Target Spreadsheet ID:** `18LGXn6JbjFeiVuKlrh0CvJ79M3mpsKTVbc0FJx8LuOk`
 * **Target Audience:** Science Laboratory Technicians (`LabTech`) & Teaching Assistants (`TA`)
 * **Target Window:** Annual September Procurement Inventory Survey (AY 2569 / 2026)

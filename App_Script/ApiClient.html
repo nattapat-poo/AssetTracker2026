@@ -116,7 +116,7 @@ window.ApiClient = (function() {
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8l") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8k", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8l", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -142,6 +142,7 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8l");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8k");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8j");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
@@ -290,7 +291,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8k",
+          APP_VERSION: "v1.1.8l",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,

@@ -69,7 +69,7 @@ function getActorEmailSafe() {
  */
 function getAuthorizedUsers() {
   var cache = CacheService.getScriptCache();
-  var cacheKey = "AUTHORIZED_USERS_CACHE_v1.1.8k";
+  var cacheKey = "AUTHORIZED_USERS_CACHE_v1.1.8l";
   var cached = cache ? cache.get(cacheKey) : null;
   if (cached) {
     try { return JSON.parse(cached); } catch (e) {}

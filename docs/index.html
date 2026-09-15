@@ -702,7 +702,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8k</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8l</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -755,7 +755,7 @@
     <div class="w-full flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60 select-none">
       <!-- Left: Semantic Version Badge -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8k • Mobile Audit</span>
+        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8l • Mobile Audit</span>
       </div>
 
       <!-- Right: Active Logged-in User Identity Pill (Never hidden or clipped) -->
@@ -1405,7 +1405,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8k</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8l</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -2082,8 +2082,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8k";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8j";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8l";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8k";
 
   var initialLogs = (function() {
     try {
@@ -2160,14 +2160,14 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8k";
+    var CURRENT_RELEASE = "v1.1.8l";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
       // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
           cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1 &&
-          cfgVer.indexOf("1.1.8i") === -1 && cfgVer.indexOf("1.1.8j") === -1) {
+          cfgVer.indexOf("1.1.8i") === -1 && cfgVer.indexOf("1.1.8j") === -1 && cfgVer.indexOf("1.1.8k") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }
@@ -2494,7 +2494,7 @@ window.ApiClient = (function() {
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8l") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2510,7 +2510,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8k", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8l", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2520,6 +2520,7 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8l");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8k");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8j");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
@@ -2668,7 +2669,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8k",
+          APP_VERSION: "v1.1.8l",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -3173,20 +3174,21 @@ window.ModalController = (function() {
       borderClass = "border-sky-500/60 bg-slate-900/95 text-slate-200 toast-info";
     }
 
-    // Floating, interactive, expand-on-hover/tap notification pill
-    toast.className = "app-toast flex items-start gap-2.5 px-4 py-2.5 rounded-full border " + borderClass + " shadow-2xl backdrop-blur-md text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md pointer-events-auto cursor-pointer select-text";
-    toast.title = "Tap to read full message / hold";
+    // Full non-truncated toast notification card (v1.1.8l)
+    toast.className = "app-toast flex items-start gap-2.5 px-4 py-3 rounded-2xl border " + borderClass + " shadow-2xl backdrop-blur-md text-xs sm:text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md w-auto pointer-events-auto cursor-pointer select-text";
+    toast.title = "Tap to dismiss / hold";
     
     var textSpan = document.createElement("span");
-    textSpan.className = "toast-message-text truncate flex-1 leading-snug";
+    textSpan.className = "toast-message-text break-words whitespace-normal flex-1 leading-snug";
     textSpan.textContent = message;
 
-    var expandIndicator = document.createElement("i");
-    expandIndicator.className = "fa-solid fa-up-right-and-down-left-from-center text-[10px] opacity-40 shrink-0 mt-0.5";
+    var dismissIndicator = document.createElement("i");
+    dismissIndicator.className = "fa-solid fa-xmark text-xs opacity-50 hover:opacity-100 shrink-0 mt-0.5 p-1 cursor-pointer transition";
+    dismissIndicator.title = "ปิดการแจ้งเตือน (Dismiss)";
 
     toast.innerHTML = iconHtml;
     toast.appendChild(textSpan);
-    toast.appendChild(expandIndicator);
+    toast.appendChild(dismissIndicator);
 
     container.appendChild(toast);
 
@@ -3218,37 +3220,27 @@ window.ModalController = (function() {
     var collapseOrDismiss = dismissToastNow;
 
     function expandToast() {
-      if (!isExpanded) {
-        isExpanded = true;
-        textSpan.classList.remove("truncate");
-        textSpan.classList.add("break-words", "whitespace-normal");
-        toast.classList.remove("rounded-full", "max-w-sm", "sm:max-w-md");
-        toast.classList.add("rounded-2xl", "max-w-lg", "w-full", "sm:w-auto");
-        expandIndicator.className = "fa-solid fa-xmark text-xs opacity-70 shrink-0 mt-0.5 hover:opacity-100 p-1 cursor-pointer";
-        expandIndicator.title = "ปิดการแจ้งเตือน (Dismiss)";
-      }
-      // v1.1.8b: Tapping expands and stays for 15 seconds so technician can read comfortably
+      // v1.1.8l: Always fully displayed with break-words. Tapping stays for 15s.
       startDismissTimer(15000);
     }
 
     // Explicit dismiss button
-    expandIndicator.addEventListener("click", function(e) {
+    dismissIndicator.addEventListener("click", function(e) {
       e.stopPropagation();
       dismissToastNow();
     });
 
     // Hover interactions (desktop)
     toast.addEventListener("mouseenter", function() {
-      expandToast();
+      if (dismissTimer) clearTimeout(dismissTimer);
     });
 
     toast.addEventListener("mouseleave", function() {
       startDismissTimer(6000); // 6s grace period after mouse leaves
     });
 
-    // Tap/Click interactions: Expands and prolongs timer (never disappears suddenly)
+    // Tap/Click interactions: prolongs timer (never disappears suddenly)
     toast.addEventListener("click", function(e) {
-      e.stopPropagation();
       expandToast();
     });
 
@@ -5058,7 +5050,19 @@ window.AuditController = (function() {
       ScannerController.triggerHaptic();
     }
     var icon = (newStatus.indexOf("ใช้งานอยู่") === 0) ? "✅" : (newStatus.indexOf("หมดความจำเป็น") === 0 ? "⚠️" : "📋");
-    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + "...", "info", 2000);
+    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + " (" + newStatus + ")", "info", 4000);
+
+    // Immediate in-flight audit log so user sees immediate progress
+    if (AppState.logActivity) {
+      AppState.logActivity("audit", "⏳ กำลังส่งบันทึก: " + targetAsset.assetId, {
+        assetId: targetAsset.assetId,
+        itemName: extraData.renameText || targetAsset.itemName,
+        status: newStatus,
+        sticker: extraData.sticker || selectedSticker,
+        room: extraData.destinationRoom || targetAsset.registeredLocation,
+        notes: notes ? ("กำลังส่งข้อมูล: " + notes) : "กำลังส่งข้อมูลไปยัง Google Sheets"
+      });
+    }
 
     // Switch to scanner tab & resume live camera feed immediately for next scan
     if (AppState.get("activeTab") !== "scanner") {
@@ -5072,14 +5076,21 @@ window.AuditController = (function() {
       ScannerController.resetLastScannedCode();
     }
 
-    // Safety watchdog: reset UI locks if server call hangs or takes >12s
+    // Safety watchdog: reset UI locks if server call hangs or takes >45s
     var watchdogTimer = setTimeout(function() {
       if (isSubmitting) {
-        console.warn("[AuditController] Network request watchdog: restoring button states after 12s");
+        console.warn("[AuditController] Network request watchdog: timeout reached (45s)");
         resetSubmissionState();
-        ModalController.showToast("⚠️ การส่งข้อมูลไปยังเซิร์ฟเวอร์ใช้เวลานานกว่าปกติ ได้ปลดล็อกปุ่มแล้ว", "warning", 4000);
+        ModalController.showToast("⚠️ การส่งข้อมูลใช้เวลานานผิดปกติ กรุณาตรวจสอบการเชื่อมต่อ", "warning", 8000);
+        if (AppState.logActivity) {
+          AppState.logActivity("audit", "⚠️ ส่งข้อมูลล่าช้า: " + targetAsset.assetId, {
+            assetId: targetAsset.assetId,
+            status: "warning",
+            notes: "การส่งข้อมูลใช้เวลานานเกิน 45 วินาที กรุณาตรวจสอบการเชื่อมต่อ"
+          });
+        }
       }
-    }, 12000);
+    }, 45000);
 
     ApiClient.updateAssetStatus(payload)
       .then(function(res) {
@@ -5088,12 +5099,20 @@ window.AuditController = (function() {
         activeAsset = null;
 
         if (res && res.success === false) {
-          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 8000);
+          var errMsg = res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต";
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + errMsg, "error", 10000);
+          if (AppState.logActivity) {
+            AppState.logActivity("audit", "❌ บันทึกไม่สำเร็จ: " + targetAsset.assetId, {
+              assetId: targetAsset.assetId,
+              status: "error",
+              notes: errMsg
+            });
+          }
           return;
         }
 
-        // Live confirmation toast upon verified persistence
-        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 3000);
+        // Live confirmation toast upon verified persistence (full non-truncated message)
+        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 4000);
 
         // Record recent scan
         AppState.addRecentScan({
@@ -5103,17 +5122,17 @@ window.AuditController = (function() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
         });
 
-        // Record User Activity Log
+        // Record User Activity Log for successful save
         if (AppState.logActivity) {
           var actType = extraData.destinationRoom ? "move" : (extraData.renameText ? "rename" : "audit");
-          var actTitle = extraData.destinationRoom ? ("ย้ายห้อง ➔ " + extraData.destinationRoom) : (extraData.renameText ? "แก้ไขชื่อครุภัณฑ์" : ("บันทึก: " + newStatus));
+          var actTitle = extraData.destinationRoom ? ("ย้ายห้อง ➔ " + extraData.destinationRoom) : (extraData.renameText ? "แก้ไขชื่อครุภัณฑ์" : ("✅ บันทึกสำเร็จ: " + newStatus));
           AppState.logActivity(actType, actTitle, {
             assetId: targetAsset.assetId,
             itemName: extraData.renameText || targetAsset.itemName,
             status: newStatus,
             sticker: extraData.sticker || selectedSticker,
             room: extraData.destinationRoom || targetAsset.registeredLocation,
-            notes: notes
+            notes: notes || "บันทึกข้อมูลเรียบร้อยแล้ว"
           });
         }
 
@@ -5130,9 +5149,36 @@ window.AuditController = (function() {
         // Update AppState room summary only if returned summary matches active view
         var activeRoom = AppState.get("currentRoom");
         if (res && res.roomSummary && res.roomSummary.roomName === activeRoom) {
-          AppState.set("summary", res.roomSummary);
+          var curSummary = AppState.get("summary") || {};
+          var updatedSummary = Object.assign({}, curSummary, res.roomSummary);
+          if ((!res.roomSummary.items || res.roomSummary.items.length === 0) && curSummary.items) {
+            updatedSummary.items = curSummary.items;
+          }
+          AppState.set("summary", updatedSummary);
+        } else if (activeRoom === "Master_Asset") {
+          // In-place Master Table checklist summary mutation: avoids heavy 25s re-download
+          var curSummary = AppState.get("summary") || {};
+          if (curSummary && curSummary.items && curSummary.items.length > 0) {
+            var foundIdx = curSummary.items.findIndex(function(it) {
+              return it.assetId === targetAsset.assetId;
+            });
+            if (foundIdx !== -1) {
+              var oldItem = curSummary.items[foundIdx];
+              var wasVerified = oldItem.scanned69 && oldItem.scanned69 !== "-" && oldItem.scanned69 !== "Unverified";
+              var nowVerified = newStatus && newStatus !== "-" && newStatus !== "Unverified";
+              curSummary.items[foundIdx] = Object.assign({}, oldItem, targetAsset);
+              if (!wasVerified && nowVerified) {
+                curSummary.verified = (curSummary.verified || 0) + 1;
+                curSummary.unverified = Math.max(0, (curSummary.unverified || curSummary.total || 0) - 1);
+              }
+              if (curSummary.total > 0) {
+                curSummary.percentComplete = Math.round((curSummary.verified / curSummary.total) * 100);
+              }
+              AppState.set("summary", Object.assign({}, curSummary));
+            }
+          }
         } else {
-          // Re-fetch active room summary so full Master_Asset checklist is preserved
+          // Re-fetch active room summary so full room checklist is refreshed
           loadRoomData(activeRoom);
         }
       })
@@ -5140,7 +5186,15 @@ window.AuditController = (function() {
         clearTimeout(watchdogTimer);
         resetSubmissionState();
         activeAsset = null;
-        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + err.toString(), "error", 8000);
+        var errStr = err ? (err.message || err.toString()) : "Network error";
+        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + errStr, "error", 10000);
+        if (AppState.logActivity) {
+          AppState.logActivity("audit", "❌ บันทึกไม่สำเร็จ: " + targetAsset.assetId, {
+            assetId: targetAsset.assetId,
+            status: "error",
+            notes: errStr
+          });
+        }
       });
   }
 
@@ -5513,10 +5567,10 @@ window.AuditController = (function() {
                 statusBadgeHtml +
                 stickerBadgeHtml +
               '</div>' +
-              (entry.itemName ? '<p class="text-[11px] text-slate-400 truncate mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
-              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 flex-wrap">' +
-                (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-600 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
-                (entry.notes ? '<span class="break-words text-amber-400/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
+              (entry.itemName ? '<p class="text-[11px] text-slate-300 break-words whitespace-normal leading-snug mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
+              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-400 flex-wrap">' +
+                (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-500 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
+                (entry.notes ? '<span class="break-words whitespace-normal text-amber-300/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
               '</div>' +
             '</div>' +
           '</div>' +

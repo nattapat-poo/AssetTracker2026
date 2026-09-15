@@ -1,6 +1,36 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
-## 2026-09-16 — Release v1.1.8k: Live Save Pipeline & Sync Audit Hardening
+## 2026-09-16 — Release v1.1.8l: Non-Truncated Toasts/Logs & Full Save Telemetry
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8l`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, redeploy canonical deployment @23) and Git (`git push origin main`, tag `v1.1.8l`).
+* **Root Cause Analyses & System Polish**:
+  1. **RCA: Why the User Saw `กำลังบันทึก...` but No `บันทึกสำเร็จ` in Logs**:
+     - *Observation*: User inspected the Activity Log under the "Stat" tab almost immediately after saving (`04:16:21`). The log displayed `"⏳ กำลังบันทึก [id]..."`, but no subsequent `"บันทึกสำเร็จ"` entry appeared.
+     - *Root Cause 1 (In-Flight String Mirroring)*: In `v1.1.8k`, the in-flight toast message was `"⏳ กำลังบันทึก " + targetAsset.assetId + "..."`. Because `ModalController.showToast` logged to `AppState.logActivity("toast", ...)`, the activity log recorded this string verbatim with `...`.
+     - *Root Cause 2 (Client Watchdog Racing GAS Flush)*: The watchdog timer in `AuditController.html` was set to only 12 seconds (`12000` ms). When Google Apps Script took >12s due to Master Table spreadsheet flushes, the watchdog fired early, unlocking buttons but failing to log confirmed success or failure.
+     - *Root Cause 3 (Missing Lifecycle Activity Logs)*: In `AuditController.html`, `AppState.logActivity` was only called by `showToast()`. If toast logging was suppressed or delayed, the Activity Log lacked explicit `audit` category entries for in-flight, confirmed success, or failure.
+     - *Resolution*:
+       - Watchdog extended from 12s to 45s (matching `ApiClient.html` 45s JSONP timeout).
+       - Explicit in-flight logging: `AppState.logActivity("audit", "⏳ กำลังส่งบันทึก: " + targetAsset.assetId, ...)` immediately before network dispatch.
+       - Explicit success logging: `AppState.logActivity("audit", "✅ บันทึกสำเร็จ: " + newStatus, ...)` upon receiving `res.success === true`.
+       - Explicit failure logging: `AppState.logActivity("audit", "❌ บันทึกไม่สำเร็จ: " + (res.error || ...), ...)` on server error or network exception.
+  2. **RCA: Toast & Activity Log Truncation**:
+     - *Issue Reported*: User noted: "the log+toast truncated, make it fully display without truncated or shortend, just display everything".
+     - *Root Cause*:
+       - In `ModalController.html`, `textSpan.className = "toast-message-text truncate flex-1 leading-snug"`. The Tailwind `truncate` class enforced `overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`, cutting off any message longer than the toast pill.
+       - In `AuditController.html`, `<p class="text-[11px] text-slate-400 truncate mt-0.5">` on `entry.itemName` truncated long item descriptions in the Activity Log list.
+     - *Resolution*:
+       - Removed all `truncate` classes from toast message elements and activity log items.
+       - Applied `break-words whitespace-normal leading-snug` to all text spans.
+       - Expanded toast containers (`rounded-2xl max-w-sm sm:max-w-md w-auto`) and added an accessible dismiss button (`fa-xmark`).
+  3. **Master Table Summary Mutation Optimization**:
+     - When auditing from the Master Table view (`activeRoom === "Master_Asset"`), `AuditController.html` previously skipped `loadRoomData(activeRoom)` to avoid a heavy 25s download, but left `AppState.summary` un-updated.
+     - Now performs in-place RAM mutation on `AppState.summary.items` and recalculates verified/unverified totals, updating the UI counter instantly with 0 latency.
+* **Automated Verification**:
+  - Suite 47 added to `Tools/test_core.js`.
+  - 100% pass rate across all 47 test suites.
+
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8k`.
 * **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, redeploy canonical deployment @22) and Git (`git push origin main`, tag `v1.1.8k`).
