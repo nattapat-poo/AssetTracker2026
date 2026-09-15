@@ -19,7 +19,7 @@
   <!-- Modular Embedded Sub-views & Styles -->
   <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8d Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8f Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -702,7 +702,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8d</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8f</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -712,7 +712,7 @@
   <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8d) -->
+      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8f) -->
       <div class="flex flex-col min-w-0 flex-1">
         <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
         <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
@@ -728,7 +728,7 @@
 
         <!-- Version numbering & Mahidol User Verification under the app title -->
         <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8d</span>
+          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8f</span>
           <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="Mahidol User Verification">
             <i id="header-user-icon" class="fa-solid fa-shield-check text-[9px] text-emerald-400"></i>
             <span id="header-user-text" class="text-[9px] font-semibold text-slate-300">Mahidol Verified</span>
@@ -1347,8 +1347,30 @@
       </div>
 
       <!-- Quick Action Cards -->
-      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono">System &amp; Sync Utilities</h4>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+            <i class="fa-solid fa-screwdriver-wrench text-amber-400"></i>
+            <span>System &amp; Sync Utilities</span>
+          </h4>
+          <span class="text-[10px] text-slate-500 font-mono">v1.1.8f</span>
+        </div>
+
+        <!-- Total Flush Cache Action Banner / Primary Button -->
+        <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div class="space-y-0.5">
+            <div class="text-xs font-bold text-rose-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-fire text-rose-400"></i>
+              <span>Total Flush &amp; Clear All Cache</span>
+            </div>
+            <p class="text-[11px] text-slate-400">ล้างแคชทั้งหมดในเครื่องและบน Server พร้อมโหลดข้อมูลใหม่ทันที</p>
+          </div>
+          <button id="btn-total-flush-cache" onclick="ModalController.triggerTotalFlushCache()" class="touch-target shrink-0 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-950/40 flex items-center justify-center gap-2 transition cursor-pointer">
+            <i class="fa-solid fa-broom"></i>
+            <span>ล้างแคชระบบทั้งหมด</span>
+          </button>
+        </div>
+
         <div class="flex flex-wrap gap-2 pt-1">
           <button onclick="ModalController.triggerFlushCache()" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2">
             <i class="fa-solid fa-arrows-rotate text-emerald-400"></i> Refresh Sheet Index &amp; Cache
@@ -1371,7 +1393,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8d</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8f</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1564,7 +1586,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8d</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8f</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -1609,11 +1631,14 @@
         </div>
       </div>
 
-      <div class="pt-3 border-t border-slate-800 flex gap-2 shrink-0">
-        <button onclick="ModalController.triggerFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-          Flush Caches
+      <div class="pt-3 border-t border-slate-800 flex flex-wrap gap-2 shrink-0">
+        <button onclick="ModalController.triggerTotalFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-broom"></i> Total Flush
         </button>
-        <button onclick="ModalController.closeDeveloperModal()" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+        <button onclick="ModalController.triggerFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+          Flush Server Cache
+        </button>
+        <button onclick="ModalController.closeDeveloperModal()" class="touch-target px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
           Close
         </button>
       </div>
@@ -2037,13 +2062,13 @@
   <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8d";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8b";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8f";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8e";
 
   var initialLogs = (function() {
     try {
@@ -2123,7 +2148,7 @@ window.AppState = (function() {
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       return String(state.config.APP_VERSION).trim();
     }
-    return "v1.1.8d";
+    return "v1.1.8f";
   }
 
   function applyGlobalVersion(ver) {
@@ -2291,7 +2316,7 @@ window.AppState = (function() {
   <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2309,40 +2334,41 @@ window.ApiClient = (function() {
     try {
       if (typeof window !== "undefined" && window.location) {
         var params = new URLSearchParams(window.location.search);
-        var qUrl = params.get("gas_url");
-        if (qUrl && qUrl.trim() !== "") return qUrl.trim();
+        var urlParam = params.get("endpoint");
+        if (urlParam) return urlParam;
       }
-      var stored = localStorage.getItem("MUIDS_GAS_WEBAPP_URL");
-      if (stored && stored.trim() !== "") return stored.trim();
     } catch (e) {}
     return LIVE_GAS_WEBAPP_URL;
   }
 
+  function getActiveEndpoint() {
+    return getGasEndpointUrl();
+  }
+
   function setGasEndpointUrl(url) {
-    if (!url || url.trim() === "") {
-      localStorage.removeItem("MUIDS_GAS_WEBAPP_URL");
-    } else {
-      localStorage.setItem("MUIDS_GAS_WEBAPP_URL", url.trim());
+    if (url && typeof url === "string" && url.trim()) {
+      LIVE_GAS_WEBAPP_URL = url.trim();
     }
   }
 
-  // 15 Rooms Configuration (v1.1.7f)
+  var setEndpointOverride = setGasEndpointUrl;
+
   var ROOM_SHEETS_CONFIG = [
-    "Bio Prep",
-    "Bio1",
-    "Bio2",
-    "Chem Pre",
-    "Chem1",
-    "Chem2",
-    "Physics P",
-    "Physics1",
-    "Physics2",
-    "Mobile",
-    "Science",
-    "ปาณิษา",
-    "ชำรุด",
-    "ไม่ใช้งาน",
-    "Storage"
+    { roomName: "Bio1", displayName: "Bio1 (Biology 1)", department: "Science" },
+    { roomName: "Bio2", displayName: "Bio2 (Biology 2)", department: "Science" },
+    { roomName: "Chem1", displayName: "Chem1 (Chemistry 1)", department: "Science" },
+    { roomName: "Chem2", displayName: "Chem2 (Chemistry 2)", department: "Science" },
+    { roomName: "Physics1", displayName: "Physics1 (Physics 1)", department: "Science" },
+    { roomName: "Physics2", displayName: "Physics2 (Physics 2)", department: "Science" },
+    { roomName: "GeneralSci1", displayName: "GeneralSci1 (General Science 1)", department: "Science" },
+    { roomName: "GeneralSci2", displayName: "GeneralSci2 (General Science 2)", department: "Science" },
+    { roomName: "PrepRoom1", displayName: "PrepRoom1 (Preparation Room 1)", department: "Science" },
+    { roomName: "PrepRoom2", displayName: "PrepRoom2 (Preparation Room 2)", department: "Science" },
+    { roomName: "ComputerLab1", displayName: "ComputerLab1 (Computer Lab 1)", department: "IT" },
+    { roomName: "ComputerLab2", displayName: "ComputerLab2 (Computer Lab 2)", department: "IT" },
+    { roomName: "RoboticsLab", displayName: "RoboticsLab (Robotics Lab)", department: "STEM" },
+    { roomName: "FabLab", displayName: "FabLab (Fabrication Lab)", department: "Design" },
+    { roomName: "StorageSci", displayName: "StorageSci (Science Storage)", department: "Science" }
   ];
 
   // 3 Color-Coded Status Option Groups (v1.1.2b)
@@ -2380,13 +2406,12 @@ window.ApiClient = (function() {
   var STATUS_OPTIONS = [
     "ใช้งานอยู่",
     "ใช้งานอยู่แต่ชำรุดนะ",
-    "ใช้งานอยู่+ย้ายไป...",
-    "ใช้งานอยู่+แก้ไขชื่อเป็น...",
-    "หมดความจำเป็นต้องใช้งาน",
-    "หมดความจำเป็นต้องใช้งานเพราะชำรุด",
+    "ชำรุดรอซ่อม",
+    "ชำรุดรอจำหน่าย",
+    "รอจำหน่าย",
     "สูญหาย",
-    "หาไม่เจอ",
-    "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน",
+    "โอนย้ายแล้ว",
+    "ไม่พบในการสำรวจ",
     "งง+ให้พัสดุมาตรวจสอบหน้างาน"
   ];
 
@@ -2402,11 +2427,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8d)
+  // Persistent Local Storage of REAL Assets (v1.1.8f)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8d") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8b");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8f") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8e");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2422,8 +2447,19 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8d", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8f", JSON.stringify(data));
         }
+      }
+    } catch (e) {}
+  }
+
+  function clearLocalCache() {
+    try {
+      MOCK_ASSETS = [];
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8f");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8e");
+        localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
       }
     } catch (e) {}
   }
@@ -2555,7 +2591,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8d",
+          APP_VERSION: "v1.1.8f",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2747,7 +2783,7 @@ window.ApiClient = (function() {
     }
 
     if (action === "syncConfigSheet") {
-      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
+      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
       return {
         success: true,
         message: "Config sheet synchronized (" + syncVer + "). Local mock simulation mode.",
@@ -2808,15 +2844,36 @@ window.ApiClient = (function() {
 
     if (action === "verifyMahidolUser") {
       var email = String(payload.email || "nattapat.poo@mahidol.ac.th").toLowerCase().trim();
-      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu"));
+      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu") || email.endsWith("@student.mahidol.ac.th"));
+      
+      var MASTER_USER_REGISTRY = {
+        "nattapat.poo@mahidol.ac.th": { name: "Nattapat Poolyam (Mek)", nickname: "Mek", role: "SuperAdmin", isAdmin: true, isSuperAdmin: true },
+        "nattasuda.yaw@mahidol.ac.th": { name: "Nattasuda Yawichai (Mai)", nickname: "Mai", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "rawinsiwat.dec@mahidol.ac.th": { name: "Rawinsiwat Dechpala (Win)", nickname: "Win", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "panisa.lue@mahidol.ac.th": { name: "Panisa Luewattananukul (Fern)", nickname: "Fern", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "thanaphat.cha@mahidol.ac.th": { name: "Thanaphat Chaimongkol (Kris)", nickname: "Kris", role: "Admin", isAdmin: true, isSuperAdmin: false }
+      };
+
+      var matched = MASTER_USER_REGISTRY[email];
+      var isAuthorized = isMahidol && (!!matched || email === "nattapat.poo@mahidol.ac.th");
+      var role = matched ? matched.role : (isMahidol ? "Auditor" : "Guest");
+      var name = matched ? matched.name : (email.split("@")[0]);
+      var isAdmin = matched ? matched.isAdmin : false;
+      var isSuperAdmin = matched ? matched.isSuperAdmin : false;
+
       return {
         email: email,
-        name: email.split("@")[0],
-        role: "Auditor",
+        name: name,
+        nickname: matched ? matched.nickname : "",
+        role: role,
+        isAdmin: isAdmin,
+        isSuperAdmin: isSuperAdmin,
+        isTALT: isAuthorized,
         isMahidolAccount: isMahidol,
-        isNexusAuthorized: isMahidol,
-        isVerified: isMahidol,
-        authStatus: isMahidol ? "VERIFIED" : "EXTERNAL_ACCOUNT"
+        isNexusAuthorized: isAuthorized,
+        isVerified: isAuthorized,
+        authStatus: isAuthorized ? "VERIFIED" : (isMahidol ? "UNREGISTERED_MAHIDOL" : "EXTERNAL_ACCOUNT"),
+        primarySubject: "Science"
       };
     }
 
@@ -2881,6 +2938,7 @@ window.ApiClient = (function() {
       MOCK_ASSETS = Array.isArray(assets) ? assets.slice() : [];
       return MOCK_ASSETS.length;
     },
+    clearLocalCache: clearLocalCache,
     invoke: invoke,
     getInitialPayload: function() { return invoke("getInitialPayload", {}); },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },
@@ -2961,17 +3019,21 @@ window.ThemeController = (function() {
 
   <script>
 /**
- * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * ModalController.html — Dialog, Drawer & UI Interactivity Layer
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.ModalController = (function() {
+  var activeTimer = null;
+  var currentLookupCode = "";
+  var developerClickCount = 0;
+  var developerClickTimer = null;
 
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.8d: 8.5s default, minimum 6.5s)
+    // Extended toast timer for mobile readability (v1.1.8f: 8.5s default, minimum 6.5s)
     if (typeof duration === "undefined" || !duration) duration = 8500;
     if (duration < 6500) duration = 6500;
 
@@ -3386,8 +3448,98 @@ window.ModalController = (function() {
       });
   }
 
+  function triggerTotalFlushCache() {
+    var btn = document.getElementById("btn-total-flush-cache");
+    var originalBtnHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>กำลังล้างแคช...</span>';
+    }
+
+    showToast("🧹 กำลังล้างแคชทั้งหมด (Client & Server)...", "info", 5000);
+
+    // 1. Purge client-side local & session storage
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && (key.indexOf("MUIDS_ASSET_CACHE") === 0 || key.indexOf("MUIDS_INITIAL_PAYLOAD") === 0)) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+      }
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.clear();
+      }
+    } catch (storageErr) {
+      console.warn("[CACHE] Local storage purge warning:", storageErr);
+    }
+
+    // 2. Clear ApiClient memory caches if available
+    if (window.ApiClient && typeof window.ApiClient.clearLocalCache === "function") {
+      window.ApiClient.clearLocalCache();
+    }
+
+    // 3. Flush server-side multi-tier caches (CacheService + PropertiesService)
+    ApiClient.flushCache()
+      .then(function() {
+        // 4. Re-fetch fresh live initial payload
+        return ApiClient.getInitialPayload();
+      })
+      .then(function(freshPayload) {
+        if (freshPayload) {
+          try {
+            localStorage.setItem("MUIDS_INITIAL_PAYLOAD_CACHE", JSON.stringify(freshPayload));
+          } catch (e) {}
+
+          if (freshPayload.summary && window.AppState) window.AppState.set("summary", freshPayload.summary);
+          if (freshPayload.config && window.AppState) window.AppState.set("config", freshPayload.config);
+          if (freshPayload.rooms && window.AppState) window.AppState.set("rooms", freshPayload.rooms);
+          if (freshPayload.config && freshPayload.config.appVersion && window.AppState && typeof window.AppState.applyGlobalVersion === "function") {
+            window.AppState.applyGlobalVersion(freshPayload.config.appVersion);
+          }
+
+          // Re-render summary stat cards in Stat tab
+          var t = document.getElementById("summary-stat-total");
+          var u = document.getElementById("summary-stat-unverified");
+          var g = document.getElementById("summary-stat-good");
+          var d = document.getElementById("summary-stat-damaged");
+          var m = document.getElementById("summary-stat-missing");
+          if (freshPayload.summary) {
+            if (t) t.innerText = freshPayload.summary.total || 0;
+            if (u) u.innerText = (freshPayload.summary.unverified !== undefined ? freshPayload.summary.unverified : ((freshPayload.summary.total || 0) - (freshPayload.summary.verified || 0)));
+            if (g) g.innerText = freshPayload.summary.good || 0;
+            if (d) d.innerText = freshPayload.summary.damaged || 0;
+            if (m) m.innerText = freshPayload.summary.missing || 0;
+          }
+
+          if (window.AuditController && typeof window.AuditController.renderActivityLogs === "function") {
+            window.AuditController.renderActivityLogs();
+          }
+        }
+
+        if (window.AppState && typeof window.AppState.logActivity === "function") {
+          window.AppState.logActivity("sync", "Total Flush & Clear Cache", { notes: "Client + Server caches wiped & reloaded" });
+        }
+        showToast("✅ ล้างแคชทั้งหมดและดึงข้อมูลใหม่สำเร็จ!", "success", 6000);
+        closeDeveloperModal();
+      })
+      .catch(function(err) {
+        showToast("❌ ล้างแคชไม่สำเร็จ: " + err.toString(), "error", 6000);
+      })
+      .finally(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        }
+      });
+  }
+
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
@@ -3643,6 +3795,7 @@ window.ModalController = (function() {
     openDeveloperModal: openDeveloperModal,
     closeDeveloperModal: closeDeveloperModal,
     triggerFlushCache: triggerFlushCache,
+    triggerTotalFlushCache: triggerTotalFlushCache,
     triggerSyncConfigSheet: triggerSyncConfigSheet,
     triggerSetupRow5Headers: triggerSetupRow5Headers,
     triggerBuildMasterTable: triggerBuildMasterTable,
@@ -3654,8 +3807,8 @@ window.ModalController = (function() {
 
   <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8d)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -3840,7 +3993,7 @@ window.ScannerController = (function() {
   }
 
   /**
-   * Mode 2: Live Video Stream Scanner (v1.1.8d: RCA-Hardened Constraints & Telemetry)
+   * Mode 2: Live Video Stream Scanner (v1.1.8f: RCA-Hardened Constraints & Telemetry)
    */
   function startScanner() {
     if (isScanning) return;
@@ -4241,7 +4394,7 @@ window.ScannerController = (function() {
   <script>
 /**
  * AuditController.html — Asset Inventory & Audit Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */

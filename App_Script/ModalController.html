@@ -1,16 +1,20 @@
 <script>
 /**
- * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * ModalController.html — Dialog, Drawer & UI Interactivity Layer
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.ModalController = (function() {
+  var activeTimer = null;
+  var currentLookupCode = "";
+  var developerClickCount = 0;
+  var developerClickTimer = null;
 
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.8d: 8.5s default, minimum 6.5s)
+    // Extended toast timer for mobile readability (v1.1.8f: 8.5s default, minimum 6.5s)
     if (typeof duration === "undefined" || !duration) duration = 8500;
     if (duration < 6500) duration = 6500;
 
@@ -425,8 +429,98 @@ window.ModalController = (function() {
       });
   }
 
+  function triggerTotalFlushCache() {
+    var btn = document.getElementById("btn-total-flush-cache");
+    var originalBtnHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>กำลังล้างแคช...</span>';
+    }
+
+    showToast("🧹 กำลังล้างแคชทั้งหมด (Client & Server)...", "info", 5000);
+
+    // 1. Purge client-side local & session storage
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && (key.indexOf("MUIDS_ASSET_CACHE") === 0 || key.indexOf("MUIDS_INITIAL_PAYLOAD") === 0)) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+      }
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.clear();
+      }
+    } catch (storageErr) {
+      console.warn("[CACHE] Local storage purge warning:", storageErr);
+    }
+
+    // 2. Clear ApiClient memory caches if available
+    if (window.ApiClient && typeof window.ApiClient.clearLocalCache === "function") {
+      window.ApiClient.clearLocalCache();
+    }
+
+    // 3. Flush server-side multi-tier caches (CacheService + PropertiesService)
+    ApiClient.flushCache()
+      .then(function() {
+        // 4. Re-fetch fresh live initial payload
+        return ApiClient.getInitialPayload();
+      })
+      .then(function(freshPayload) {
+        if (freshPayload) {
+          try {
+            localStorage.setItem("MUIDS_INITIAL_PAYLOAD_CACHE", JSON.stringify(freshPayload));
+          } catch (e) {}
+
+          if (freshPayload.summary && window.AppState) window.AppState.set("summary", freshPayload.summary);
+          if (freshPayload.config && window.AppState) window.AppState.set("config", freshPayload.config);
+          if (freshPayload.rooms && window.AppState) window.AppState.set("rooms", freshPayload.rooms);
+          if (freshPayload.config && freshPayload.config.appVersion && window.AppState && typeof window.AppState.applyGlobalVersion === "function") {
+            window.AppState.applyGlobalVersion(freshPayload.config.appVersion);
+          }
+
+          // Re-render summary stat cards in Stat tab
+          var t = document.getElementById("summary-stat-total");
+          var u = document.getElementById("summary-stat-unverified");
+          var g = document.getElementById("summary-stat-good");
+          var d = document.getElementById("summary-stat-damaged");
+          var m = document.getElementById("summary-stat-missing");
+          if (freshPayload.summary) {
+            if (t) t.innerText = freshPayload.summary.total || 0;
+            if (u) u.innerText = (freshPayload.summary.unverified !== undefined ? freshPayload.summary.unverified : ((freshPayload.summary.total || 0) - (freshPayload.summary.verified || 0)));
+            if (g) g.innerText = freshPayload.summary.good || 0;
+            if (d) d.innerText = freshPayload.summary.damaged || 0;
+            if (m) m.innerText = freshPayload.summary.missing || 0;
+          }
+
+          if (window.AuditController && typeof window.AuditController.renderActivityLogs === "function") {
+            window.AuditController.renderActivityLogs();
+          }
+        }
+
+        if (window.AppState && typeof window.AppState.logActivity === "function") {
+          window.AppState.logActivity("sync", "Total Flush & Clear Cache", { notes: "Client + Server caches wiped & reloaded" });
+        }
+        showToast("✅ ล้างแคชทั้งหมดและดึงข้อมูลใหม่สำเร็จ!", "success", 6000);
+        closeDeveloperModal();
+      })
+      .catch(function(err) {
+        showToast("❌ ล้างแคชไม่สำเร็จ: " + err.toString(), "error", 6000);
+      })
+      .finally(function() {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHtml;
+        }
+      });
+  }
+
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
@@ -682,6 +776,7 @@ window.ModalController = (function() {
     openDeveloperModal: openDeveloperModal,
     closeDeveloperModal: closeDeveloperModal,
     triggerFlushCache: triggerFlushCache,
+    triggerTotalFlushCache: triggerTotalFlushCache,
     triggerSyncConfigSheet: triggerSyncConfigSheet,
     triggerSetupRow5Headers: triggerSetupRow5Headers,
     triggerBuildMasterTable: triggerBuildMasterTable,

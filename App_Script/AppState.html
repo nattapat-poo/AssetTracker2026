@@ -1,13 +1,13 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8d";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8b";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8f";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8e";
 
   var initialLogs = (function() {
     try {
@@ -87,7 +87,7 @@ window.AppState = (function() {
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       return String(state.config.APP_VERSION).trim();
     }
-    return "v1.1.8d";
+    return "v1.1.8f";
   }
 
   function applyGlobalVersion(ver) {

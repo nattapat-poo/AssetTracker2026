@@ -1,5 +1,45 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-15 — Release v1.1.8f: Master Google Sheet User Tab Inspection & 5-Member Team Registry
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8f`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Key Implementations & Features**:
+  - **Master Google Sheet `User` Tab Inspection**:
+    - Previously, user verification in `AuthService.js` strictly targeted the external `NEXUS_SPREADSHEET_ID`. It did not check the `User` tab within the primary master asset spreadsheet (`getSpreadsheet()`).
+    - Updated `AuthService.getAuthorizedUsers()` to first inspect `getSpreadsheet().getSheetByName("User")`, extracting columns for Email, Name/Nickname, and Role with dynamic header resolution (`Email`, `User`, `Name`, `Role`).
+  - **5-Member Science Team Baseline Authorization & Fallback**:
+    - Created `MASTER_USER_REGISTRY` in `AuthService.js` and updated `ApiClient.verifyMahidolUser` to ensure all 5 science department members are guaranteed instant verification, correct nickname mapping, and `Admin`/`SuperAdmin` permission:
+      1. `nattapat.poo@mahidol.ac.th`: Mek (SuperAdmin / Lead)
+      2. `nattasuda.yaw@mahidol.ac.th`: Mai (Admin / TA / LabTech)
+      3. `rawinsiwat.dec@mahidol.ac.th`: Win (Admin / TA / LabTech)
+      4. `panisa.lue@mahidol.ac.th`: Fern (Admin / TA / LabTech)
+      5. `thanaphat.cha@mahidol.ac.th`: Kris (Admin / TA / LabTech)
+  - **Config & Cache Integration**:
+    - Updated `ADMIN_USERS` in `Config.js` to include the full email addresses in addition to nicknames.
+    - Added `AUTHORIZED_USERS_CACHE` and `NEXUS_USERS_CACHE` invalidation to `Nexus_FlushCache()` ensuring immediate synchronization when users are updated.
+  - **Automated Verification**:
+    - Added Test Suite 41 to `Tools/test_core.js` validating User tab parsing, master user registry fallback, and functional authentication for all 5 team members.
+    - All 41 automated suites pass 100%.
+
+## 2026-09-15 — Release v1.1.8e: Total Flush Cache Button in Stat Tab & Complete Cache Purge Engine
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8e`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Key Implementations & Features**:
+  - **User Feedback & Camera Confirmation**:
+    - User reported: "the camera scan is running fine now" — verifying that the standard string constraint fix `{ facingMode: currentFacingMode }` and `webkit-playsinline` permanently solved the camera feed initialization failure across iOS and Android.
+  - **Total Flush / Clear All Cache Button in Stat Tab**:
+    - Added dedicated action banner in `#view-summary` (Stat tab) with primary button `#btn-total-flush-cache` (`[🧹 ล้างแคชระบบทั้งหมด]`).
+    - Added a quick-trigger Total Flush button inside the Developer Gateway Modal (`#dev-gateway-modal`).
+    - Engineered `ModalController.triggerTotalFlushCache()`:
+      1. Client cache purge: Clears `localStorage` keys (`MUIDS_INITIAL_PAYLOAD_CACHE`, `MUIDS_ASSET_CACHE_*`), resets in-memory cache via `ApiClient.clearLocalCache()`, and clears `sessionStorage`.
+      2. Server cache purge: Executes `ApiClient.flushCache()` which clears `CacheService` scripts and `PropertiesService` indexes on Google Apps Script.
+      3. Live Re-hydration: Executes `ApiClient.getInitialPayload()`, stores fresh payload in `localStorage`, updates `AppState` (summary, config, rooms), triggers `AppState.applyGlobalVersion()`, and refreshes summary stat counters.
+      4. Telemetry: Logs action to `AppState.logActivity("sync", "Total Flush & Clear Cache", ...)` and shows clear 6.0s confirmation toast (`✅ ล้างแคชทั้งหมดและดึงข้อมูลใหม่สำเร็จ!`).
+  - **Automated Verification**:
+    - Expanded test suite in `Tools/test_core.js` to 40 complete test suites. All 40 suites passing 100%.
+
 ## 2026-09-15 — Release v1.1.8d: Camera Feed RCA, Universal Telemetry & Globalized Versioning
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8d`.

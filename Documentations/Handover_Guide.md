@@ -1,4 +1,4 @@
-# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8d)
+# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8f)
 ### MUIDS Lab Oops OS — Science Department
 
 ---
@@ -17,9 +17,23 @@
    - **Step 4: Comment Box (Optional)** $\rightarrow$ Add optional remarks for `หมายเหตุปี 69` (Column N remains completely blank if omitted; no auto-injected `[Found in ...]` text). User can tap `[◀ ย้อนกลับ]` to change status or `[ถัดไป: ตรวจสติกเกอร์ ➔]` to proceed.
    - **Step 5: Sticker Modal** $\rightarrow$ Select sticker condition (`ปกติ`, `ปริ้นใหม่`, `ปริ้นใหม่+แก้ข้อมูล`). User can tap `[◀ ย้อนกลับ]` to return to the comment box.
    - **Step 6: Save Record** $\rightarrow$ Tap **ยืนยันและบันทึก (Save & Scan Next)**. Data is committed directly to Google Sheets with real-time CacheService invalidation. Camera automatically re-arms!
-4. **Universal Dynamic Versioning & Live Telemetry**:
+4. **Total Flush & Clear Cache Engine (Stat Tab)**:
+   - When encountering out-of-sync data or when testing across multiple devices, navigate to the **Stat** tab and locate the **"Total Flush & Clear All Cache"** banner.
+   - Tap **[🧹 ล้างแคชระบบทั้งหมด]** to execute an end-to-end multi-tier purge:
+     - Wipes all client `localStorage` caches (`MUIDS_INITIAL_PAYLOAD_CACHE`, `MUIDS_ASSET_CACHE_*`) and clears in-memory structures.
+     - Calls `ApiClient.flushCache()` to clear server `CacheService` snapshots and `PropertiesService` indexes.
+     - Automatically re-fetches the latest initial payload from the live Google Sheet, re-hydrating the UI counters and active state instantaneously.
+5. **Universal Dynamic Versioning & Live Telemetry**:
    - Version numbering is globalized: changing `APP_VERSION` in the Google Sheet's `Config` tab dynamically updates all app headers, footers, and modal badges upon sync.
    - Complete telemetry logging: camera connection attempts, errors, snapshot triggers, decode results, and toast alerts are logged in the **Stat** tab under **Activity Logs**.
+6. **Authorized Team Members & Role Registry (Master Sheet `User` Tab)**:
+   - System automatically verifies authorized users from the `User` tab in the master Google Sheet, backed by baseline registry in `AuthService.js`:
+     - `nattapat.poo@mahidol.ac.th` $\rightarrow$ **Mek** (`SuperAdmin` / Lead Architect)
+     - `nattasuda.yaw@mahidol.ac.th` $\rightarrow$ **Mai** (`Admin` / TA / LabTech)
+     - `rawinsiwat.dec@mahidol.ac.th` $\rightarrow$ **Win** (`Admin` / TA / LabTech)
+     - `panisa.lue@mahidol.ac.th` $\rightarrow$ **Fern** (`Admin` / TA / LabTech)
+     - `thanaphat.cha@mahidol.ac.th` $\rightarrow$ **Kris** (`Admin` / TA / LabTech)
+   - All 5 accounts have full administrative rights (`ADMIN_USERS` in `Config.js`) to perform audits, edit records, and access developer diagnostics.
 
 ---
 

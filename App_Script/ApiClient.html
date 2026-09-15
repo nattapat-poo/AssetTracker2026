@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -19,40 +19,41 @@ window.ApiClient = (function() {
     try {
       if (typeof window !== "undefined" && window.location) {
         var params = new URLSearchParams(window.location.search);
-        var qUrl = params.get("gas_url");
-        if (qUrl && qUrl.trim() !== "") return qUrl.trim();
+        var urlParam = params.get("endpoint");
+        if (urlParam) return urlParam;
       }
-      var stored = localStorage.getItem("MUIDS_GAS_WEBAPP_URL");
-      if (stored && stored.trim() !== "") return stored.trim();
     } catch (e) {}
     return LIVE_GAS_WEBAPP_URL;
   }
 
+  function getActiveEndpoint() {
+    return getGasEndpointUrl();
+  }
+
   function setGasEndpointUrl(url) {
-    if (!url || url.trim() === "") {
-      localStorage.removeItem("MUIDS_GAS_WEBAPP_URL");
-    } else {
-      localStorage.setItem("MUIDS_GAS_WEBAPP_URL", url.trim());
+    if (url && typeof url === "string" && url.trim()) {
+      LIVE_GAS_WEBAPP_URL = url.trim();
     }
   }
 
-  // 15 Rooms Configuration (v1.1.7f)
+  var setEndpointOverride = setGasEndpointUrl;
+
   var ROOM_SHEETS_CONFIG = [
-    "Bio Prep",
-    "Bio1",
-    "Bio2",
-    "Chem Pre",
-    "Chem1",
-    "Chem2",
-    "Physics P",
-    "Physics1",
-    "Physics2",
-    "Mobile",
-    "Science",
-    "ปาณิษา",
-    "ชำรุด",
-    "ไม่ใช้งาน",
-    "Storage"
+    { roomName: "Bio1", displayName: "Bio1 (Biology 1)", department: "Science" },
+    { roomName: "Bio2", displayName: "Bio2 (Biology 2)", department: "Science" },
+    { roomName: "Chem1", displayName: "Chem1 (Chemistry 1)", department: "Science" },
+    { roomName: "Chem2", displayName: "Chem2 (Chemistry 2)", department: "Science" },
+    { roomName: "Physics1", displayName: "Physics1 (Physics 1)", department: "Science" },
+    { roomName: "Physics2", displayName: "Physics2 (Physics 2)", department: "Science" },
+    { roomName: "GeneralSci1", displayName: "GeneralSci1 (General Science 1)", department: "Science" },
+    { roomName: "GeneralSci2", displayName: "GeneralSci2 (General Science 2)", department: "Science" },
+    { roomName: "PrepRoom1", displayName: "PrepRoom1 (Preparation Room 1)", department: "Science" },
+    { roomName: "PrepRoom2", displayName: "PrepRoom2 (Preparation Room 2)", department: "Science" },
+    { roomName: "ComputerLab1", displayName: "ComputerLab1 (Computer Lab 1)", department: "IT" },
+    { roomName: "ComputerLab2", displayName: "ComputerLab2 (Computer Lab 2)", department: "IT" },
+    { roomName: "RoboticsLab", displayName: "RoboticsLab (Robotics Lab)", department: "STEM" },
+    { roomName: "FabLab", displayName: "FabLab (Fabrication Lab)", department: "Design" },
+    { roomName: "StorageSci", displayName: "StorageSci (Science Storage)", department: "Science" }
   ];
 
   // 3 Color-Coded Status Option Groups (v1.1.2b)
@@ -90,13 +91,12 @@ window.ApiClient = (function() {
   var STATUS_OPTIONS = [
     "ใช้งานอยู่",
     "ใช้งานอยู่แต่ชำรุดนะ",
-    "ใช้งานอยู่+ย้ายไป...",
-    "ใช้งานอยู่+แก้ไขชื่อเป็น...",
-    "หมดความจำเป็นต้องใช้งาน",
-    "หมดความจำเป็นต้องใช้งานเพราะชำรุด",
+    "ชำรุดรอซ่อม",
+    "ชำรุดรอจำหน่าย",
+    "รอจำหน่าย",
     "สูญหาย",
-    "หาไม่เจอ",
-    "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน",
+    "โอนย้ายแล้ว",
+    "ไม่พบในการสำรวจ",
     "งง+ให้พัสดุมาตรวจสอบหน้างาน"
   ];
 
@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8d)
+  // Persistent Local Storage of REAL Assets (v1.1.8f)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8d") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8b");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8f") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8e");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,8 +132,19 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8d", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8f", JSON.stringify(data));
         }
+      }
+    } catch (e) {}
+  }
+
+  function clearLocalCache() {
+    try {
+      MOCK_ASSETS = [];
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8f");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8e");
+        localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
       }
     } catch (e) {}
   }
@@ -265,7 +276,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8d",
+          APP_VERSION: "v1.1.8f",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -457,7 +468,7 @@ window.ApiClient = (function() {
     }
 
     if (action === "syncConfigSheet") {
-      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
+      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
       return {
         success: true,
         message: "Config sheet synchronized (" + syncVer + "). Local mock simulation mode.",
@@ -518,15 +529,36 @@ window.ApiClient = (function() {
 
     if (action === "verifyMahidolUser") {
       var email = String(payload.email || "nattapat.poo@mahidol.ac.th").toLowerCase().trim();
-      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu"));
+      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu") || email.endsWith("@student.mahidol.ac.th"));
+      
+      var MASTER_USER_REGISTRY = {
+        "nattapat.poo@mahidol.ac.th": { name: "Nattapat Poolyam (Mek)", nickname: "Mek", role: "SuperAdmin", isAdmin: true, isSuperAdmin: true },
+        "nattasuda.yaw@mahidol.ac.th": { name: "Nattasuda Yawichai (Mai)", nickname: "Mai", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "rawinsiwat.dec@mahidol.ac.th": { name: "Rawinsiwat Dechpala (Win)", nickname: "Win", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "panisa.lue@mahidol.ac.th": { name: "Panisa Luewattananukul (Fern)", nickname: "Fern", role: "Admin", isAdmin: true, isSuperAdmin: false },
+        "thanaphat.cha@mahidol.ac.th": { name: "Thanaphat Chaimongkol (Kris)", nickname: "Kris", role: "Admin", isAdmin: true, isSuperAdmin: false }
+      };
+
+      var matched = MASTER_USER_REGISTRY[email];
+      var isAuthorized = isMahidol && (!!matched || email === "nattapat.poo@mahidol.ac.th");
+      var role = matched ? matched.role : (isMahidol ? "Auditor" : "Guest");
+      var name = matched ? matched.name : (email.split("@")[0]);
+      var isAdmin = matched ? matched.isAdmin : false;
+      var isSuperAdmin = matched ? matched.isSuperAdmin : false;
+
       return {
         email: email,
-        name: email.split("@")[0],
-        role: "Auditor",
+        name: name,
+        nickname: matched ? matched.nickname : "",
+        role: role,
+        isAdmin: isAdmin,
+        isSuperAdmin: isSuperAdmin,
+        isTALT: isAuthorized,
         isMahidolAccount: isMahidol,
-        isNexusAuthorized: isMahidol,
-        isVerified: isMahidol,
-        authStatus: isMahidol ? "VERIFIED" : "EXTERNAL_ACCOUNT"
+        isNexusAuthorized: isAuthorized,
+        isVerified: isAuthorized,
+        authStatus: isAuthorized ? "VERIFIED" : (isMahidol ? "UNREGISTERED_MAHIDOL" : "EXTERNAL_ACCOUNT"),
+        primarySubject: "Science"
       };
     }
 
@@ -591,6 +623,7 @@ window.ApiClient = (function() {
       MOCK_ASSETS = Array.isArray(assets) ? assets.slice() : [];
       return MOCK_ASSETS.length;
     },
+    clearLocalCache: clearLocalCache,
     invoke: invoke,
     getInitialPayload: function() { return invoke("getInitialPayload", {}); },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },

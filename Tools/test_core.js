@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.8d' && payload.config.APP_VERSION !== 'v1.1.8b') throw new Error(`Expected APP_VERSION to be v1.1.8d, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.8f' && payload.config.APP_VERSION !== 'v1.1.8e' && payload.config.APP_VERSION !== 'v1.1.8d' && payload.config.APP_VERSION !== 'v1.1.8b') throw new Error(`Expected APP_VERSION to be v1.1.8f, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.8d Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.8f Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
+  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8f' && configSyncRes.appVersion !== 'v1.1.8e' && configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.8d or v1.1.8b
-  if (!configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.8d in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8f, v1.1.8e, or v1.1.8d
+  if (!configJs.includes('VERSION: "v1.1.8f"') && !configJs.includes('VERSION: "v1.1.8e"') && !configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8f in Config.js');
   }
-  if (!codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8d in Code.js');
+  if (!codeJs.includes('v1.1.8f') && !codeJs.includes('v1.1.8e') && !codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8f in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8d in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8f') && !dbServiceJs.includes('v1.1.8e') && !dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8f in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8d in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8f in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -818,18 +818,18 @@ async function runTests() {
   // Check ApiClient clean production state (all legacy mock data cleared, dynamic sheet fetch)
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8d') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8b') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a'))) {
-    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8d cache key');
+      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8f') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8e') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8d') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8b') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a'))) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8f cache key');
   }
   console.log('  Verified: ApiClient clean production configuration (legacy mock data purged, live Google Sheet cache configured).');
 
-  console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
+  console.log('\n--- 36. Testing Room Landing Tab & Version Under App Title ---');
   // 1. App Title and Version Numbering Under App Title check
-  if ((!idxHtml.includes('v1.1.8d') && !idxHtml.includes('v1.1.8b')) ||
+  if ((!idxHtml.includes('v1.1.8f') && !idxHtml.includes('v1.1.8e') && !idxHtml.includes('v1.1.8d') && !idxHtml.includes('v1.1.8b')) ||
       !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
     throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Version numbering (v1.1.8d) placed neatly under the app title.');
+  console.log('  Verified: Version numbering (v1.1.8f) placed neatly under the app title.');
 
   // 2. Room Center Tab Default Landing Verification
   const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
@@ -955,14 +955,16 @@ async function runTests() {
 
   // 4. Bottom Footer Version Branding
   if (!idxHtml.includes('QR Asset Survey</span>') ||
-      (!idxHtml.includes('app-version-badge">v1.1.8d</span>') &&
+      (!idxHtml.includes('app-version-badge">v1.1.8f</span>') &&
+       !idxHtml.includes('app-version-badge">v1.1.8e</span>') &&
+       !idxHtml.includes('app-version-badge">v1.1.8d</span>') &&
        !idxHtml.includes('border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>') &&
        !idxHtml.includes('footer-version-text'))) {
     throw new Error('index.html footer must display updated version branding badge');
   }
-  console.log('  Verified: Footer version branding updated to v1.1.8b/v1.1.8d at the bottom of the page.');
+  console.log('  Verified: Footer version branding updated to v1.1.8f at the bottom of the page.');
 
-  console.log('\n--- 39. Testing v1.1.8d Camera Feed RCA, Universal Telemetry & Globalized Versioning ---');
+  console.log('\n--- 39. Testing Camera Feed RCA, Universal Telemetry & Globalized Versioning ---');
   const scannerCtrlV118d = fs.readFileSync('App_Script/ScannerController.html', 'utf8');
   const appStateV118d = fs.readFileSync('App_Script/AppState.html', 'utf8');
   const modalCtrlV118d = fs.readFileSync('App_Script/ModalController.html', 'utf8');
@@ -999,13 +1001,106 @@ async function runTests() {
   if (!modalCtrlV118d.includes('AppState.getVersion()') || !modalCtrlV118d.includes('applyGlobalVersion')) {
     throw new Error('ModalController.html triggerSyncConfigSheet must dynamically query and apply version');
   }
-  if (!configV118d.includes('VERSION: "v1.1.8d"') && !configV118d.includes('VERSION: "1.1.8d"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8d');
+  if (!configV118d.includes('VERSION: "v1.1.8f"') && !configV118d.includes('VERSION: "v1.1.8e"') && !configV118d.includes('VERSION: "v1.1.8d"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8f');
   }
   console.log('  Verified: Globalized versioning engine active; UI elements dynamically bind to Config sheet APP_VERSION.');
 
+  console.log('\n--- 40. Testing v1.1.8e Total Flush Cache Button in Stat Tab & Complete Cache Purge ---');
+  const modalCtrlV118e = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  const apiClientV118e = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
+  const indexHtmlV118e = fs.readFileSync('App_Script/index.html', 'utf8');
+  const configV118e = fs.readFileSync('App_Script/Config.js', 'utf8');
+
+  // 1. Total Flush Cache Controller Function & Export
+  if (!modalCtrlV118e.includes('function triggerTotalFlushCache()')) {
+    throw new Error('ModalController.html must define triggerTotalFlushCache() function');
+  }
+  if (!modalCtrlV118e.includes('triggerTotalFlushCache: triggerTotalFlushCache')) {
+    throw new Error('ModalController.html must export triggerTotalFlushCache in its return object');
+  }
+  if (!modalCtrlV118e.includes('MUIDS_INITIAL_PAYLOAD_CACHE') ||
+      !modalCtrlV118e.includes('ApiClient.flushCache()') ||
+      !modalCtrlV118e.includes('ApiClient.getInitialPayload()')) {
+    throw new Error('triggerTotalFlushCache must purge localStorage, call ApiClient.flushCache(), and re-fetch getInitialPayload()');
+  }
+  console.log('  Verified: ModalController.triggerTotalFlushCache() purges client storage, invokes server flush, and re-hydrates live state.');
+
+  // 2. ApiClient local cache reset
+  if (!apiClientV118e.includes('clearLocalCache') || !apiClientV118e.includes('clearLocalCache: clearLocalCache')) {
+    throw new Error('ApiClient.html must implement and export clearLocalCache()');
+  }
+  console.log('  Verified: ApiClient.clearLocalCache() available for memory and storage cache resets.');
+
+  // 3. Stat Tab Total Flush Button Presence
+  if (!indexHtmlV118e.includes('id="btn-total-flush-cache"') ||
+      !indexHtmlV118e.includes('ModalController.triggerTotalFlushCache()')) {
+    throw new Error('index.html Stat tab (#view-summary) must contain #btn-total-flush-cache calling ModalController.triggerTotalFlushCache()');
+  }
+  if (!indexHtmlV118e.includes('Total Flush &amp; Clear All Cache') &&
+      !indexHtmlV118e.includes('ล้างแคชระบบทั้งหมด')) {
+    throw new Error('index.html must display prominent Thai & English text for Total Flush button');
+  }
+  console.log('  Verified: Total Flush / Clear All Cache button prominently mounted inside Stat Tab (#view-summary) and Dev Modal.');
+
+  console.log('\n--- 41. Testing v1.1.8f Master Google Sheet User Tab & 5-Member Team Registry ---');
+  const authServiceV118f = fs.readFileSync('App_Script/AuthService.js', 'utf8');
+  const configV118f = fs.readFileSync('App_Script/Config.js', 'utf8');
+  const apiClientV118f = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
+
+  // 1. Master Sheet User Tab Inspection in AuthService
+  if (!authServiceV118f.includes('getSheetByName("User")') ||
+      !authServiceV118f.includes('getAuthorizedUsers')) {
+    throw new Error('AuthService.js must inspect getSpreadsheet().getSheetByName("User")');
+  }
+  console.log('  Verified: AuthService.js dynamically reads the User sheet tab in the Master Google Sheet.');
+
+  // 2. Exact 5-Member Team Registry Verification
+  const expectedTeam = [
+    { email: "nattapat.poo@mahidol.ac.th", nickname: "Mek" },
+    { email: "nattasuda.yaw@mahidol.ac.th", nickname: "Mai" },
+    { email: "rawinsiwat.dec@mahidol.ac.th", nickname: "Win" },
+    { email: "panisa.lue@mahidol.ac.th", nickname: "Fern" },
+    { email: "thanaphat.cha@mahidol.ac.th", nickname: "Kris" }
+  ];
+
+  expectedTeam.forEach(member => {
+    if (!authServiceV118f.includes(member.email) || !authServiceV118f.includes(member.nickname)) {
+      throw new Error(`AuthService.js missing registered team member: ${member.email} (${member.nickname})`);
+    }
+    if (!configV118f.includes(member.email)) {
+      throw new Error(`Config.js ADMIN_USERS missing registered email: ${member.email}`);
+    }
+    if (!apiClientV118f.includes(member.email)) {
+      throw new Error(`ApiClient.html verifyMahidolUser missing registered email: ${member.email}`);
+    }
+  });
+  console.log('  Verified: All 5 team members (Mek, Mai, Win, Fern, Kris) registered across AuthService.js, Config.js, and ApiClient.html.');
+
+  // 3. Functional Verification via ApiClient.verifyMahidolUser
+  for (const member of expectedTeam) {
+    const verified = await ApiClient.verifyMahidolUser(member.email);
+    if (!verified.isVerified || !verified.isNexusAuthorized || verified.authStatus !== "VERIFIED") {
+      throw new Error(`verifyMahidolUser failed for ${member.email}`);
+    }
+    if (verified.nickname !== member.nickname) {
+      throw new Error(`verifyMahidolUser nickname mismatch for ${member.email}: expected ${member.nickname}, got ${verified.nickname}`);
+    }
+    console.log(`  ✓ Team Member: ${verified.name} <${verified.email}> -> Role: ${verified.role} | Verified: ${verified.authStatus}`);
+  }
+
+  // 4. Version v1.1.8f Rollout Verification
+  if (!configV118f.includes('VERSION: "v1.1.8f"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8f');
+  }
+  const indexHtmlV118f = fs.readFileSync('App_Script/index.html', 'utf8');
+  if (!indexHtmlV118f.includes('v1.1.8f')) {
+    throw new Error('index.html must reflect v1.1.8f branding');
+  }
+  console.log('  Verified: Codebase fully rolled to v1.1.8f across all components.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 39 TEST SUITES PASSED FOR v1.1.8d RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 41 TEST SUITES PASSED FOR v1.1.8f RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

@@ -28,7 +28,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8d</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8f</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -38,7 +38,7 @@
   <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8d) -->
+      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8f) -->
       <div class="flex flex-col min-w-0 flex-1">
         <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
         <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
@@ -54,7 +54,7 @@
 
         <!-- Version numbering & Mahidol User Verification under the app title -->
         <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8d</span>
+          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8f</span>
           <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="Mahidol User Verification">
             <i id="header-user-icon" class="fa-solid fa-shield-check text-[9px] text-emerald-400"></i>
             <span id="header-user-text" class="text-[9px] font-semibold text-slate-300">Mahidol Verified</span>
@@ -673,8 +673,30 @@
       </div>
 
       <!-- Quick Action Cards -->
-      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono">System &amp; Sync Utilities</h4>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+            <i class="fa-solid fa-screwdriver-wrench text-amber-400"></i>
+            <span>System &amp; Sync Utilities</span>
+          </h4>
+          <span class="text-[10px] text-slate-500 font-mono">v1.1.8f</span>
+        </div>
+
+        <!-- Total Flush Cache Action Banner / Primary Button -->
+        <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div class="space-y-0.5">
+            <div class="text-xs font-bold text-rose-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-fire text-rose-400"></i>
+              <span>Total Flush &amp; Clear All Cache</span>
+            </div>
+            <p class="text-[11px] text-slate-400">ล้างแคชทั้งหมดในเครื่องและบน Server พร้อมโหลดข้อมูลใหม่ทันที</p>
+          </div>
+          <button id="btn-total-flush-cache" onclick="ModalController.triggerTotalFlushCache()" class="touch-target shrink-0 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-950/40 flex items-center justify-center gap-2 transition cursor-pointer">
+            <i class="fa-solid fa-broom"></i>
+            <span>ล้างแคชระบบทั้งหมด</span>
+          </button>
+        </div>
+
         <div class="flex flex-wrap gap-2 pt-1">
           <button onclick="ModalController.triggerFlushCache()" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2">
             <i class="fa-solid fa-arrows-rotate text-emerald-400"></i> Refresh Sheet Index &amp; Cache
@@ -697,7 +719,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8d</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8f</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -890,7 +912,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8d</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8f</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -935,11 +957,14 @@
         </div>
       </div>
 
-      <div class="pt-3 border-t border-slate-800 flex gap-2 shrink-0">
-        <button onclick="ModalController.triggerFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-          Flush Caches
+      <div class="pt-3 border-t border-slate-800 flex flex-wrap gap-2 shrink-0">
+        <button onclick="ModalController.triggerTotalFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-broom"></i> Total Flush
         </button>
-        <button onclick="ModalController.closeDeveloperModal()" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
+        <button onclick="ModalController.triggerFlushCache()" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+          Flush Server Cache
+        </button>
+        <button onclick="ModalController.closeDeveloperModal()" class="touch-target px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
           Close
         </button>
       </div>

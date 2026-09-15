@@ -1,12 +1,12 @@
 /**
  * Config.js — Application Constants & 3-Tier Cache Snapshot Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
- * MUIDS Lab Oops OS — Science Department
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Config.js — Architectural Constants, Master Registry & Runtime Settings
+ * Lab Oops OS Ecosystem | Mahidol University International Demonstration School
  */
 
-const APP_CONFIG = {
-  APP_NAME: "MUIDS Mobile Asset Tracker",
-  VERSION: "v1.1.8d",
+var APP_CONFIG = {
+  VERSION: "v1.1.8f",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };
@@ -324,7 +324,7 @@ function syncConfigSheet(ss) {
     { key: "VIBRATION_FEEDBACK_ENABLED", val: "true", type: "BOOLEAN", desc: "Haptic vibration toggle on mobile" },
     { key: "ASSET_SPREADSHEET_ID", val: DEFAULT_ASSET_SPREADSHEET_ID, type: "STRING", desc: "Target science asset inventory sheet ID" },
     { key: "NEXUS_SPREADSHEET_ID", val: NEXUS_SPREADSHEET_ID, type: "STRING", desc: "Central Nexus kernel database ID" },
-    { key: "ADMIN_USERS", val: "TALT,TA,LabTech,Mek,Fern,Kris,Mai,Win,Turner", type: "COMMA_LIST", desc: "Authorized survey administrators" }
+    { key: "ADMIN_USERS", val: "nattapat.poo@mahidol.ac.th, nattasuda.yaw@mahidol.ac.th, rawinsiwat.dec@mahidol.ac.th, panisa.lue@mahidol.ac.th, thanaphat.cha@mahidol.ac.th, Mek, Mai, Win, Fern, Kris, TALT, TA, LabTech, Turner", type: "COMMA_LIST", desc: "Authorized survey administrators" }
   ];
   
   var rowsToAppend = [];
@@ -490,7 +490,14 @@ function getLocalConfigDefaults() {
     "VIBRATION_FEEDBACK_ENABLED": true,
     "ASSET_SPREADSHEET_ID": DEFAULT_ASSET_SPREADSHEET_ID,
     "NEXUS_SPREADSHEET_ID": NEXUS_SPREADSHEET_ID,
-    "ADMIN_USERS": ["TALT", "TA", "LabTech", "Mek", "Fern", "Kris", "Mai", "Win", "Turner"]
+    "ADMIN_USERS": [
+      "nattapat.poo@mahidol.ac.th",
+      "nattasuda.yaw@mahidol.ac.th",
+      "rawinsiwat.dec@mahidol.ac.th",
+      "panisa.lue@mahidol.ac.th",
+      "thanaphat.cha@mahidol.ac.th",
+      "Mek", "Mai", "Win", "Fern", "Kris", "TALT", "TA", "LabTech", "Turner"
+    ]
   };
 }
 
@@ -503,6 +510,8 @@ function Nexus_FlushCache() {
   cache.remove("NEXUS_ROOM_DIRECTORY_SNAPSHOT");
   cache.remove("DYNAMIC_ROOM_TYPES_CACHE");
   cache.remove("MASTER_ASSET_CACHE");
+  cache.remove("AUTHORIZED_USERS_CACHE");
+  cache.remove("NEXUS_USERS_CACHE");
   
   var props = PropertiesService.getScriptProperties();
   props.deleteProperty("GLOBAL_CONFIG_SNAPSHOT");
@@ -512,6 +521,8 @@ function Nexus_FlushCache() {
   props.deleteProperty("NEXUS_ROOM_DIRECTORY_SNAPSHOT");
   props.deleteProperty("DYNAMIC_ROOM_TYPES_CACHE");
   props.deleteProperty("MASTER_ASSET_CACHE");
+  props.deleteProperty("AUTHORIZED_USERS_CACHE");
+  props.deleteProperty("NEXUS_USERS_CACHE");
   
   IN_MEMORY_CACHE = null;
   getGlobalConfig();

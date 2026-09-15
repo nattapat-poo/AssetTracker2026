@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8f] - 2026-09-15
+
+### Added & Improved
+- **Master Sheet `User` Tab Inspection & 5-Member Team Registry (`AuthService.js`, `Config.js`, `ApiClient.html`)**:
+  - **Master Google Sheet `User` Sheet Inspection**: Updated `AuthService.getAuthorizedUsers()` to directly inspect the `User` worksheet tab (`getSpreadsheet().getSheetByName("User")`) in the active master asset survey spreadsheet prior to checking external spreadsheets.
+  - **5-Member Science Team Baseline Authorization**: Implemented `MASTER_USER_REGISTRY` in `AuthService.js` and updated `ApiClient.verifyMahidolUser` so that all 5 science department members are recognized with their respective nicknames, formatted display names, and `Admin`/`SuperAdmin` roles:
+    1. `nattapat.poo@mahidol.ac.th` $\rightarrow$ **Mek** (`SuperAdmin` / Lead Architect)
+    2. `nattasuda.yaw@mahidol.ac.th` $\rightarrow$ **Mai** (`Admin` / TA / LabTech)
+    3. `rawinsiwat.dec@mahidol.ac.th` $\rightarrow$ **Win** (`Admin` / TA / LabTech)
+    4. `panisa.lue@mahidol.ac.th` $\rightarrow$ **Fern** (`Admin` / TA / LabTech)
+    5. `thanaphat.cha@mahidol.ac.th` $\rightarrow$ **Kris** (`Admin` / TA / LabTech)
+  - **Admin Users Configuration**: Added all 5 full Mahidol email addresses alongside their nicknames to `ADMIN_USERS` in `Config.js` (`standardConfigs` and `getLocalConfigDefaults()`).
+  - **Cache Purge Enhancements**: Added `AUTHORIZED_USERS_CACHE` and `NEXUS_USERS_CACHE` eviction to `Nexus_FlushCache()`.
+- **Semantic Version Rollout (`v1.1.8f`)**:
+  - Full codebase rollout across `Config.js`, `AppState.html`, `ApiClient.html`, `ScannerController.html`, `ModalController.html`, `AuditController.html`, `Code.js`, `DatabaseService.js`, `AuthService.js`, `TelemetryService.js`, `styles.html`, and `index.html`.
+  - Added Test Suite 41 to `Tools/test_core.js` validating User tab parsing and team member authentication (41/41 suites passing 100%).
+
+## [1.1.8e] - 2026-09-15
+
+### Added & Improved
+- **Total Flush / Clear All Cache Button in Stat Tab (`index.html`, `ModalController.html`, `ApiClient.html`)**:
+  - Added dedicated **"Total Flush & Clear All Cache"** (`#btn-total-flush-cache`) action banner and button directly in the Stat Tab (`#view-summary`) under the "System & Sync Utilities" section.
+  - Also embedded a secondary quick-trigger Total Flush button inside the Developer Gateway Modal (`#dev-gateway-modal`).
+  - **Comprehensive Multi-Tier Purge (`ModalController.triggerTotalFlushCache`)**:
+    1. **Browser Client Purge**: Wipes `MUIDS_INITIAL_PAYLOAD_CACHE`, all versioned asset caches (`MUIDS_ASSET_CACHE_*`), and resets memory arrays via `ApiClient.clearLocalCache()`. Clears `sessionStorage`.
+    2. **Google Apps Script Server Purge**: Invokes `ApiClient.flushCache()` to clear `CacheService` snapshots and `PropertiesService` persisted indexes, pre-warming fresh configuration caches.
+    3. **Automated Live Re-Hydration**: Immediately calls `ApiClient.getInitialPayload()` to pull the freshest records directly from the Google Sheets database, update `AppState` (summary, config, rooms), refresh Stat tab counter metrics, and trigger `AppState.applyGlobalVersion()`.
+    4. **Telemetry & Visual Feedback**: Emits audit event `AppState.logActivity("sync", "Total Flush & Clear Cache", ...)` and shows clear bilingual confirmation toast (`✅ ล้างแคชทั้งหมดและดึงข้อมูลใหม่สำเร็จ!`).
+- **Semantic Version Rollout (`v1.1.8e`)**:
+  - Full codebase rollout across `Config.js`, `AppState.html`, `ApiClient.html`, `ScannerController.html`, `ModalController.html`, `AuditController.html`, `Code.js`, `DatabaseService.js`, `AuthService.js`, `TelemetryService.js`, `styles.html`, `index.html`, and `Tools/test_core.js`.
+  - Added Test Suite 40 to `Tools/test_core.js` verifying 100% automated test coverage.
+
 ## [1.1.8d] - 2026-09-15
 
 ### Fixed & Improved
