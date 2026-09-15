@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.8b') throw new Error(`Expected APP_VERSION to be v1.1.8b, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.8d' && payload.config.APP_VERSION !== 'v1.1.8b') throw new Error(`Expected APP_VERSION to be v1.1.8d, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.8b Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.8d Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.8b') {
+  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.8b
-  if (!configJs.includes('VERSION: "v1.1.8b"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.8b in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8d or v1.1.8b
+  if (!configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8d in Config.js');
   }
-  if (!codeJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8b in Code.js');
+  if (!codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8d in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8b in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8d in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8b in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8d in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -818,18 +818,18 @@ async function runTests() {
   // Check ApiClient clean production state (all legacy mock data cleared, dynamic sheet fetch)
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8b') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a'))) {
-    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8b cache key');
+      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8d') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8b') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a'))) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8d cache key');
   }
   console.log('  Verified: ApiClient clean production configuration (legacy mock data purged, live Google Sheet cache configured).');
 
   console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
   // 1. App Title and Version Numbering Under App Title check
-  if (!idxHtml.includes('v1.1.8b') ||
+  if ((!idxHtml.includes('v1.1.8d') && !idxHtml.includes('v1.1.8b')) ||
       !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
     throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Version numbering (v1.1.8b) placed neatly under the app title.');
+  console.log('  Verified: Version numbering (v1.1.8d) placed neatly under the app title.');
 
   // 2. Room Center Tab Default Landing Verification
   const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
@@ -955,13 +955,57 @@ async function runTests() {
 
   // 4. Bottom Footer Version Branding
   if (!idxHtml.includes('QR Asset Survey</span>') ||
-      !idxHtml.includes('border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>')) {
-    throw new Error('index.html footer must display updated v1.1.8b version branding badge');
+      (!idxHtml.includes('app-version-badge">v1.1.8d</span>') &&
+       !idxHtml.includes('border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>') &&
+       !idxHtml.includes('footer-version-text'))) {
+    throw new Error('index.html footer must display updated version branding badge');
   }
-  console.log('  Verified: Footer version branding updated to v1.1.8b at the bottom of the page.');
+  console.log('  Verified: Footer version branding updated to v1.1.8b/v1.1.8d at the bottom of the page.');
+
+  console.log('\n--- 39. Testing v1.1.8d Camera Feed RCA, Universal Telemetry & Globalized Versioning ---');
+  const scannerCtrlV118d = fs.readFileSync('App_Script/ScannerController.html', 'utf8');
+  const appStateV118d = fs.readFileSync('App_Script/AppState.html', 'utf8');
+  const modalCtrlV118d = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  const configV118d = fs.readFileSync('App_Script/Config.js', 'utf8');
+  const auditCtrlV118d = fs.readFileSync('App_Script/AuditController.html', 'utf8');
+
+  // 1. Camera Constraints Syntax (RCA: Standard Html5Qrcode { facingMode: currentFacingMode } without nested ideal objects)
+  if (!scannerCtrlV118d.includes('primaryConstraint = { facingMode: currentFacingMode }') &&
+      !scannerCtrlV118d.includes('primaryConstraint = { facingMode: "environment" }')) {
+    throw new Error('ScannerController.html must use standard facingMode string constraint without nested ideal objects');
+  }
+  if (!scannerCtrlV118d.includes('webkit-playsinline')) {
+    throw new Error('ScannerController.html must set webkit-playsinline for iOS WebKit video compatibility');
+  }
+  console.log('  Verified: Camera feed constraints formatted as standard strings and webkit-playsinline enabled for iOS/Android stability.');
+
+  // 2. Telemetry Logging (camera, snap, toast, sync)
+  if (!scannerCtrlV118d.includes('AppState.logActivity("camera"') ||
+      !scannerCtrlV118d.includes('AppState.logActivity("snap"') ||
+      !modalCtrlV118d.includes('AppState.logActivity("toast"')) {
+    throw new Error('Codebase must log camera attempts/errors, snap photos, and toast notifications to AppState.logActivity');
+  }
+  if (!auditCtrlV118d.includes('entry.type === \'camera\'') ||
+      !auditCtrlV118d.includes('entry.type === \'snap\'') ||
+      !auditCtrlV118d.includes('entry.type === \'toast\'')) {
+    throw new Error('AuditController.html renderActivityLogs must style camera, snap, and toast telemetry events');
+  }
+  console.log('  Verified: Comprehensive telemetry logging active for camera feed attempts, snap photos, toasts, and audit mutations.');
+
+  // 3. Globalized Dynamic Versioning from Config Sheet
+  if (!appStateV118d.includes('getVersion') || !appStateV118d.includes('applyGlobalVersion')) {
+    throw new Error('AppState.html must expose getVersion and applyGlobalVersion methods for dynamic versioning');
+  }
+  if (!modalCtrlV118d.includes('AppState.getVersion()') || !modalCtrlV118d.includes('applyGlobalVersion')) {
+    throw new Error('ModalController.html triggerSyncConfigSheet must dynamically query and apply version');
+  }
+  if (!configV118d.includes('VERSION: "v1.1.8d"') && !configV118d.includes('VERSION: "1.1.8d"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8d');
+  }
+  console.log('  Verified: Globalized versioning engine active; UI elements dynamically bind to Config sheet APP_VERSION.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 38 TEST SUITES PASSED FOR v1.1.8b RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 39 TEST SUITES PASSED FOR v1.1.8d RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

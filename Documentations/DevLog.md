@@ -1,5 +1,31 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-15 — Release v1.1.8d: Camera Feed RCA, Universal Telemetry & Globalized Versioning
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8d`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Root Cause Analysis (RCA) on Camera Feed Initialization Failures**:
+  - **RCA 1: Constraints Format Mismatch in Html5Qrcode**:
+    - Passing `{ facingMode: { ideal: "environment" } }` caused Html5Qrcode to treat the object as a constraint string, generating an invalid MediaTrackConstraint `[object Object]` that failed WebRTC validation in iOS Safari and Android Chrome (`OverconstrainedError` / `TypeError`).
+    - Fixed by using clean standard constraints: `{ facingMode: currentFacingMode }` (`"environment"` or `"user"`).
+  - **RCA 2: iOS WebKit Video Autoplay Restrictions**:
+    - iOS Safari rejects video playback unless `<video webkit-playsinline playsinline muted autoplay>` is explicitly declared on the element before stream playback begins.
+    - Fixed by enforcing `webkit-playsinline` and `playsinline` directly on the viewfinder video tag.
+  - **RCA 3: Google Apps Script Web App Sandboxed Iframe Permissions**:
+    - Google Apps Script embeds Web Apps inside a sandboxed iframe without `allow="camera; microphone"` on certain mobile browsers.
+    - Probed `window.isSecureContext` and `window.self !== window.top` to diagnose sandbox restrictions and route technicians to the native snapshot mode (`<input type="file" capture="environment">`).
+* **Globalized Dynamic Versioning from Config Sheet**:
+  - Centralized version authority to the Google Sheet's `Config` tab (`APP_VERSION`).
+  - Added `AppState.getVersion()` and `AppState.applyGlobalVersion()` to bind version labels dynamically without static hardcoding.
+  - Updating `APP_VERSION` in the Google Sheet now instantly propagates to all headers, canvas badges, footers, and developer modals.
+* **Comprehensive Telemetry & Activity Logging**:
+  - Logged camera startup attempts, initialization successes, and detailed failure diagnostics into `AppState.logActivity("camera", ...)`.
+  - Logged "Snap Photo" captures, file processing, and decode outcomes into `AppState.logActivity("snap", ...)`.
+  - Logged all toast notifications into `AppState.logActivity("toast", ...)`.
+  - Added dedicated styling and icons for all telemetry event types in the Stat tab (`#view-summary`).
+* **Verification**:
+  - All 39 automated verification suites passing in `Tools/test_core.js`.
+
 ## 2026-09-15 — Release v1.1.8b: Camera Feed Fix, Toast Polish, Activity Logs Panel & Branding Update
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8b`.

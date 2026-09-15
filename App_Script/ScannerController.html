@@ -1,7 +1,7 @@
 <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8b)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -159,6 +159,11 @@ window.ScannerController = (function() {
    */
   function openNativeCameraSnap() {
     initAudioContext();
+    if (AppState.logActivity) {
+      AppState.logActivity("snap", "ถ่ายภาพ QR ด้วยกล้องมือถือ (Snap Camera)", {
+        notes: "Native OS camera capture triggered via <input type=file capture=environment>"
+      });
+    }
     var input = document.getElementById("native-camera-input");
     if (input) {
       input.value = ""; // Reset to allow re-capturing same QR
@@ -181,11 +186,21 @@ window.ScannerController = (function() {
   }
 
   /**
-   * Mode 2: Live Video Stream Scanner (Laptop Webcam & Direct Browser)
+   * Mode 2: Live Video Stream Scanner (v1.1.8d: RCA-Hardened Constraints & Telemetry)
    */
   function startScanner() {
     if (isScanning) return;
     initAudioContext();
+
+    var isSecure = (typeof window !== "undefined" && window.isSecureContext);
+    var hasMediaDevices = (typeof navigator !== "undefined" && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function");
+    var inIframe = (typeof window !== "undefined" && window.self !== window.top);
+
+    if (AppState.logActivity) {
+      AppState.logActivity("camera", "เริ่มเปิดกล้องสด (Camera Attempt)", {
+        notes: "Facing: " + currentFacingMode + ", Secure: " + isSecure + ", MediaDevices: " + !!hasMediaDevices + ", InIframe: " + inIframe
+      });
+    }
 
     var readerElement = document.getElementById("qr-reader");
     if (!readerElement) return;
@@ -204,10 +219,9 @@ window.ScannerController = (function() {
 
     ModalController.showToast("Initializing camera stream...", "info", 1500);
 
-    // Primary constraint: Use ideal facingMode so mobile browsers select the true autofocus rear camera without throwing
-    var primaryConstraint = (currentFacingMode === "environment")
-      ? { facingMode: { ideal: "environment" } }
-      : { facingMode: { ideal: "user" } };
+    // RCA Fix: Use standard Html5Qrcode constraint format { facingMode: "environment" | "user" }
+    // Passing nested objects like { facingMode: { ideal: ... } } triggers OverconstrainedError/TypeError on iOS Safari & Android Chrome
+    var primaryConstraint = { facingMode: currentFacingMode };
 
     function runStart(constraint) {
       return html5QrCode.start(
@@ -227,18 +241,24 @@ window.ScannerController = (function() {
         var v = document.querySelector("#qr-reader video");
         if (v) {
           v.setAttribute("playsinline", "true");
+          v.setAttribute("webkit-playsinline", "true");
           v.setAttribute("autoplay", "true");
           v.muted = true;
           startNativeDetectionLoop(v);
+        }
+        if (AppState.logActivity) {
+          AppState.logActivity("camera", "เชื่อมต่อกล้องสดสำเร็จ (Camera Ready)", {
+            notes: "Live 60fps stream active on " + currentFacingMode + " lens"
+          });
         }
         ModalController.showToast("Camera active (Instant Scan).", "success", 2000);
       })
       .catch(function(primaryErr) {
         console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
-        // Fallback for laptops/webcams without rear camera
+        // Fallback: Camera enumeration for laptops/webcams or specific sensor selection
         Html5Qrcode.getCameras().then(function(cameras) {
-          var fallbackChoice = { facingMode: { ideal: "user" } };
-          if (cameras && cameras.length > 0) {
+          var fallbackChoice = { facingMode: "user" };
+          if (cameras && cameras.length > 0 && cameras[0].id) {
             fallbackChoice = cameras[0].id;
           }
           return runStart(fallbackChoice);
@@ -250,9 +270,15 @@ window.ScannerController = (function() {
           var vFallback = document.querySelector("#qr-reader video");
           if (vFallback) {
             vFallback.setAttribute("playsinline", "true");
+            vFallback.setAttribute("webkit-playsinline", "true");
             vFallback.setAttribute("autoplay", "true");
             vFallback.muted = true;
             startNativeDetectionLoop(vFallback);
+          }
+          if (AppState.logActivity) {
+            AppState.logActivity("camera", "เชื่อมต่อกล้องสำเร็จผ่าน Fallback (Fallback Ready)", {
+              notes: "Camera stream active via fallback enumeration"
+            });
           }
         }).catch(function(finalErr) {
           stopNativeDetectionLoop();
@@ -262,6 +288,15 @@ window.ScannerController = (function() {
           updateScannerControlsUI();
           showScanLaser(false);
 
+          var errName = (finalErr && finalErr.name) || "Error";
+          var errMsg = (finalErr && finalErr.message) || String(finalErr);
+          if (AppState.logActivity) {
+            AppState.logActivity("camera", "เชื่อมต่อกล้องไม่สำเร็จ (Camera Error)", {
+              status: "error",
+              notes: errName + ": " + errMsg + " (InIframe: " + inIframe + ", Secure: " + isSecure + ")"
+            });
+          }
+
           var errStr = String(finalErr || "").toLowerCase();
           var isPermIssue = errStr.indexOf("notallowed") !== -1 ||
                             errStr.indexOf("permission") !== -1 ||
@@ -269,9 +304,9 @@ window.ScannerController = (function() {
                             errStr.indexOf("policy") !== -1;
 
           if (isPermIssue) {
-            ModalController.showToast("⚠️ Camera permission blocked. Please allow camera access or tap '📸 Snap Photo with Camera'!", "warning", 5000);
+            ModalController.showToast("⚠️ Camera permission blocked. Tap '📸 Snap Photo with Camera' to scan without restrictions!", "warning", 5500);
           } else {
-            ModalController.showToast("Live video unavailable. Tap '📸 Snap Photo with Camera' to scan directly!", "warning", 5000);
+            ModalController.showToast("Live video unavailable (" + errName + "). Tap '📸 Snap Photo with Camera' to scan directly!", "warning", 5500);
           }
         });
       });
@@ -382,6 +417,12 @@ window.ScannerController = (function() {
     isProcessingFile = true;
     initAudioContext();
 
+    if (AppState.logActivity) {
+      AppState.logActivity("snap", "ประมวลผลภาพถ่าย QR (Processing Photo)", {
+        notes: (file ? file.name : "photo") + " (" + (file ? Math.round(file.size / 1024) : 0) + " KB)"
+      });
+    }
+
     ModalController.showToast("⚡ Scanning QR code...", "info", 2000);
 
     // Stage 1: Check native browser BarcodeDetector API (5ms GPU hardware acceleration)
@@ -428,6 +469,12 @@ window.ScannerController = (function() {
         onScanSuccess(decodedText, null);
       }).catch(function(finalErr) {
         isProcessingFile = false;
+        if (AppState.logActivity) {
+          AppState.logActivity("snap", "ถอดรหัสภาพไม่พบ QR (Decode Failed)", {
+            status: "warning",
+            notes: "No clear QR code found in captured photo"
+          });
+        }
         ModalController.showToast("No clear QR code detected. Please ensure good lighting and tap '📸 SNAP WITH CAMERA' again.", "error", 4500);
       });
     });
@@ -438,7 +485,7 @@ window.ScannerController = (function() {
     var cleanCode = String(decodedText || "").trim();
 
     // Debounce to prevent multiple trigger cascades
-    if (cleanCode === lastScannedCode && (now - lastScanTimestamp) < DEBOUNCE_MS) {
+    if (cleanCode === lastScannedCode && (now - lastScanTimestamp) < scanCooldownMs) {
       return;
     }
 
@@ -449,6 +496,14 @@ window.ScannerController = (function() {
     var isStandardFormat = isValidAssetInventoryFormat(cleanCode);
     playSuccessChime();
     triggerHaptic(!isStandardFormat);
+
+    if (AppState.logActivity) {
+      AppState.logActivity("scan", "ตรวจพบรหัส QR (QR Detected)", {
+        assetId: cleanCode,
+        status: isStandardFormat ? "Good" : "Warning",
+        notes: "Format: " + (isStandardFormat ? "Standard Inventory Code" : "Custom/Non-standard Code")
+      });
+    }
 
     // Visual pulse feedback on viewfinder
     flashViewfinder();

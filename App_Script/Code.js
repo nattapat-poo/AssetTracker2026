@@ -1,14 +1,15 @@
 /**
  * Code.js — Unified API Router & Native Web App Dispatcher
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
 function onOpen() {
   try {
+    var ver = (typeof APP_CONFIG !== "undefined" && APP_CONFIG.VERSION) ? APP_CONFIG.VERSION : "v1.1.8d";
     var ui = SpreadsheetApp.getUi();
     ui.createMenu("🚀 Lab Oops: Asset Tracker")
-      .addItem("⚙️ 0. Update / Sync Config Sheet (v1.1.8b)", "menuSyncConfigSheet")
+      .addItem("⚙️ 0. Update / Sync Config Sheet (" + ver + ")", "menuSyncConfigSheet")
       .addSeparator()
       .addItem("🏷️ 1. Setup Row 5 Audit Columns on Room Sheets...", "menuSetupRow5Headers")
       .addItem("📥 2. Aggregate Rooms into Master Table...", "menuAggregateRoomsToMaster")

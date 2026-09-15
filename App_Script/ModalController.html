@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -10,9 +10,19 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.8b: 8.5s default, minimum 6.5s)
+    // Extended toast timer for mobile readability (v1.1.8d: 8.5s default, minimum 6.5s)
     if (typeof duration === "undefined" || !duration) duration = 8500;
     if (duration < 6500) duration = 6500;
+
+    // Log toast notification to activity logs for complete telemetry
+    if (window.AppState && typeof window.AppState.logActivity === "function") {
+      try {
+        window.AppState.logActivity("toast", "แจ้งเตือน (" + type + ")", {
+          notes: message,
+          status: type
+        });
+      } catch (eLog) {}
+    }
 
     var container = document.getElementById("toast-container");
     if (!container) return;
@@ -416,10 +426,13 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7e";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
+        if (res && res.appVersion && window.AppState && typeof window.AppState.applyGlobalVersion === "function") {
+          window.AppState.applyGlobalVersion(res.appVersion);
+        }
         showToast("✅ " + (res.message || "Config synchronized."), "success", 4000);
         var jsonView = document.getElementById("dev-json-state");
         if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);

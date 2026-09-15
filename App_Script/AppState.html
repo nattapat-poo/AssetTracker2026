@@ -1,15 +1,18 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8d";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8b";
+
   var initialLogs = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var saved = localStorage.getItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+        var saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
         if (saved) {
           var parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) return parsed;
@@ -80,9 +83,36 @@ window.AppState = (function() {
     return state[key];
   }
 
+  function getVersion() {
+    if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
+      return String(state.config.APP_VERSION).trim();
+    }
+    return "v1.1.8d";
+  }
+
+  function applyGlobalVersion(ver) {
+    if (!ver) ver = getVersion();
+    var displayVer = ver.indexOf("v") === 0 ? ver : ("v" + ver);
+    
+    // Update all elements carrying version class or specific IDs across the entire DOM
+    var targets = document.querySelectorAll(".app-version-label, .app-version-badge, #header-version-badge, #footer-version-text, #canvas-version-badge, #dev-modal-version");
+    targets.forEach(function(el) {
+      if (el.id === "header-version-badge") {
+        el.innerText = displayVer + " • Mobile Audit";
+      } else if (el.id === "footer-version-text") {
+        el.innerText = "QR Asset Survey • MUIDS Science Dept • " + displayVer;
+      } else {
+        el.innerText = displayVer;
+      }
+    });
+  }
+
   function set(key, value) {
     var prev = state[key];
     state[key] = value;
+    if (key === "config" && value) {
+      applyGlobalVersion();
+    }
     notify("change:" + key, { key: key, value: value, prev: prev });
     notify("change", { key: key, value: value, prev: prev });
   }
@@ -92,6 +122,9 @@ window.AppState = (function() {
       Object.keys(patch).forEach(function(k) {
         state[k] = patch[k];
       });
+      if (patch.config) {
+        applyGlobalVersion();
+      }
       notify("update", patch);
     }
   }
@@ -166,8 +199,8 @@ window.AppState = (function() {
       id: "log_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
       timestamp: timeStr,
       date: dateStr,
-      type: type || "audit", // "audit", "move", "rename", "unlisted", "scan", "sync"
-      title: title || "Asset Updated",
+      type: type || "audit", // "audit", "move", "rename", "unlisted", "scan", "sync", "camera", "snap", "toast"
+      title: title || "Activity Logged",
       assetId: (details && details.assetId) || "",
       itemName: (details && details.itemName) || "",
       status: (details && details.status) || "",
@@ -178,12 +211,12 @@ window.AppState = (function() {
     };
 
     state.activityLogs.unshift(entry);
-    if (state.activityLogs.length > 80) {
+    if (state.activityLogs.length > 100) {
       state.activityLogs.pop();
     }
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("MUIDS_ACTIVITY_LOGS_v1.1.8b", JSON.stringify(state.activityLogs));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.activityLogs));
       }
     } catch (e) {}
 
@@ -195,7 +228,8 @@ window.AppState = (function() {
     state.activityLogs = [];
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LEGACY_KEY);
       }
     } catch (e) {}
     notify("change:activityLogs", []);
@@ -207,6 +241,8 @@ window.AppState = (function() {
     update: update,
     subscribe: subscribe,
     notify: notify,
+    getVersion: getVersion,
+    applyGlobalVersion: applyGlobalVersion,
     getFilteredItems: getFilteredItems,
     addRecentScan: addRecentScan,
     logActivity: logActivity,

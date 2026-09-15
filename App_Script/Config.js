@@ -1,12 +1,12 @@
 /**
  * Config.js — Application Constants & 3-Tier Cache Snapshot Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
 const APP_CONFIG = {
   APP_NAME: "MUIDS Mobile Asset Tracker",
-  VERSION: "v1.1.8b",
+  VERSION: "v1.1.8d",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };
@@ -446,12 +446,9 @@ function getLocalConfig() {
       config[key] = parsedVal;
     }
     
-    // Self-healing: if sheet version is older, sync it
-    if (config.APP_VERSION !== APP_CONFIG.VERSION) {
-      try {
-        syncConfigSheet(ss);
-        config.APP_VERSION = APP_CONFIG.VERSION;
-      } catch (e) {}
+    // Globalized versioning: Ensure config has a valid version, defaulting to APP_CONFIG.VERSION
+    if (!config.APP_VERSION || String(config.APP_VERSION).trim() === "") {
+      config.APP_VERSION = APP_CONFIG.VERSION;
     }
     
     var defaults = getLocalConfigDefaults();

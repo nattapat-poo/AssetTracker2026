@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8d] - 2026-09-15
+
+### Fixed & Improved
+- **Camera Feed RCA & Initialization Fixes (`ScannerController.html`)**:
+  - **RCA Cause 1**: Identified constraint format issue where passing `{ facingMode: { ideal: "environment" } }` to `Html5Qrcode.start()` generated invalid `[object Object]` MediaTrackConstraints, triggering `OverconstrainedError` / `TypeError` on both Android Chrome and iOS Safari. Resolved by standardizing constraints to `{ facingMode: currentFacingMode }`.
+  - **RCA Cause 2**: iOS WebKit requires `<video webkit-playsinline playsinline>` to allow inline video playback without user rejection. Added explicit attributes on the camera video mount.
+  - **RCA Cause 3**: Probed secure context (`window.isSecureContext`) and sandboxed iframe environment (`window.self !== window.top`) to detect Google Apps Script permission restrictions and guide technicians smoothly to native snapshot fallback when needed.
+- **Universal Dynamic Version Numbering from Config Sheet (`Config.js`, `AppState.html`, `index.html`)**:
+  - Globalized version resolution: Eliminated static hardcoded version strings across the app.
+  - `AppState.getVersion()` and `AppState.applyGlobalVersion()` dynamically bind all UI version labels (header, canvas badge, footer, developer modal) to the Google Sheet's `Config` tab (`APP_VERSION`).
+  - Editing `APP_VERSION` in the Google Sheet now propagates directly to the entire app interface without requiring code modifications.
+- **Comprehensive Telemetry Logging (`ScannerController.html`, `ModalController.html`, `AppState.html`, `AuditController.html`)**:
+  - Automatically records camera feed startup attempts, stream initialization successes, and detailed failure diagnostics (`err.name`, `err.message`, host, iframe status) to the Activity Logs.
+  - Logs native camera snapshot ("Snap Photo") launches, image upload processing, and decode outcomes.
+  - Logs all toast notifications with severity and content into the Activity Logs panel.
+  - Enhanced Activity Logs in the Stat tab with dedicated colored icons and badges for `camera`, `snap`, `toast`, and `sync` events.
+
 ## [1.1.8b] - 2026-09-15
 
 ### Fixed & Improved

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🔍 QR Asset Survey v1.1.8b — Lab Oops OS</title>
+  <title>🔍 QR Asset Survey — Lab Oops OS</title>
   
   <!-- Font Awesome 6.5.1 (Free Icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,7 +28,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span class="text-slate-500">430px Canvas • v1.1.8b</span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8d</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -38,7 +38,7 @@
   <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8b) -->
+      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8d) -->
       <div class="flex flex-col min-w-0 flex-1">
         <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
         <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
@@ -54,7 +54,7 @@
 
         <!-- Version numbering & Mahidol User Verification under the app title -->
         <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span class="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8b</span>
+          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8d</span>
           <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="Mahidol User Verification">
             <i id="header-user-icon" class="fa-solid fa-shield-check text-[9px] text-emerald-400"></i>
             <span id="header-user-text" class="text-[9px] font-semibold text-slate-300">Mahidol Verified</span>
@@ -697,7 +697,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8d</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -890,7 +890,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.8b</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8d</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -1476,6 +1476,11 @@
 
         // Update summary view metrics if elements exist
         updateSummaryViewStats(payload.summary);
+      }
+
+      // Initialize globalized versioning across header, canvas, footer & modals
+      if (AppState.applyGlobalVersion) {
+        AppState.applyGlobalVersion();
       }
 
       // SWR Step 1: Instant render from localStorage cache (<20ms boot time!)

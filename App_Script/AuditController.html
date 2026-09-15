@@ -1,8 +1,8 @@
 <script>
 /**
- * Lab Oops OS - AuditController.html
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
- * Ecosystem Lead: Nattapat Poolyam (Mek)
+ * AuditController.html — Asset Inventory & Audit Workflow Controller
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * MUIDS Lab Oops OS — Science Department
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
 window.AuditController = (function() {
@@ -882,16 +882,43 @@ window.AuditController = (function() {
     var html = '';
     logs.forEach(function(entry) {
       var icon = 'fa-pen-to-square text-sky-400';
-      if (entry.type === 'unlisted') icon = 'fa-plus-circle text-amber-400';
-      else if (entry.type === 'move') icon = 'fa-arrows-turn-right text-purple-400';
-      else if (entry.type === 'rename') icon = 'fa-signature text-teal-400';
-      else if (entry.type === 'scan') icon = 'fa-qrcode text-emerald-400';
+      var borderAccent = 'border-slate-800/80';
+
+      if (entry.type === 'unlisted') {
+        icon = 'fa-plus-circle text-amber-400';
+      } else if (entry.type === 'move') {
+        icon = 'fa-arrows-turn-right text-purple-400';
+      } else if (entry.type === 'rename') {
+        icon = 'fa-signature text-teal-400';
+      } else if (entry.type === 'scan') {
+        icon = 'fa-qrcode text-emerald-400';
+      } else if (entry.type === 'camera') {
+        if (entry.status === 'error') {
+          icon = 'fa-video-slash text-rose-400';
+          borderAccent = 'border-rose-500/40 bg-rose-950/20';
+        } else {
+          icon = 'fa-video text-emerald-400';
+        }
+      } else if (entry.type === 'snap') {
+        if (entry.status === 'warning' || entry.status === 'error') {
+          icon = 'fa-triangle-exclamation text-amber-400';
+        } else {
+          icon = 'fa-camera text-sky-400';
+        }
+      } else if (entry.type === 'toast') {
+        if (entry.status === 'error') icon = 'fa-circle-exclamation text-rose-400';
+        else if (entry.status === 'warning') icon = 'fa-triangle-exclamation text-amber-400';
+        else if (entry.status === 'success') icon = 'fa-circle-check text-emerald-400';
+        else icon = 'fa-bell text-sky-400';
+      } else if (entry.type === 'sync') {
+        icon = 'fa-arrows-rotate text-purple-400';
+      }
 
       var statusBadgeHtml = entry.status ? renderStatusBadgeHtml(entry.status) : '';
       var stickerBadgeHtml = entry.sticker ? ('<span class="text-[10px] text-sky-300 bg-sky-500/10 border border-sky-500/30 px-1.5 py-0.2 rounded"><i class="fa-solid fa-tag text-[9px] mr-1"></i>' + escapeHtml(entry.sticker) + '</span>') : '';
 
       html +=
-        '<div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 transition flex items-start justify-between gap-2.5 text-xs">' +
+        '<div class="p-2.5 rounded-xl bg-slate-950/80 border ' + borderAccent + ' hover:border-slate-700 transition flex items-start justify-between gap-2.5 text-xs">' +
           '<div class="flex items-start gap-2 min-w-0 flex-1">' +
             '<div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 mt-0.5">' +
               '<i class="fa-solid ' + icon + ' text-[11px]"></i>' +
@@ -904,9 +931,9 @@ window.AuditController = (function() {
                 stickerBadgeHtml +
               '</div>' +
               (entry.itemName ? '<p class="text-[11px] text-slate-400 truncate mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
-              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500">' +
+              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 flex-wrap">' +
                 (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-600 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
-                (entry.notes ? '<span class="truncate max-w-[140px] text-amber-400/80"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
+                (entry.notes ? '<span class="break-words text-amber-400/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
               '</div>' +
             '</div>' +
           '</div>' +

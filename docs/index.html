@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🔍 QR Asset Survey v1.1.8b — Lab Oops OS</title>
+  <title>🔍 QR Asset Survey — Lab Oops OS</title>
   
   <!-- Font Awesome 6.5.1 (Free Icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,7 +19,7 @@
   <!-- Modular Embedded Sub-views & Styles -->
   <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8b Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8d Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -702,7 +702,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span class="text-slate-500">430px Canvas • v1.1.8b</span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8d</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -712,7 +712,7 @@
   <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
     <div class="w-full flex items-center justify-between gap-2">
       
-      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8b) -->
+      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8d) -->
       <div class="flex flex-col min-w-0 flex-1">
         <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
         <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
@@ -728,7 +728,7 @@
 
         <!-- Version numbering & Mahidol User Verification under the app title -->
         <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span class="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8b</span>
+          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8d</span>
           <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="Mahidol User Verification">
             <i id="header-user-icon" class="fa-solid fa-shield-check text-[9px] text-emerald-400"></i>
             <span id="header-user-text" class="text-[9px] font-semibold text-slate-300">Mahidol Verified</span>
@@ -1371,7 +1371,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8d</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1564,7 +1564,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> v1.1.8b</div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8d</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -2037,15 +2037,18 @@
   <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8d";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8b";
+
   var initialLogs = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var saved = localStorage.getItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+        var saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
         if (saved) {
           var parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) return parsed;
@@ -2116,9 +2119,36 @@ window.AppState = (function() {
     return state[key];
   }
 
+  function getVersion() {
+    if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
+      return String(state.config.APP_VERSION).trim();
+    }
+    return "v1.1.8d";
+  }
+
+  function applyGlobalVersion(ver) {
+    if (!ver) ver = getVersion();
+    var displayVer = ver.indexOf("v") === 0 ? ver : ("v" + ver);
+    
+    // Update all elements carrying version class or specific IDs across the entire DOM
+    var targets = document.querySelectorAll(".app-version-label, .app-version-badge, #header-version-badge, #footer-version-text, #canvas-version-badge, #dev-modal-version");
+    targets.forEach(function(el) {
+      if (el.id === "header-version-badge") {
+        el.innerText = displayVer + " • Mobile Audit";
+      } else if (el.id === "footer-version-text") {
+        el.innerText = "QR Asset Survey • MUIDS Science Dept • " + displayVer;
+      } else {
+        el.innerText = displayVer;
+      }
+    });
+  }
+
   function set(key, value) {
     var prev = state[key];
     state[key] = value;
+    if (key === "config" && value) {
+      applyGlobalVersion();
+    }
     notify("change:" + key, { key: key, value: value, prev: prev });
     notify("change", { key: key, value: value, prev: prev });
   }
@@ -2128,6 +2158,9 @@ window.AppState = (function() {
       Object.keys(patch).forEach(function(k) {
         state[k] = patch[k];
       });
+      if (patch.config) {
+        applyGlobalVersion();
+      }
       notify("update", patch);
     }
   }
@@ -2202,8 +2235,8 @@ window.AppState = (function() {
       id: "log_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
       timestamp: timeStr,
       date: dateStr,
-      type: type || "audit", // "audit", "move", "rename", "unlisted", "scan", "sync"
-      title: title || "Asset Updated",
+      type: type || "audit", // "audit", "move", "rename", "unlisted", "scan", "sync", "camera", "snap", "toast"
+      title: title || "Activity Logged",
       assetId: (details && details.assetId) || "",
       itemName: (details && details.itemName) || "",
       status: (details && details.status) || "",
@@ -2214,12 +2247,12 @@ window.AppState = (function() {
     };
 
     state.activityLogs.unshift(entry);
-    if (state.activityLogs.length > 80) {
+    if (state.activityLogs.length > 100) {
       state.activityLogs.pop();
     }
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("MUIDS_ACTIVITY_LOGS_v1.1.8b", JSON.stringify(state.activityLogs));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.activityLogs));
       }
     } catch (e) {}
 
@@ -2231,7 +2264,8 @@ window.AppState = (function() {
     state.activityLogs = [];
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LEGACY_KEY);
       }
     } catch (e) {}
     notify("change:activityLogs", []);
@@ -2243,6 +2277,8 @@ window.AppState = (function() {
     update: update,
     subscribe: subscribe,
     notify: notify,
+    getVersion: getVersion,
+    applyGlobalVersion: applyGlobalVersion,
     getFilteredItems: getFilteredItems,
     addRecentScan: addRecentScan,
     logActivity: logActivity,
@@ -2255,7 +2291,7 @@ window.AppState = (function() {
   <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2366,11 +2402,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8b)
+  // Persistent Local Storage of REAL Assets (v1.1.8d)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8b");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8d") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8b");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2386,7 +2422,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8b", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8d", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2519,7 +2555,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8b",
+          APP_VERSION: "v1.1.8d",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2711,10 +2747,11 @@ window.ApiClient = (function() {
     }
 
     if (action === "syncConfigSheet") {
+      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.8b). Local mock simulation mode.",
-        appVersion: "v1.1.8b",
+        message: "Config sheet synchronized (" + syncVer + "). Local mock simulation mode.",
+        appVersion: syncVer,
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -2925,7 +2962,7 @@ window.ThemeController = (function() {
   <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2934,9 +2971,19 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.8b: 8.5s default, minimum 6.5s)
+    // Extended toast timer for mobile readability (v1.1.8d: 8.5s default, minimum 6.5s)
     if (typeof duration === "undefined" || !duration) duration = 8500;
     if (duration < 6500) duration = 6500;
+
+    // Log toast notification to activity logs for complete telemetry
+    if (window.AppState && typeof window.AppState.logActivity === "function") {
+      try {
+        window.AppState.logActivity("toast", "แจ้งเตือน (" + type + ")", {
+          notes: message,
+          status: type
+        });
+      } catch (eLog) {}
+    }
 
     var container = document.getElementById("toast-container");
     if (!container) return;
@@ -3340,10 +3387,13 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && window.AppState.get("config") && window.AppState.get("config").APP_VERSION) ? window.AppState.get("config").APP_VERSION : "v1.1.7e";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8d";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
+        if (res && res.appVersion && window.AppState && typeof window.AppState.applyGlobalVersion === "function") {
+          window.AppState.applyGlobalVersion(res.appVersion);
+        }
         showToast("✅ " + (res.message || "Config synchronized."), "success", 4000);
         var jsonView = document.getElementById("dev-json-state");
         if (jsonView) jsonView.innerText = JSON.stringify(res, null, 2);
@@ -3604,8 +3654,8 @@ window.ModalController = (function() {
 
   <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8b)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8d)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -3763,6 +3813,11 @@ window.ScannerController = (function() {
    */
   function openNativeCameraSnap() {
     initAudioContext();
+    if (AppState.logActivity) {
+      AppState.logActivity("snap", "ถ่ายภาพ QR ด้วยกล้องมือถือ (Snap Camera)", {
+        notes: "Native OS camera capture triggered via <input type=file capture=environment>"
+      });
+    }
     var input = document.getElementById("native-camera-input");
     if (input) {
       input.value = ""; // Reset to allow re-capturing same QR
@@ -3785,11 +3840,21 @@ window.ScannerController = (function() {
   }
 
   /**
-   * Mode 2: Live Video Stream Scanner (Laptop Webcam & Direct Browser)
+   * Mode 2: Live Video Stream Scanner (v1.1.8d: RCA-Hardened Constraints & Telemetry)
    */
   function startScanner() {
     if (isScanning) return;
     initAudioContext();
+
+    var isSecure = (typeof window !== "undefined" && window.isSecureContext);
+    var hasMediaDevices = (typeof navigator !== "undefined" && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function");
+    var inIframe = (typeof window !== "undefined" && window.self !== window.top);
+
+    if (AppState.logActivity) {
+      AppState.logActivity("camera", "เริ่มเปิดกล้องสด (Camera Attempt)", {
+        notes: "Facing: " + currentFacingMode + ", Secure: " + isSecure + ", MediaDevices: " + !!hasMediaDevices + ", InIframe: " + inIframe
+      });
+    }
 
     var readerElement = document.getElementById("qr-reader");
     if (!readerElement) return;
@@ -3808,10 +3873,9 @@ window.ScannerController = (function() {
 
     ModalController.showToast("Initializing camera stream...", "info", 1500);
 
-    // Primary constraint: Use ideal facingMode so mobile browsers select the true autofocus rear camera without throwing
-    var primaryConstraint = (currentFacingMode === "environment")
-      ? { facingMode: { ideal: "environment" } }
-      : { facingMode: { ideal: "user" } };
+    // RCA Fix: Use standard Html5Qrcode constraint format { facingMode: "environment" | "user" }
+    // Passing nested objects like { facingMode: { ideal: ... } } triggers OverconstrainedError/TypeError on iOS Safari & Android Chrome
+    var primaryConstraint = { facingMode: currentFacingMode };
 
     function runStart(constraint) {
       return html5QrCode.start(
@@ -3831,18 +3895,24 @@ window.ScannerController = (function() {
         var v = document.querySelector("#qr-reader video");
         if (v) {
           v.setAttribute("playsinline", "true");
+          v.setAttribute("webkit-playsinline", "true");
           v.setAttribute("autoplay", "true");
           v.muted = true;
           startNativeDetectionLoop(v);
+        }
+        if (AppState.logActivity) {
+          AppState.logActivity("camera", "เชื่อมต่อกล้องสดสำเร็จ (Camera Ready)", {
+            notes: "Live 60fps stream active on " + currentFacingMode + " lens"
+          });
         }
         ModalController.showToast("Camera active (Instant Scan).", "success", 2000);
       })
       .catch(function(primaryErr) {
         console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
-        // Fallback for laptops/webcams without rear camera
+        // Fallback: Camera enumeration for laptops/webcams or specific sensor selection
         Html5Qrcode.getCameras().then(function(cameras) {
-          var fallbackChoice = { facingMode: { ideal: "user" } };
-          if (cameras && cameras.length > 0) {
+          var fallbackChoice = { facingMode: "user" };
+          if (cameras && cameras.length > 0 && cameras[0].id) {
             fallbackChoice = cameras[0].id;
           }
           return runStart(fallbackChoice);
@@ -3854,9 +3924,15 @@ window.ScannerController = (function() {
           var vFallback = document.querySelector("#qr-reader video");
           if (vFallback) {
             vFallback.setAttribute("playsinline", "true");
+            vFallback.setAttribute("webkit-playsinline", "true");
             vFallback.setAttribute("autoplay", "true");
             vFallback.muted = true;
             startNativeDetectionLoop(vFallback);
+          }
+          if (AppState.logActivity) {
+            AppState.logActivity("camera", "เชื่อมต่อกล้องสำเร็จผ่าน Fallback (Fallback Ready)", {
+              notes: "Camera stream active via fallback enumeration"
+            });
           }
         }).catch(function(finalErr) {
           stopNativeDetectionLoop();
@@ -3866,6 +3942,15 @@ window.ScannerController = (function() {
           updateScannerControlsUI();
           showScanLaser(false);
 
+          var errName = (finalErr && finalErr.name) || "Error";
+          var errMsg = (finalErr && finalErr.message) || String(finalErr);
+          if (AppState.logActivity) {
+            AppState.logActivity("camera", "เชื่อมต่อกล้องไม่สำเร็จ (Camera Error)", {
+              status: "error",
+              notes: errName + ": " + errMsg + " (InIframe: " + inIframe + ", Secure: " + isSecure + ")"
+            });
+          }
+
           var errStr = String(finalErr || "").toLowerCase();
           var isPermIssue = errStr.indexOf("notallowed") !== -1 ||
                             errStr.indexOf("permission") !== -1 ||
@@ -3873,9 +3958,9 @@ window.ScannerController = (function() {
                             errStr.indexOf("policy") !== -1;
 
           if (isPermIssue) {
-            ModalController.showToast("⚠️ Camera permission blocked. Please allow camera access or tap '📸 Snap Photo with Camera'!", "warning", 5000);
+            ModalController.showToast("⚠️ Camera permission blocked. Tap '📸 Snap Photo with Camera' to scan without restrictions!", "warning", 5500);
           } else {
-            ModalController.showToast("Live video unavailable. Tap '📸 Snap Photo with Camera' to scan directly!", "warning", 5000);
+            ModalController.showToast("Live video unavailable (" + errName + "). Tap '📸 Snap Photo with Camera' to scan directly!", "warning", 5500);
           }
         });
       });
@@ -3986,6 +4071,12 @@ window.ScannerController = (function() {
     isProcessingFile = true;
     initAudioContext();
 
+    if (AppState.logActivity) {
+      AppState.logActivity("snap", "ประมวลผลภาพถ่าย QR (Processing Photo)", {
+        notes: (file ? file.name : "photo") + " (" + (file ? Math.round(file.size / 1024) : 0) + " KB)"
+      });
+    }
+
     ModalController.showToast("⚡ Scanning QR code...", "info", 2000);
 
     // Stage 1: Check native browser BarcodeDetector API (5ms GPU hardware acceleration)
@@ -4032,6 +4123,12 @@ window.ScannerController = (function() {
         onScanSuccess(decodedText, null);
       }).catch(function(finalErr) {
         isProcessingFile = false;
+        if (AppState.logActivity) {
+          AppState.logActivity("snap", "ถอดรหัสภาพไม่พบ QR (Decode Failed)", {
+            status: "warning",
+            notes: "No clear QR code found in captured photo"
+          });
+        }
         ModalController.showToast("No clear QR code detected. Please ensure good lighting and tap '📸 SNAP WITH CAMERA' again.", "error", 4500);
       });
     });
@@ -4042,7 +4139,7 @@ window.ScannerController = (function() {
     var cleanCode = String(decodedText || "").trim();
 
     // Debounce to prevent multiple trigger cascades
-    if (cleanCode === lastScannedCode && (now - lastScanTimestamp) < DEBOUNCE_MS) {
+    if (cleanCode === lastScannedCode && (now - lastScanTimestamp) < scanCooldownMs) {
       return;
     }
 
@@ -4053,6 +4150,14 @@ window.ScannerController = (function() {
     var isStandardFormat = isValidAssetInventoryFormat(cleanCode);
     playSuccessChime();
     triggerHaptic(!isStandardFormat);
+
+    if (AppState.logActivity) {
+      AppState.logActivity("scan", "ตรวจพบรหัส QR (QR Detected)", {
+        assetId: cleanCode,
+        status: isStandardFormat ? "Good" : "Warning",
+        notes: "Format: " + (isStandardFormat ? "Standard Inventory Code" : "Custom/Non-standard Code")
+      });
+    }
 
     // Visual pulse feedback on viewfinder
     flashViewfinder();
@@ -4135,9 +4240,9 @@ window.ScannerController = (function() {
 
   <script>
 /**
- * Lab Oops OS - AuditController.html
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
- * Ecosystem Lead: Nattapat Poolyam (Mek)
+ * AuditController.html — Asset Inventory & Audit Workflow Controller
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8d)
+ * MUIDS Lab Oops OS — Science Department
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
 window.AuditController = (function() {
@@ -5017,16 +5122,43 @@ window.AuditController = (function() {
     var html = '';
     logs.forEach(function(entry) {
       var icon = 'fa-pen-to-square text-sky-400';
-      if (entry.type === 'unlisted') icon = 'fa-plus-circle text-amber-400';
-      else if (entry.type === 'move') icon = 'fa-arrows-turn-right text-purple-400';
-      else if (entry.type === 'rename') icon = 'fa-signature text-teal-400';
-      else if (entry.type === 'scan') icon = 'fa-qrcode text-emerald-400';
+      var borderAccent = 'border-slate-800/80';
+
+      if (entry.type === 'unlisted') {
+        icon = 'fa-plus-circle text-amber-400';
+      } else if (entry.type === 'move') {
+        icon = 'fa-arrows-turn-right text-purple-400';
+      } else if (entry.type === 'rename') {
+        icon = 'fa-signature text-teal-400';
+      } else if (entry.type === 'scan') {
+        icon = 'fa-qrcode text-emerald-400';
+      } else if (entry.type === 'camera') {
+        if (entry.status === 'error') {
+          icon = 'fa-video-slash text-rose-400';
+          borderAccent = 'border-rose-500/40 bg-rose-950/20';
+        } else {
+          icon = 'fa-video text-emerald-400';
+        }
+      } else if (entry.type === 'snap') {
+        if (entry.status === 'warning' || entry.status === 'error') {
+          icon = 'fa-triangle-exclamation text-amber-400';
+        } else {
+          icon = 'fa-camera text-sky-400';
+        }
+      } else if (entry.type === 'toast') {
+        if (entry.status === 'error') icon = 'fa-circle-exclamation text-rose-400';
+        else if (entry.status === 'warning') icon = 'fa-triangle-exclamation text-amber-400';
+        else if (entry.status === 'success') icon = 'fa-circle-check text-emerald-400';
+        else icon = 'fa-bell text-sky-400';
+      } else if (entry.type === 'sync') {
+        icon = 'fa-arrows-rotate text-purple-400';
+      }
 
       var statusBadgeHtml = entry.status ? renderStatusBadgeHtml(entry.status) : '';
       var stickerBadgeHtml = entry.sticker ? ('<span class="text-[10px] text-sky-300 bg-sky-500/10 border border-sky-500/30 px-1.5 py-0.2 rounded"><i class="fa-solid fa-tag text-[9px] mr-1"></i>' + escapeHtml(entry.sticker) + '</span>') : '';
 
       html +=
-        '<div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 transition flex items-start justify-between gap-2.5 text-xs">' +
+        '<div class="p-2.5 rounded-xl bg-slate-950/80 border ' + borderAccent + ' hover:border-slate-700 transition flex items-start justify-between gap-2.5 text-xs">' +
           '<div class="flex items-start gap-2 min-w-0 flex-1">' +
             '<div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 mt-0.5">' +
               '<i class="fa-solid ' + icon + ' text-[11px]"></i>' +
@@ -5039,9 +5171,9 @@ window.AuditController = (function() {
                 stickerBadgeHtml +
               '</div>' +
               (entry.itemName ? '<p class="text-[11px] text-slate-400 truncate mt-0.5">' + escapeHtml(entry.itemName) + '</p>' : '') +
-              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500">' +
+              '<div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 flex-wrap">' +
                 (entry.room ? '<span><i class="fa-solid fa-door-open text-slate-600 mr-1"></i>' + escapeHtml(entry.room) + '</span>' : '') +
-                (entry.notes ? '<span class="truncate max-w-[140px] text-amber-400/80"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
+                (entry.notes ? '<span class="break-words text-amber-400/90"><i class="fa-solid fa-comment-dots mr-1"></i>' + escapeHtml(entry.notes) + '</span>' : '') +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -5219,6 +5351,11 @@ window.AuditController = (function() {
 
         // Update summary view metrics if elements exist
         updateSummaryViewStats(payload.summary);
+      }
+
+      // Initialize globalized versioning across header, canvas, footer & modals
+      if (AppState.applyGlobalVersion) {
+        AppState.applyGlobalVersion();
       }
 
       // SWR Step 1: Instant render from localStorage cache (<20ms boot time!)
