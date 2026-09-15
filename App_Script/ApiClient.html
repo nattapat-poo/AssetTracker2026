@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.7f)
+  // Persistent Local Storage of REAL Assets (v1.1.8a)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7f");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8a");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7f", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8a", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -257,11 +257,15 @@ window.ApiClient = (function() {
           role: "SuperAdmin",
           isAdmin: true,
           isSuperAdmin: true,
-          isTALT: true
+          isTALT: true,
+          isMahidolAccount: true,
+          isNexusAuthorized: true,
+          isVerified: true,
+          authStatus: "VERIFIED"
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.7f",
+          APP_VERSION: "v1.1.8a",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -455,8 +459,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.7f). Local mock simulation mode.",
-        appVersion: "v1.1.7f",
+        message: "Config sheet synchronized (v1.1.8a). Local mock simulation mode.",
+        appVersion: "v1.1.8a",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -508,6 +512,20 @@ window.ApiClient = (function() {
           ],
           timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
         }
+      };
+    }
+
+    if (action === "verifyMahidolUser") {
+      var email = String(payload.email || "nattapat.poo@mahidol.ac.th").toLowerCase().trim();
+      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu"));
+      return {
+        email: email,
+        name: email.split("@")[0],
+        role: "Auditor",
+        isMahidolAccount: isMahidol,
+        isNexusAuthorized: isMahidol,
+        isVerified: isMahidol,
+        authStatus: isMahidol ? "VERIFIED" : "EXTERNAL_ACCOUNT"
       };
     }
 
@@ -585,7 +603,8 @@ window.ApiClient = (function() {
     migrateMasterToRooms: function() { return invoke("migrateMasterToRooms", {}); },
     checkMasterContradictions: function() { return invoke("checkMasterContradictions", {}); },
     queryMasterTable: function(filters) { return invoke("queryMasterTable", { filters: filters }); },
-    flushCache: function() { return invoke("flushCache", {}); }
+    flushCache: function() { return invoke("flushCache", {}); },
+    verifyMahidolUser: function(email) { return invoke("verifyMahidolUser", { email: email }); }
   };
 })();
 </script>

@@ -19,7 +19,7 @@
   <!-- Modular Embedded Sub-views & Styles -->
   <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.7f Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8a Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -713,10 +713,13 @@
           <span>🔍 QR Asset Survey</span>
         </h1>
 
-        <!-- Version numbering under the app title -->
-        <div class="flex items-center gap-1 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span class="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.7f</span>
-          <span class="text-slate-500 font-normal text-[9px]">• Mobile Audit</span>
+        <!-- Version numbering & Mahidol User Verification under the app title -->
+        <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
+          <span class="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8a</span>
+          <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="Mahidol User Verification">
+            <i id="header-user-icon" class="fa-solid fa-shield-check text-[9px] text-emerald-400"></i>
+            <span id="header-user-text" class="text-[9px] font-semibold text-slate-300">Mahidol Verified</span>
+          </span>
         </div>
       </div>
 
@@ -1000,11 +1003,11 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">1. ใช้งานอยู่ (In Use)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'card')" data-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('ใช้งานอยู่', 'card')" data-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-check text-sm"></i>
                 <span>ใช้งานอยู่</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'card')" data-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'card')" data-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-screwdriver-wrench text-xs text-amber-300"></i>
                 <span>ใช้งานอยู่แต่ชำรุดนะ</span>
               </button>
@@ -1023,11 +1026,11 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">2. หมดความจำเป็น (No Longer Needed)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'card')" data-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('หมดความจำเป็นต้องใช้งาน', 'card')" data-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-ban text-xs"></i>
                 <span class="truncate">หมดความจำเป็นต้องใช้</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'card')" data-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'card')" data-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
                 <span>หมดความจำเป็นฯ(ชำรุด)</span>
               </button>
@@ -1038,19 +1041,19 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. สูญหาย / ให้พัสดุตรวจ (Missing / Verify)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'card')" data-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('สูญหาย', 'card')" data-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-xmark text-xs text-rose-400"></i>
                 <span>สูญหาย</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'card')" data-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('หาไม่เจอ', 'card')" data-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-magnifying-glass text-xs text-amber-400"></i>
                 <span>หาไม่เจอ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-clipboard-question text-xs text-sky-400"></i>
                 <span>หาไม่เจอ+ให้พัสดุตรวจ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'card')" data-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-circle-question text-xs text-purple-400"></i>
                 <span>งง+ให้พัสดุตรวจ</span>
               </button>
@@ -1065,8 +1068,9 @@
               <i class="fa-solid fa-arrow-right-arrow-left"></i>
               <span>เลือกห้องปลายทางที่ย้ายไป (15 Rooms):</span>
             </span>
-            <button type="button" onclick="AuditController.closeSublayers('card')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
           </div>
           <div id="card-move-room-chips" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs">
@@ -1081,17 +1085,53 @@
               <i class="fa-solid fa-pen-to-square"></i>
               <span>แก้ไขชื่อสินทรัพย์ (Asset Description 1):</span>
             </span>
-            <button type="button" onclick="AuditController.closeSublayers('card')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
           </div>
           <input type="text" id="card-rename-input" placeholder="พิมพ์ชื่อสินทรัพย์ที่ต้องการแก้ไข..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
           <div class="flex gap-2">
-            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
-            <button type="button" onclick="AuditController.confirmRenameAndSubmit('card')" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold">
-              บันทึกชื่อ &amp; ยืนยัน
+            <button type="button" onclick="AuditController.confirmRenameAndSubmit('card')" class="touch-target flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold flex items-center justify-center gap-1">
+              <span>บันทึกชื่อ &amp; ถัดไป</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Optional Comment Box (Card) -->
+        <div id="card-sublayer-comment" class="hidden p-3 rounded-xl bg-slate-950 border border-amber-500/50 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-comment-dots"></i>
+              <span>หมายเหตุเพิ่มเติม (Comment)</span>
+            </span>
+            <span id="card-comment-selected-status-badge" class="badge-status-green text-xs font-bold px-2.5 py-0.5 rounded-full border truncate max-w-[170px]">
+              ใช้งานอยู่
+            </span>
+          </div>
+
+          <div class="space-y-1">
+            <label for="card-comment-input" class="text-[10px] font-medium text-slate-400 flex items-center justify-between">
+              <span>ระบุหมายเหตุสำหรับปี 69 (Column N):</span>
+              <span class="text-[9px] text-amber-400 font-semibold">(เว้นว่างได้ / Optional)</span>
+            </label>
+            <textarea id="card-comment-input" rows="2" placeholder="พิมพ์ข้อความหมายเหตุ (หากไม่มีข้อความ ให้กด 'ถัดไป' ได้เลย)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button type="button" onclick="AuditController.backToStatusFromComment('card')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-arrow-left text-[11px]"></i>
+              <span>ย้อนกลับ</span>
+            </button>
+            <button type="button" onclick="AuditController.proceedToStickerFromComment('card')" class="touch-target flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-amber-950/50 active:scale-[0.98] transition select-none">
+              <span class="text-xs font-extrabold tracking-tight">ถัดไป: ตรวจสติกเกอร์</span>
+              <i class="fa-solid fa-arrow-right text-xs shrink-0 text-slate-950"></i>
             </button>
           </div>
         </div>
@@ -1135,11 +1175,11 @@
 
           <!-- Action Buttons -->
           <div class="flex gap-2">
-            <button type="button" onclick="AuditController.closeSublayers('card')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+            <button type="button" onclick="AuditController.backToCommentFromSticker('card')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
               <i class="fa-solid fa-arrow-left text-[11px]"></i>
               <span>ย้อนกลับ</span>
             </button>
-            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('card')" class="touch-target flex-1 py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-sky-950/50 active:scale-[0.98] transition select-none">
+            <button type="button" onclick="AuditController.confirmStickerInspectionAndSubmit('card')" class="touch-target flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-sky-950/50 active:scale-[0.98] transition">
               <i class="fa-solid fa-circle-check text-base shrink-0 text-slate-950"></i>
               <div class="flex flex-col items-start text-left leading-tight">
                 <span class="text-xs font-extrabold tracking-tight">ยืนยันและบันทึก</span>
@@ -1714,11 +1754,11 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">1. ใช้งานอยู่ (IN USE)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่', 'modal')" data-modal-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('ใช้งานอยู่', 'modal')" data-modal-status="ใช้งานอยู่" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-check text-xs"></i>
                 <span>ใช้งานอยู่</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'modal')" data-modal-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('ใช้งานอยู่แต่ชำรุดนะ', 'modal')" data-modal-status="ใช้งานอยู่แต่ชำรุดนะ" class="thumb-btn py-2.5 px-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600/90 text-emerald-100 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-screwdriver-wrench text-xs text-amber-300"></i>
                 <span>ใช้งานอยู่แต่ชำรุดนะ</span>
               </button>
@@ -1737,11 +1777,11 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">2. หมดความจำเป็น (NO LONGER NEEDED)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งาน', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('หมดความจำเป็นต้องใช้งาน', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งาน" class="thumb-btn py-2.5 px-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-950/40 active:scale-[0.98] transition">
                 <i class="fa-solid fa-ban text-xs"></i>
                 <span>หมดความจำเป็นต้องใช้</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('หมดความจำเป็นต้องใช้งานเพราะชำรุด', 'modal')" data-modal-status="หมดความจำเป็นต้องใช้งานเพราะชำรุด" class="thumb-btn py-2.5 px-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-100 border border-rose-600/50 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
                 <span>หมดความจำเป็นฯ(ชำรุด)</span>
               </button>
@@ -1752,19 +1792,19 @@
           <div class="space-y-1">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. สูญหาย / ให้พัสดุตรวจ (MISSING / VERIFY)</span>
             <div class="grid grid-cols-2 gap-1.5">
-              <button onclick="AuditController.openStickerInspectionSublayer('สูญหาย', 'modal')" data-modal-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('สูญหาย', 'modal')" data-modal-status="สูญหาย" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-circle-xmark text-xs text-rose-400"></i>
                 <span>สูญหาย</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ', 'modal')" data-modal-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+              <button onclick="AuditController.openCommentSublayer('หาไม่เจอ', 'modal')" data-modal-status="หาไม่เจอ" class="thumb-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                 <i class="fa-solid fa-magnifying-glass text-xs text-amber-400"></i>
                 <span>หาไม่เจอ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-clipboard-question text-xs text-sky-400"></i>
                 <span>หาไม่เจอ+ให้พัสดุตรวจ</span>
               </button>
-              <button onclick="AuditController.openStickerInspectionSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
+              <button onclick="AuditController.openCommentSublayer('งง+ให้พัสดุมาตรวจสอบหน้างาน', 'modal')" data-modal-status="งง+ให้พัสดุมาตรวจสอบหน้างาน" class="thumb-btn py-2 px-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-[0.98] transition leading-tight">
                 <i class="fa-solid fa-circle-question text-xs text-purple-400"></i>
                 <span>งง+ให้พัสดุตรวจ</span>
               </button>
@@ -1779,8 +1819,9 @@
               <i class="fa-solid fa-arrow-right-arrow-left"></i>
               <span>เลือกห้องปลายทางที่ย้ายไป (15 Rooms):</span>
             </span>
-            <button type="button" onclick="AuditController.closeSublayers('modal')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
           </div>
           <div id="modal-move-room-chips" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs max-h-40 overflow-y-auto">
@@ -1795,17 +1836,53 @@
               <i class="fa-solid fa-pen-to-square"></i>
               <span>แก้ไขชื่อสินทรัพย์ (Asset Description 1):</span>
             </span>
-            <button type="button" onclick="AuditController.closeSublayers('modal')" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
           </div>
           <input type="text" id="modal-rename-input" placeholder="พิมพ์ชื่อสินทรัพย์ที่ต้องการแก้ไข..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
           <div class="flex gap-2">
-            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">
-              ยกเลิก
+            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>ย้อนกลับ</span>
             </button>
-            <button type="button" onclick="AuditController.confirmRenameAndSubmit('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold">
-              บันทึกชื่อ &amp; ยืนยัน
+            <button type="button" onclick="AuditController.confirmRenameAndSubmit('modal')" class="touch-target flex-1 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold flex items-center justify-center gap-1">
+              <span>บันทึกชื่อ &amp; ถัดไป</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Sub-layer: Optional Comment Box (Modal) -->
+        <div id="modal-sublayer-comment" class="hidden p-2.5 rounded-xl bg-slate-950 border border-amber-500/50 space-y-2 mt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-comment-dots"></i>
+              <span>หมายเหตุเพิ่มเติม (Comment)</span>
+            </span>
+            <span id="modal-comment-selected-status-badge" class="badge-status-green text-xs font-bold px-2.5 py-0.5 rounded-full border truncate max-w-[170px]">
+              ใช้งานอยู่
+            </span>
+          </div>
+
+          <div class="space-y-1">
+            <label for="modal-comment-input" class="text-[10px] font-medium text-slate-400 flex items-center justify-between">
+              <span>ระบุหมายเหตุสำหรับปี 69 (Column N):</span>
+              <span class="text-[9px] text-amber-400 font-semibold">(เว้นว่างได้ / Optional)</span>
+            </label>
+            <textarea id="modal-comment-input" rows="2" placeholder="พิมพ์ข้อความหมายเหตุ (หากไม่มีข้อความ ให้กด 'ถัดไป' ได้เลย)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2 pt-1">
+            <button type="button" onclick="AuditController.backToStatusFromComment('modal')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-arrow-left text-[11px]"></i>
+              <span>ย้อนกลับ</span>
+            </button>
+            <button type="button" onclick="AuditController.proceedToStickerFromComment('modal')" class="touch-target flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-md shadow-amber-950/50 active:scale-[0.98] transition select-none">
+              <span class="text-xs font-extrabold tracking-tight">ถัดไป: ตรวจสติกเกอร์</span>
+              <i class="fa-solid fa-arrow-right text-xs shrink-0 text-slate-950"></i>
             </button>
           </div>
         </div>
@@ -1849,7 +1926,7 @@
 
           <!-- Action Buttons -->
           <div class="flex gap-2 pt-1">
-            <button type="button" onclick="AuditController.closeSublayers('modal')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
+            <button type="button" onclick="AuditController.backToCommentFromSticker('modal')" class="touch-target px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0">
               <i class="fa-solid fa-arrow-left text-[11px]"></i>
               <span>ย้อนกลับ</span>
             </button>
@@ -1868,6 +1945,52 @@
     </div>
   </div>
 
+  <!-- ==================== USER PROFILE / VERIFICATION MODAL ==================== -->
+  <div id="user-profile-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/75 backdrop-blur-sm hidden" onclick="ModalController.handleBackdropClick(event, 'user-profile-modal')">
+    <div class="app-modal-dialog bg-slate-900 border border-slate-700 rounded-2xl p-4 text-white space-y-3.5 shadow-2xl relative" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-id-badge text-sky-400"></i>
+          <span>ข้อมูลบัญชีผู้ใช้งาน (User Profile)</span>
+        </h3>
+        <button onclick="ModalController.closeUserProfileModal()" class="touch-target w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">ชื่อผู้ใช้งาน:</span>
+            <span id="profile-user-name" class="font-bold text-white">-</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Google Account:</span>
+            <span id="profile-user-email" class="font-mono text-emerald-400 font-semibold truncate max-w-[200px]">-</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">บทบาท (Role):</span>
+            <span id="profile-user-role" class="font-semibold text-sky-300">-</span>
+          </div>
+        </div>
+
+        <div id="profile-user-status" class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px]">
+          <!-- Dynamic verification status -->
+        </div>
+
+        <p class="text-[10px] text-slate-400 leading-relaxed">
+          * การยืนยันสิทธิ์ถูกตรวจสอบกับฐานข้อมูล Nexus Master DB (User Sheet) ในโดเมน Google ของมหาวิทยาลัยมหิดล (@mahidol.ac.th)
+        </p>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="ModalController.closeUserProfileModal()" class="touch-target w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER (Non-blocking floating pill at top under header) -->
   <div id="toast-container" class="fixed top-16 right-4 left-4 sm:left-auto sm:right-6 z-50 flex flex-col gap-2 pointer-events-none items-center sm:items-end"></div>
 
@@ -1875,13 +1998,13 @@
   <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
   var state = {
-    user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true },
+    user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true, isSuperAdmin: true, isMahidolAccount: true, isNexusAuthorized: true, isVerified: true, authStatus: "VERIFIED" },
     config: {},
     rooms: [],
     currentRoom: "Master_Asset",
@@ -2033,7 +2156,7 @@ window.AppState = (function() {
   <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -2144,11 +2267,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.7f)
+  // Persistent Local Storage of REAL Assets (v1.1.8a)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.7f");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8a");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2164,7 +2287,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.7f", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8a", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2289,11 +2412,15 @@ window.ApiClient = (function() {
           role: "SuperAdmin",
           isAdmin: true,
           isSuperAdmin: true,
-          isTALT: true
+          isTALT: true,
+          isMahidolAccount: true,
+          isNexusAuthorized: true,
+          isVerified: true,
+          authStatus: "VERIFIED"
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.7f",
+          APP_VERSION: "v1.1.8a",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2487,8 +2614,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.7f). Local mock simulation mode.",
-        appVersion: "v1.1.7f",
+        message: "Config sheet synchronized (v1.1.8a). Local mock simulation mode.",
+        appVersion: "v1.1.8a",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1
@@ -2540,6 +2667,20 @@ window.ApiClient = (function() {
           ],
           timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
         }
+      };
+    }
+
+    if (action === "verifyMahidolUser") {
+      var email = String(payload.email || "nattapat.poo@mahidol.ac.th").toLowerCase().trim();
+      var isMahidol = (email.endsWith("@mahidol.ac.th") || email.endsWith("@mahidol.edu"));
+      return {
+        email: email,
+        name: email.split("@")[0],
+        role: "Auditor",
+        isMahidolAccount: isMahidol,
+        isNexusAuthorized: isMahidol,
+        isVerified: isMahidol,
+        authStatus: isMahidol ? "VERIFIED" : "EXTERNAL_ACCOUNT"
       };
     }
 
@@ -2617,7 +2758,8 @@ window.ApiClient = (function() {
     migrateMasterToRooms: function() { return invoke("migrateMasterToRooms", {}); },
     checkMasterContradictions: function() { return invoke("checkMasterContradictions", {}); },
     queryMasterTable: function(filters) { return invoke("queryMasterTable", { filters: filters }); },
-    flushCache: function() { return invoke("flushCache", {}); }
+    flushCache: function() { return invoke("flushCache", {}); },
+    verifyMahidolUser: function(email) { return invoke("verifyMahidolUser", { email: email }); }
   };
 })();
 </script>
@@ -2684,7 +2826,7 @@ window.ThemeController = (function() {
   <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -3290,6 +3432,33 @@ window.ModalController = (function() {
     }
   }
 
+  function openUserProfileModal() {
+    var modal = document.getElementById("user-profile-modal");
+    if (!modal) return;
+    var user = AppState.get("user") || {};
+    var emailElem = document.getElementById("profile-user-email");
+    var nameElem = document.getElementById("profile-user-name");
+    var roleElem = document.getElementById("profile-user-role");
+    var statusElem = document.getElementById("profile-user-status");
+
+    if (emailElem) emailElem.innerText = user.email || "Unknown";
+    if (nameElem) nameElem.innerText = user.name || "Auditor";
+    if (roleElem) roleElem.innerText = user.role || "Auditor";
+    if (statusElem) {
+      if (user.isVerified) {
+        statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold"><i class="fa-solid fa-circle-check text-xs"></i> <span>บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว</span></span>';
+      } else {
+        statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation text-xs"></i> <span>บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อแอดมิน</span></span>';
+      }
+    }
+    modal.classList.remove("hidden");
+  }
+
+  function closeUserProfileModal() {
+    var modal = document.getElementById("user-profile-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
   // Keyboard shortcut listener for Ctrl + Shift + Q
   window.addEventListener("keydown", function(e) {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Q" || e.key === "q")) {
@@ -3300,6 +3469,8 @@ window.ModalController = (function() {
 
   return {
     showToast: showToast,
+    openUserProfileModal: openUserProfileModal,
+    closeUserProfileModal: closeUserProfileModal,
     openManualLookupModal: openManualLookupModal,
     closeManualLookupModal: closeManualLookupModal,
     submitManualLookup: submitManualLookup,
@@ -3329,18 +3500,17 @@ window.ModalController = (function() {
 
   <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.7f)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
  * 1. Mode 1: Instant Native Camera Snap (<input type="file" capture="environment">)
  *    Bypasses GAS sandboxed iframe permission policy restrictions 100% on iOS/Android.
- * 2. Mode 2: Smart Laptop Webcam Fallback via Html5Qrcode.getCameras()
- *    Picks device camera ID or user-facing webcam on laptops to prevent OverconstrainedError.
- * 3. Mode 3: Accelerated Dual-Stage QR Decoder
- *    Uses hardware-accelerated BarcodeDetector (5ms) with off-screen canvas downscaling
- *    for 12MP-48MP mobile photos before ZXing fallback.
+ * 2. Mode 2: Hardware-Accelerated 60fps Native BarcodeDetector (AppSheet Parity)
+ *    Direct requestAnimationFrame loop on <video> stream; sub-5ms instant detection.
+ * 3. Mode 3: Smart Laptop Webcam Fallback via Html5Qrcode.getCameras()
+ *    Full-frame uncropped scanning with continuous autofocus.
  */
 
 window.ScannerController = (function() {
@@ -3353,6 +3523,65 @@ window.ScannerController = (function() {
   var audioCtx = null;
   var torchActive = false;
   var isProcessingFile = false;
+
+  var nativeBarcodeDetector = null;
+  var nativeScanAnimId = null;
+  var isNativeDetecting = false;
+
+  if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+    try {
+      nativeBarcodeDetector = new window.BarcodeDetector({ formats: ["qr_code", "code_128", "code_39", "ean_13"] });
+    } catch (e) {
+      console.warn("[ScannerController] Native BarcodeDetector init:", e);
+    }
+  }
+
+  function startNativeDetectionLoop(videoElem) {
+    if (!nativeBarcodeDetector || !videoElem) return;
+    if (nativeScanAnimId) {
+      cancelAnimationFrame(nativeScanAnimId);
+      nativeScanAnimId = null;
+    }
+
+    function scanFrame() {
+      if (!isScanning) return;
+      if (videoElem.readyState >= 2 && !isNativeDetecting && !isProcessingFile) {
+        isNativeDetecting = true;
+        nativeBarcodeDetector.detect(videoElem)
+          .then(function(barcodes) {
+            isNativeDetecting = false;
+            if (barcodes && barcodes.length > 0 && isScanning) {
+              var code = barcodes[0].rawValue || barcodes[0].value;
+              if (code && String(code).trim() !== "") {
+                onScanSuccess(code, { result: { text: code } });
+                return;
+              }
+            }
+            if (isScanning) {
+              nativeScanAnimId = requestAnimationFrame(scanFrame);
+            }
+          })
+          .catch(function() {
+            isNativeDetecting = false;
+            if (isScanning) {
+              nativeScanAnimId = requestAnimationFrame(scanFrame);
+            }
+          });
+      } else if (isScanning) {
+        nativeScanAnimId = requestAnimationFrame(scanFrame);
+      }
+    }
+
+    nativeScanAnimId = requestAnimationFrame(scanFrame);
+  }
+
+  function stopNativeDetectionLoop() {
+    if (nativeScanAnimId) {
+      cancelAnimationFrame(nativeScanAnimId);
+      nativeScanAnimId = null;
+    }
+    isNativeDetecting = false;
+  }
 
   function initAudioContext() {
     if (!audioCtx) {
@@ -3466,16 +3695,16 @@ window.ScannerController = (function() {
     }
 
     var qrConfig = {
-      fps: 20,
+      fps: 25,
       qrbox: function(viewfinderWidth, viewfinderHeight) {
-        var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-        var qrboxSize = Math.floor(minEdge * 0.85);
-        return { width: qrboxSize, height: qrboxSize };
+        return { width: viewfinderWidth, height: viewfinderHeight };
       },
       aspectRatio: 1.0,
       videoConstraints: {
         facingMode: { ideal: currentFacingMode },
-        focusMode: { ideal: "continuous" }
+        focusMode: { ideal: "continuous" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
@@ -3504,7 +3733,11 @@ window.ScannerController = (function() {
         AppState.set("isScannerRunning", true);
         updateScannerControlsUI();
         showScanLaser(true);
-        ModalController.showToast("Camera active. Align QR in frame.", "success", 2000);
+        var v = document.querySelector("#qr-reader video");
+        if (v) {
+          startNativeDetectionLoop(v);
+        }
+        ModalController.showToast("Camera active (Instant Scan).", "success", 2000);
       })
       .catch(function(primaryErr) {
         console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
@@ -3520,7 +3753,12 @@ window.ScannerController = (function() {
           AppState.set("isScannerRunning", true);
           updateScannerControlsUI();
           showScanLaser(true);
+          var vFallback = document.querySelector("#qr-reader video");
+          if (vFallback) {
+            startNativeDetectionLoop(vFallback);
+          }
         }).catch(function(finalErr) {
+          stopNativeDetectionLoop();
           console.warn("Live stream start failed:", finalErr);
           isScanning = false;
           AppState.set("isScannerRunning", false);
@@ -3543,15 +3781,18 @@ window.ScannerController = (function() {
   }
 
   function stopScanner() {
+    stopNativeDetectionLoop();
     if (!isScanning || !html5QrCode) return Promise.resolve();
 
     return html5QrCode.stop().then(function() {
+      stopNativeDetectionLoop();
       isScanning = false;
       torchActive = false;
       AppState.set("isScannerRunning", false);
       updateScannerControlsUI();
       showScanLaser(false);
     }).catch(function(err) {
+      stopNativeDetectionLoop();
       console.error("Failed to stop camera:", err);
     });
   }
@@ -3794,7 +4035,7 @@ window.ScannerController = (function() {
   <script>
 /**
  * Lab Oops OS - AuditController.html
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * Ecosystem Lead: Nattapat Poolyam (Mek)
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
@@ -3911,7 +4152,77 @@ window.AuditController = (function() {
   }
 
   /**
-   * Sticker Inspection & Validity Workflow (v1.1.3n)
+   * Step 3: Comment Box Sublayer (v1.1.8a)
+   * Dedicated optional comment step between 1-tap action and sticker modal.
+   * workflow: scan > found record > 1 tap status action > comment box (optional) > sticker modal > save record.
+   */
+  function openCommentSublayer(status, scope, extraData) {
+    pendingAudit.status = status;
+    pendingAudit.scope = scope || "modal";
+    pendingAudit.extraData = extraData || {};
+
+    var isModal = (pendingAudit.scope === "modal");
+    var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
+    var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
+    var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
+    var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
+
+    if (mainPanel) mainPanel.classList.add("hidden");
+    if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (stickerSublayer) stickerSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.remove("hidden");
+
+    // Update Status Badge in Comment Sublayer
+    var badgeId = isModal ? "modal-comment-selected-status-badge" : "card-comment-selected-status-badge";
+    var badgeElem = document.getElementById(badgeId);
+    if (badgeElem) {
+      updateStickerStatusBadgeTone(badgeElem, status);
+    }
+
+    // Populate or preserve comment textarea
+    var inputId = isModal ? "modal-comment-input" : "card-comment-input";
+    var inp = document.getElementById(inputId);
+    if (inp) {
+      var currentNote = (pendingAudit.extraData && pendingAudit.extraData.notes) ? pendingAudit.extraData.notes : (pendingAudit.comment || "");
+      inp.value = currentNote;
+      setTimeout(function() {
+        inp.focus();
+      }, 50);
+    }
+  }
+
+  function backToStatusFromComment(scope) {
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    if (pendingAudit.status === "ใช้งานอยู่+ย้ายไป...") {
+      openMoveRoomSublayer(scope);
+    } else if (pendingAudit.status === "ใช้งานอยู่+แก้ไขชื่อเป็น...") {
+      openRenameSublayer(scope);
+    } else {
+      closeSublayers(scope);
+    }
+  }
+
+  function proceedToStickerFromComment(scope) {
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    var inputId = isModal ? "modal-comment-input" : "card-comment-input";
+    var inp = document.getElementById(inputId);
+    var commentText = inp ? inp.value.trim() : "";
+
+    pendingAudit.comment = commentText;
+    pendingAudit.extraData = pendingAudit.extraData || {};
+    pendingAudit.extraData.notes = commentText;
+
+    openStickerInspectionSublayer(pendingAudit.status, scope, pendingAudit.extraData);
+  }
+
+  function backToCommentFromSticker(scope) {
+    openCommentSublayer(pendingAudit.status, scope, pendingAudit.extraData);
+  }
+
+  /**
+   * Step 4: Sticker Inspection & Validity Workflow (v1.1.8a)
    * Opens dedicated sublayer to inspect sticker condition, reprint requirement, and note edits.
    */
   function openStickerInspectionSublayer(status, scope, extraData) {
@@ -3926,11 +4237,13 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.remove("hidden");
 
     // Update Status Badge in Sublayer with Category Tone Matching (Green / Red / Gray)
@@ -3996,13 +4309,14 @@ window.AuditController = (function() {
     var enteredNote = notesElem ? notesElem.value.trim() : "";
 
     var finalExtra = Object.assign({}, pendingAudit.extraData);
-    if (enteredNote) {
-      if (finalExtra.notes && finalExtra.notes !== enteredNote) {
-        finalExtra.notes = finalExtra.notes + " | " + enteredNote;
-      } else {
-        finalExtra.notes = enteredNote;
-      }
-    }
+    var primaryComment = pendingAudit.comment || "";
+    
+    // Combine primary comment with any sticker-specific note
+    var combinedNotes = [];
+    if (primaryComment) combinedNotes.push(primaryComment);
+    if (enteredNote && enteredNote !== primaryComment) combinedNotes.push(enteredNote);
+
+    finalExtra.notes = combinedNotes.join(" | ");
     finalExtra.sticker = pendingAudit.sticker;
 
     closeSublayers(scope);
@@ -4032,19 +4346,19 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.remove("hidden");
   }
 
   function confirmMoveToRoom(destRoom, scope) {
     closeSublayers(scope);
-    var noteInput = document.getElementById(scope === "modal" ? "modal-condition-note-input" : "condition-note-input");
-    var noteVal = noteInput ? noteInput.value.trim() : "";
-    openStickerInspectionSublayer("ใช้งานอยู่+ย้ายไป...", scope, { destinationRoom: destRoom, notes: noteVal, defaultSticker: "ปกติ" });
+    openCommentSublayer("ใช้งานอยู่+ย้ายไป...", scope, { destinationRoom: destRoom, defaultSticker: "ปกติ" });
   }
 
   function openRenameSublayer(scope) {
@@ -4052,10 +4366,12 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.remove("hidden");
 
@@ -4081,9 +4397,7 @@ window.AuditController = (function() {
     }
 
     closeSublayers(scope);
-    var noteInput = document.getElementById(isModal ? "modal-condition-note-input" : "condition-note-input");
-    var noteVal = noteInput ? noteInput.value.trim() : "";
-    openStickerInspectionSublayer("ใช้งานอยู่+แก้ไขชื่อเป็น...", scope, { renameText: newName, notes: noteVal, defaultSticker: "ปริ้นใหม่+แก้ข้อมูล" });
+    openCommentSublayer("ใช้งานอยู่+แก้ไขชื่อเป็น...", scope, { renameText: newName, defaultSticker: "ปริ้นใหม่+แก้ข้อมูล" });
   }
 
   function closeSublayers(scope) {
@@ -4091,26 +4405,30 @@ window.AuditController = (function() {
       var cardMain = document.getElementById("card-status-main-panel");
       var cardMove = document.getElementById("card-sublayer-move");
       var cardRename = document.getElementById("card-sublayer-rename");
+      var cardComment = document.getElementById("card-sublayer-comment");
       var cardSticker = document.getElementById("card-sublayer-sticker");
       if (cardMain) cardMain.classList.remove("hidden");
       if (cardMove) cardMove.classList.add("hidden");
       if (cardRename) cardRename.classList.add("hidden");
+      if (cardComment) cardComment.classList.add("hidden");
       if (cardSticker) cardSticker.classList.add("hidden");
     }
     if (!scope || scope === "modal") {
       var modalMain = document.getElementById("modal-status-main-panel");
       var modalMove = document.getElementById("modal-sublayer-move");
       var modalRename = document.getElementById("modal-sublayer-rename");
+      var modalComment = document.getElementById("modal-sublayer-comment");
       var modalSticker = document.getElementById("modal-sublayer-sticker");
       if (modalMain) modalMain.classList.remove("hidden");
       if (modalMove) modalMove.classList.add("hidden");
       if (modalRename) modalRename.classList.add("hidden");
+      if (modalComment) modalComment.classList.add("hidden");
       if (modalSticker) modalSticker.classList.add("hidden");
     }
   }
 
   function submitStatusFromModal(status) {
-    openStickerInspectionSublayer(status, "modal");
+    openCommentSublayer(status, "modal");
   }
 
   function displayScannedAsset(asset) {
@@ -4573,6 +4891,10 @@ window.AuditController = (function() {
     displayScannedAsset: displayScannedAsset,
     displayUnrecognizedAsset: displayUnrecognizedAsset,
     selectSticker: selectSticker,
+    openCommentSublayer: openCommentSublayer,
+    backToStatusFromComment: backToStatusFromComment,
+    proceedToStickerFromComment: proceedToStickerFromComment,
+    backToCommentFromSticker: backToCommentFromSticker,
     openStickerInspectionSublayer: openStickerInspectionSublayer,
     selectInspectionSticker: selectInspectionSticker,
     confirmStickerInspectionAndSubmit: confirmStickerInspectionAndSubmit,
@@ -4660,36 +4982,77 @@ window.AuditController = (function() {
         devEnvStatus.innerText = ApiClient.isGasEnvironment ? "Google Apps Script V8 Native" : "Local Mock Simulation Mode";
       }
 
-      // 8. Load Initial Payload (Master Table & All Room Sheets)
+      // 8. Load Initial Payload with SWR (Stale-While-Revalidate for Instant Loading)
+      function applyPayload(payload) {
+        if (!payload) return;
+        AppState.set("user", payload.user);
+        AppState.set("config", payload.config);
+        AppState.set("rooms", payload.rooms);
+        AppState.set("currentRoom", payload.currentRoom || "Master_Asset");
+        AppState.set("summary", payload.summary);
+
+        // Update Mahidol user verification badge in header
+        if (payload.user) {
+          var userTxt = document.getElementById("header-user-text");
+          var userIcon = document.getElementById("header-user-icon");
+          var userBadge = document.getElementById("header-user-badge");
+          if (userTxt && (payload.user.name || payload.user.email)) {
+            userTxt.innerText = payload.user.name || payload.user.email.split("@")[0];
+          }
+          if (userBadge) {
+            if (payload.user.isVerified) {
+              userBadge.className = "cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition";
+              if (userIcon) userIcon.className = "fa-solid fa-shield-check text-[9px] text-emerald-400";
+            } else {
+              userBadge.className = "cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition";
+              if (userIcon) userIcon.className = "fa-solid fa-triangle-exclamation text-[9px] text-amber-400";
+            }
+          }
+        }
+
+        // Populate Room Dropdown with Master Table & All Room Sheets
+        if (roomSel) {
+          roomSel.innerHTML = '<option value="Master_Asset">Master Table (Master_Asset)</option>';
+          var roomList = (Array.isArray(payload.rooms) && payload.rooms.length > 0) ? payload.rooms : (payload.roomSheetsConfig || []);
+          roomList.forEach(function(r) {
+            if (r === "Master_Asset" || r === "Master" || r === "ALL") return;
+            var opt = document.createElement("option");
+            opt.value = r;
+            opt.innerText = r;
+            if (r === payload.currentRoom) opt.selected = true;
+            roomSel.appendChild(opt);
+          });
+        }
+
+        // Update summary view metrics if elements exist
+        updateSummaryViewStats(payload.summary);
+      }
+
+      // SWR Step 1: Instant render from localStorage cache (<20ms boot time!)
+      try {
+        var cachedPayloadStr = localStorage.getItem("MUIDS_INITIAL_PAYLOAD_CACHE");
+        if (cachedPayloadStr) {
+          var cachedPayload = JSON.parse(cachedPayloadStr);
+          applyPayload(cachedPayload);
+        }
+      } catch (cacheErr) {
+        console.warn("Local payload cache read error:", cacheErr);
+      }
+
+      // SWR Step 2: Fresh background fetch from live GAS endpoint
       ApiClient.getInitialPayload()
         .then(function(payload) {
           if (!payload) return;
-          AppState.set("user", payload.user);
-          AppState.set("config", payload.config);
-          AppState.set("rooms", payload.rooms);
-          AppState.set("currentRoom", payload.currentRoom || "Master_Asset");
-          AppState.set("summary", payload.summary);
-
-          // Populate Room Dropdown with Master Table & All Room Sheets
-          if (roomSel) {
-            roomSel.innerHTML = '<option value="Master_Asset">Master Table (Master_Asset)</option>';
-            var roomList = (Array.isArray(payload.rooms) && payload.rooms.length > 0) ? payload.rooms : (payload.roomSheetsConfig || []);
-            roomList.forEach(function(r) {
-              if (r === "Master_Asset" || r === "Master" || r === "ALL") return;
-              var opt = document.createElement("option");
-              opt.value = r;
-              opt.innerText = r;
-              if (r === payload.currentRoom) opt.selected = true;
-              roomSel.appendChild(opt);
-            });
-          }
-
-          // Update summary view metrics if elements exist
-          updateSummaryViewStats(payload.summary);
+          try {
+            localStorage.setItem("MUIDS_INITIAL_PAYLOAD_CACHE", JSON.stringify(payload));
+          } catch (e) {}
+          applyPayload(payload);
         })
         .catch(function(err) {
           console.error("Initial load failed:", err);
-          ModalController.showToast("Failed to load initial data: " + err.toString(), "error");
+          if (!AppState.get("summary")) {
+            ModalController.showToast("Failed to load initial data: " + err.toString(), "error");
+          }
         });
 
       function updateSummaryViewStats(summary) {

@@ -1,17 +1,16 @@
 <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.7f)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
  * 1. Mode 1: Instant Native Camera Snap (<input type="file" capture="environment">)
  *    Bypasses GAS sandboxed iframe permission policy restrictions 100% on iOS/Android.
- * 2. Mode 2: Smart Laptop Webcam Fallback via Html5Qrcode.getCameras()
- *    Picks device camera ID or user-facing webcam on laptops to prevent OverconstrainedError.
- * 3. Mode 3: Accelerated Dual-Stage QR Decoder
- *    Uses hardware-accelerated BarcodeDetector (5ms) with off-screen canvas downscaling
- *    for 12MP-48MP mobile photos before ZXing fallback.
+ * 2. Mode 2: Hardware-Accelerated 60fps Native BarcodeDetector (AppSheet Parity)
+ *    Direct requestAnimationFrame loop on <video> stream; sub-5ms instant detection.
+ * 3. Mode 3: Smart Laptop Webcam Fallback via Html5Qrcode.getCameras()
+ *    Full-frame uncropped scanning with continuous autofocus.
  */
 
 window.ScannerController = (function() {
@@ -24,6 +23,65 @@ window.ScannerController = (function() {
   var audioCtx = null;
   var torchActive = false;
   var isProcessingFile = false;
+
+  var nativeBarcodeDetector = null;
+  var nativeScanAnimId = null;
+  var isNativeDetecting = false;
+
+  if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+    try {
+      nativeBarcodeDetector = new window.BarcodeDetector({ formats: ["qr_code", "code_128", "code_39", "ean_13"] });
+    } catch (e) {
+      console.warn("[ScannerController] Native BarcodeDetector init:", e);
+    }
+  }
+
+  function startNativeDetectionLoop(videoElem) {
+    if (!nativeBarcodeDetector || !videoElem) return;
+    if (nativeScanAnimId) {
+      cancelAnimationFrame(nativeScanAnimId);
+      nativeScanAnimId = null;
+    }
+
+    function scanFrame() {
+      if (!isScanning) return;
+      if (videoElem.readyState >= 2 && !isNativeDetecting && !isProcessingFile) {
+        isNativeDetecting = true;
+        nativeBarcodeDetector.detect(videoElem)
+          .then(function(barcodes) {
+            isNativeDetecting = false;
+            if (barcodes && barcodes.length > 0 && isScanning) {
+              var code = barcodes[0].rawValue || barcodes[0].value;
+              if (code && String(code).trim() !== "") {
+                onScanSuccess(code, { result: { text: code } });
+                return;
+              }
+            }
+            if (isScanning) {
+              nativeScanAnimId = requestAnimationFrame(scanFrame);
+            }
+          })
+          .catch(function() {
+            isNativeDetecting = false;
+            if (isScanning) {
+              nativeScanAnimId = requestAnimationFrame(scanFrame);
+            }
+          });
+      } else if (isScanning) {
+        nativeScanAnimId = requestAnimationFrame(scanFrame);
+      }
+    }
+
+    nativeScanAnimId = requestAnimationFrame(scanFrame);
+  }
+
+  function stopNativeDetectionLoop() {
+    if (nativeScanAnimId) {
+      cancelAnimationFrame(nativeScanAnimId);
+      nativeScanAnimId = null;
+    }
+    isNativeDetecting = false;
+  }
 
   function initAudioContext() {
     if (!audioCtx) {
@@ -137,16 +195,16 @@ window.ScannerController = (function() {
     }
 
     var qrConfig = {
-      fps: 20,
+      fps: 25,
       qrbox: function(viewfinderWidth, viewfinderHeight) {
-        var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-        var qrboxSize = Math.floor(minEdge * 0.85);
-        return { width: qrboxSize, height: qrboxSize };
+        return { width: viewfinderWidth, height: viewfinderHeight };
       },
       aspectRatio: 1.0,
       videoConstraints: {
         facingMode: { ideal: currentFacingMode },
-        focusMode: { ideal: "continuous" }
+        focusMode: { ideal: "continuous" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
@@ -175,7 +233,11 @@ window.ScannerController = (function() {
         AppState.set("isScannerRunning", true);
         updateScannerControlsUI();
         showScanLaser(true);
-        ModalController.showToast("Camera active. Align QR in frame.", "success", 2000);
+        var v = document.querySelector("#qr-reader video");
+        if (v) {
+          startNativeDetectionLoop(v);
+        }
+        ModalController.showToast("Camera active (Instant Scan).", "success", 2000);
       })
       .catch(function(primaryErr) {
         console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
@@ -191,7 +253,12 @@ window.ScannerController = (function() {
           AppState.set("isScannerRunning", true);
           updateScannerControlsUI();
           showScanLaser(true);
+          var vFallback = document.querySelector("#qr-reader video");
+          if (vFallback) {
+            startNativeDetectionLoop(vFallback);
+          }
         }).catch(function(finalErr) {
+          stopNativeDetectionLoop();
           console.warn("Live stream start failed:", finalErr);
           isScanning = false;
           AppState.set("isScannerRunning", false);
@@ -214,15 +281,18 @@ window.ScannerController = (function() {
   }
 
   function stopScanner() {
+    stopNativeDetectionLoop();
     if (!isScanning || !html5QrCode) return Promise.resolve();
 
     return html5QrCode.stop().then(function() {
+      stopNativeDetectionLoop();
       isScanning = false;
       torchActive = false;
       AppState.set("isScannerRunning", false);
       updateScannerControlsUI();
       showScanLaser(false);
     }).catch(function(err) {
+      stopNativeDetectionLoop();
       console.error("Failed to stop camera:", err);
     });
   }

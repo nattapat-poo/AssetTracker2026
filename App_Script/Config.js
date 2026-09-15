@@ -1,12 +1,12 @@
 /**
  * Config.js — Application Constants & 3-Tier Cache Snapshot Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
 const APP_CONFIG = {
   APP_NAME: "MUIDS Mobile Asset Tracker",
-  VERSION: "v1.1.7f",
+  VERSION: "v1.1.8a",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };

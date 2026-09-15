@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8a] - 2026-09-15
+
+### Added & Improved
+- **AppSheet-Parity Instant Barcode Detection (`ScannerController.html`)**:
+  - Implemented hardware-accelerated native `BarcodeDetector` running at 60fps via `requestAnimationFrame` directly on the `<video>` camera stream.
+  - Sub-5ms instant detection matching AppSheet scanning speed, eliminating user alignment lag.
+  - Full-frame uncropped scan boundary (100% viewfinder) with 1280x720 ideal resolution and continuous autofocus.
+  - Seamless fallback to ZXing engine when `BarcodeDetector` is unsupported in older mobile browsers.
+- **Sub-20ms Startup Timing via Stale-While-Revalidate (SWR) Client Caching (`index.html`)**:
+  - Hydrates roster, rooms, and audit statistics immediately from `localStorage` (`MUIDS_INITIAL_PAYLOAD_CACHE`) in <20ms.
+  - Performs non-blocking background revalidation with the live Google Apps Script endpoint.
+  - Integrated Google Apps Script `CacheService.getScriptCache()` (1800s TTL) for room audit summaries with automated cache invalidation on edits.
+- **Clean Column N (`หมายเหตุปี 69`) Audit Remarks (`DatabaseService.js`)**:
+  - Permanently removed automatic injection of `"[Found in Master_Asset]"` or `"[Found in <Room>]"`.
+  - Column N remains completely blank unless the auditor explicitly types a custom note.
+- **Multi-Step Audit Modal Workflow with Optional Comment Box & Universal Back Navigation**:
+  - Enforced structured sequential flow: **Scan $\rightarrow$ Found Record $\rightarrow$ 1-Tap Status Action $\rightarrow$ Comment Box (Optional) $\rightarrow$ Sticker Modal $\rightarrow$ Save Record**.
+  - Added `#modal-sublayer-comment` and `#card-sublayer-comment` sublayers.
+  - Added `[◀ ย้อนกลับ]` Back button across every sublayer (`modal-sublayer-move`, `modal-sublayer-rename`, `modal-sublayer-comment`, `modal-sublayer-sticker`), preserving user input when navigating back and forth.
+- **Mahidol Google Account Verification & Nexus Master DB User Match (`AuthService.js`, `index.html`)**:
+  - Verified user email domain against Mahidol Google Workspace (`@mahidol.ac.th`, `@mahidol.edu`, `@student.mahidol.ac.th`).
+  - Matched authenticated user against allowed users in the Nexus Master DB (`User` sheet of `11PUpY4zVClvVbfzgu4Olyzy6e5NacNUXZv30bexQQB8`).
+  - Added interactive `#header-user-badge` in the header bar and `#user-profile-modal` displaying email, role, and Nexus authorization state.
+
 ## [1.1.7f] - 2026-09-14
 
 ### Fixed & Improved

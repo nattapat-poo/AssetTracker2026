@@ -1,7 +1,7 @@
 <script>
 /**
  * Lab Oops OS - AuditController.html
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * Ecosystem Lead: Nattapat Poolyam (Mek)
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
@@ -118,7 +118,77 @@ window.AuditController = (function() {
   }
 
   /**
-   * Sticker Inspection & Validity Workflow (v1.1.3n)
+   * Step 3: Comment Box Sublayer (v1.1.8a)
+   * Dedicated optional comment step between 1-tap action and sticker modal.
+   * workflow: scan > found record > 1 tap status action > comment box (optional) > sticker modal > save record.
+   */
+  function openCommentSublayer(status, scope, extraData) {
+    pendingAudit.status = status;
+    pendingAudit.scope = scope || "modal";
+    pendingAudit.extraData = extraData || {};
+
+    var isModal = (pendingAudit.scope === "modal");
+    var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
+    var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
+    var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
+    var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
+
+    if (mainPanel) mainPanel.classList.add("hidden");
+    if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (stickerSublayer) stickerSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.remove("hidden");
+
+    // Update Status Badge in Comment Sublayer
+    var badgeId = isModal ? "modal-comment-selected-status-badge" : "card-comment-selected-status-badge";
+    var badgeElem = document.getElementById(badgeId);
+    if (badgeElem) {
+      updateStickerStatusBadgeTone(badgeElem, status);
+    }
+
+    // Populate or preserve comment textarea
+    var inputId = isModal ? "modal-comment-input" : "card-comment-input";
+    var inp = document.getElementById(inputId);
+    if (inp) {
+      var currentNote = (pendingAudit.extraData && pendingAudit.extraData.notes) ? pendingAudit.extraData.notes : (pendingAudit.comment || "");
+      inp.value = currentNote;
+      setTimeout(function() {
+        inp.focus();
+      }, 50);
+    }
+  }
+
+  function backToStatusFromComment(scope) {
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    if (pendingAudit.status === "ใช้งานอยู่+ย้ายไป...") {
+      openMoveRoomSublayer(scope);
+    } else if (pendingAudit.status === "ใช้งานอยู่+แก้ไขชื่อเป็น...") {
+      openRenameSublayer(scope);
+    } else {
+      closeSublayers(scope);
+    }
+  }
+
+  function proceedToStickerFromComment(scope) {
+    var isModal = (scope === "modal" || pendingAudit.scope === "modal");
+    var inputId = isModal ? "modal-comment-input" : "card-comment-input";
+    var inp = document.getElementById(inputId);
+    var commentText = inp ? inp.value.trim() : "";
+
+    pendingAudit.comment = commentText;
+    pendingAudit.extraData = pendingAudit.extraData || {};
+    pendingAudit.extraData.notes = commentText;
+
+    openStickerInspectionSublayer(pendingAudit.status, scope, pendingAudit.extraData);
+  }
+
+  function backToCommentFromSticker(scope) {
+    openCommentSublayer(pendingAudit.status, scope, pendingAudit.extraData);
+  }
+
+  /**
+   * Step 4: Sticker Inspection & Validity Workflow (v1.1.8a)
    * Opens dedicated sublayer to inspect sticker condition, reprint requirement, and note edits.
    */
   function openStickerInspectionSublayer(status, scope, extraData) {
@@ -133,11 +203,13 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.remove("hidden");
 
     // Update Status Badge in Sublayer with Category Tone Matching (Green / Red / Gray)
@@ -203,13 +275,14 @@ window.AuditController = (function() {
     var enteredNote = notesElem ? notesElem.value.trim() : "";
 
     var finalExtra = Object.assign({}, pendingAudit.extraData);
-    if (enteredNote) {
-      if (finalExtra.notes && finalExtra.notes !== enteredNote) {
-        finalExtra.notes = finalExtra.notes + " | " + enteredNote;
-      } else {
-        finalExtra.notes = enteredNote;
-      }
-    }
+    var primaryComment = pendingAudit.comment || "";
+    
+    // Combine primary comment with any sticker-specific note
+    var combinedNotes = [];
+    if (primaryComment) combinedNotes.push(primaryComment);
+    if (enteredNote && enteredNote !== primaryComment) combinedNotes.push(enteredNote);
+
+    finalExtra.notes = combinedNotes.join(" | ");
     finalExtra.sticker = pendingAudit.sticker;
 
     closeSublayers(scope);
@@ -239,19 +312,19 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.remove("hidden");
   }
 
   function confirmMoveToRoom(destRoom, scope) {
     closeSublayers(scope);
-    var noteInput = document.getElementById(scope === "modal" ? "modal-condition-note-input" : "condition-note-input");
-    var noteVal = noteInput ? noteInput.value.trim() : "";
-    openStickerInspectionSublayer("ใช้งานอยู่+ย้ายไป...", scope, { destinationRoom: destRoom, notes: noteVal, defaultSticker: "ปกติ" });
+    openCommentSublayer("ใช้งานอยู่+ย้ายไป...", scope, { destinationRoom: destRoom, defaultSticker: "ปกติ" });
   }
 
   function openRenameSublayer(scope) {
@@ -259,10 +332,12 @@ window.AuditController = (function() {
     var mainPanel = document.getElementById(isModal ? "modal-status-main-panel" : "card-status-main-panel");
     var moveSublayer = document.getElementById(isModal ? "modal-sublayer-move" : "card-sublayer-move");
     var renameSublayer = document.getElementById(isModal ? "modal-sublayer-rename" : "card-sublayer-rename");
+    var commentSublayer = document.getElementById(isModal ? "modal-sublayer-comment" : "card-sublayer-comment");
     var stickerSublayer = document.getElementById(isModal ? "modal-sublayer-sticker" : "card-sublayer-sticker");
 
     if (mainPanel) mainPanel.classList.add("hidden");
     if (moveSublayer) moveSublayer.classList.add("hidden");
+    if (commentSublayer) commentSublayer.classList.add("hidden");
     if (stickerSublayer) stickerSublayer.classList.add("hidden");
     if (renameSublayer) renameSublayer.classList.remove("hidden");
 
@@ -288,9 +363,7 @@ window.AuditController = (function() {
     }
 
     closeSublayers(scope);
-    var noteInput = document.getElementById(isModal ? "modal-condition-note-input" : "condition-note-input");
-    var noteVal = noteInput ? noteInput.value.trim() : "";
-    openStickerInspectionSublayer("ใช้งานอยู่+แก้ไขชื่อเป็น...", scope, { renameText: newName, notes: noteVal, defaultSticker: "ปริ้นใหม่+แก้ข้อมูล" });
+    openCommentSublayer("ใช้งานอยู่+แก้ไขชื่อเป็น...", scope, { renameText: newName, defaultSticker: "ปริ้นใหม่+แก้ข้อมูล" });
   }
 
   function closeSublayers(scope) {
@@ -298,26 +371,30 @@ window.AuditController = (function() {
       var cardMain = document.getElementById("card-status-main-panel");
       var cardMove = document.getElementById("card-sublayer-move");
       var cardRename = document.getElementById("card-sublayer-rename");
+      var cardComment = document.getElementById("card-sublayer-comment");
       var cardSticker = document.getElementById("card-sublayer-sticker");
       if (cardMain) cardMain.classList.remove("hidden");
       if (cardMove) cardMove.classList.add("hidden");
       if (cardRename) cardRename.classList.add("hidden");
+      if (cardComment) cardComment.classList.add("hidden");
       if (cardSticker) cardSticker.classList.add("hidden");
     }
     if (!scope || scope === "modal") {
       var modalMain = document.getElementById("modal-status-main-panel");
       var modalMove = document.getElementById("modal-sublayer-move");
       var modalRename = document.getElementById("modal-sublayer-rename");
+      var modalComment = document.getElementById("modal-sublayer-comment");
       var modalSticker = document.getElementById("modal-sublayer-sticker");
       if (modalMain) modalMain.classList.remove("hidden");
       if (modalMove) modalMove.classList.add("hidden");
       if (modalRename) modalRename.classList.add("hidden");
+      if (modalComment) modalComment.classList.add("hidden");
       if (modalSticker) modalSticker.classList.add("hidden");
     }
   }
 
   function submitStatusFromModal(status) {
-    openStickerInspectionSublayer(status, "modal");
+    openCommentSublayer(status, "modal");
   }
 
   function displayScannedAsset(asset) {
@@ -780,6 +857,10 @@ window.AuditController = (function() {
     displayScannedAsset: displayScannedAsset,
     displayUnrecognizedAsset: displayUnrecognizedAsset,
     selectSticker: selectSticker,
+    openCommentSublayer: openCommentSublayer,
+    backToStatusFromComment: backToStatusFromComment,
+    proceedToStickerFromComment: proceedToStickerFromComment,
+    backToCommentFromSticker: backToCommentFromSticker,
     openStickerInspectionSublayer: openStickerInspectionSublayer,
     selectInspectionSticker: selectInspectionSticker,
     confirmStickerInspectionAndSubmit: confirmStickerInspectionAndSubmit,

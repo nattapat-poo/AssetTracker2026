@@ -1,6 +1,6 @@
 /**
  * Code.js — Unified API Router & Native Web App Dispatcher
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -8,7 +8,7 @@ function onOpen() {
   try {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu("🚀 Lab Oops: Asset Tracker")
-      .addItem("⚙️ 0. Update / Sync Config Sheet (v1.1.7f)", "menuSyncConfigSheet")
+      .addItem("⚙️ 0. Update / Sync Config Sheet (v1.1.8a)", "menuSyncConfigSheet")
       .addSeparator()
       .addItem("🏷️ 1. Setup Row 5 Audit Columns on Room Sheets...", "menuSetupRow5Headers")
       .addItem("📥 2. Aggregate Rooms into Master Table...", "menuAggregateRoomsToMaster")
@@ -266,14 +266,16 @@ function doPost(e) {
  */
 function executeApiAction(action, payload) {
   var startTime = Date.now();
-  var authUser = authenticateSession();
+  if (!payload) payload = {};
+  var authUser = authenticateSession(payload.clientEmail);
   var responseData = {};
   var status = "SUCCESS";
-  if (!payload) payload = {};
   
   try {
     if (action === "getInitialPayload") {
       responseData = getInitialPayload();
+    } else if (action === "verifyMahidolUser") {
+      responseData = verifyMahidolUser(payload.email || payload.clientEmail);
     } else if (action === "lookupAsset") {
       responseData = lookupAsset(payload.assetCode);
     } else if (action === "updateAssetStatus") {

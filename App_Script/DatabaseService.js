@@ -1,6 +1,6 @@
 /**
  * DatabaseService.js — Multi-Sheet Asset Data Access Object (DAO) Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -853,9 +853,6 @@ function updateAssetStatus(payload) {
     if (notes) {
       remarksParts.push(notes);
     }
-    if (currentRoom && currentRoom !== "ALL" && targetSheetName && currentRoom !== targetSheetName) {
-      remarksParts.push("[Found in " + currentRoom + "]");
-    }
     var finalRemarks = remarksParts.join(" | ");
 
     // 1. BI-SYNC: UPDATE MASTER_ASSET SHEET (IF PRESENT)
@@ -953,8 +950,14 @@ function updateAssetStatus(payload) {
     
     // Invalidate caches
     try {
-      CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
-      CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
+      var cache = CacheService.getScriptCache();
+      if (cache) {
+        cache.remove("ASSET_ROUTER_INDEX");
+        cache.remove("MASTER_ASSET_CACHE");
+        cache.remove("AUDIT_SUMMARY_Master_Asset");
+        cache.remove("AUDIT_SUMMARY_ALL");
+        if (targetSheetName) cache.remove("AUDIT_SUMMARY_" + targetSheetName);
+      }
     } catch (e) {}
     
     logEvent("UPDATE_ASSET_STATUS", "SUCCESS", 0, "Asset " + rawAssetId + " updated: " + newStatus, {
@@ -1089,8 +1092,14 @@ function addNewUnlistedAsset(payload) {
 
     // Invalidate caches
     try {
-      CacheService.getScriptCache().remove("ASSET_ROUTER_INDEX");
-      CacheService.getScriptCache().remove("MASTER_ASSET_CACHE");
+      var cache = CacheService.getScriptCache();
+      if (cache) {
+        cache.remove("ASSET_ROUTER_INDEX");
+        cache.remove("MASTER_ASSET_CACHE");
+        cache.remove("AUDIT_SUMMARY_Master_Asset");
+        cache.remove("AUDIT_SUMMARY_ALL");
+        if (targetRoom) cache.remove("AUDIT_SUMMARY_" + targetRoom);
+      }
     } catch (e) {}
 
     logEvent("ADD_UNLISTED_ASSET", "SUCCESS", 0, "New asset " + rawAssetId + " registered into " + targetRoom, {
@@ -1239,13 +1248,30 @@ function getMasterAuditSummary(masterSheet, roomName) {
  * Primary: Queries Master_Asset for instant sub-second speed. Secondary: Iterates room sheets with fixed Row 6 offsets.
  */
 function getRoomAuditSummary(roomName) {
+  var cacheKey = "AUDIT_SUMMARY_" + (roomName || "ALL");
+  try {
+    var cache = CacheService.getScriptCache();
+    var cached = cache ? cache.get(cacheKey) : null;
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (e) {}
+
   var ss = getSpreadsheet();
   if (!ss) return { total: 0, verified: 0, unverified: 0, items: [] };
 
   // 1. Primary: Aggregate directly from Master_Asset sheet
   var masterSheet = ss.getSheetByName(MASTER_SHEET_NAME);
   if (masterSheet && masterSheet.getLastRow() > 1) {
-    return getMasterAuditSummary(masterSheet, roomName);
+    var masterSummary = getMasterAuditSummary(masterSheet, roomName);
+    try {
+      var ser = JSON.stringify(masterSummary);
+      if (ser && ser.length < 95000) {
+        var c = CacheService.getScriptCache();
+        if (c) c.put(cacheKey, ser, 1800);
+      }
+    } catch (err) {}
+    return masterSummary;
   }
   
   // 2. Secondary fallback: Scan room worksheets using fixed Row 6 offsets

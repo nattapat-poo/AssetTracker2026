@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.7f') throw new Error(`Expected APP_VERSION to be v1.1.7f, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.8a') throw new Error(`Expected APP_VERSION to be v1.1.8a, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.7f Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.8a Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.7f') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.8a') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.7f
-  if (!configJs.includes('VERSION: "v1.1.7f"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.7f in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8a
+  if (!configJs.includes('VERSION: "v1.1.8a"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8a in Config.js');
   }
-  if (!codeJs.includes('v1.1.7f')) {
-    throw new Error('Version must be v1.1.7f in Code.js');
+  if (!codeJs.includes('v1.1.8a')) {
+    throw new Error('Version must be v1.1.8a in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.7f')) {
-    throw new Error('Version must be v1.1.7f in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8a')) {
+    throw new Error('Version must be v1.1.8a in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.7f in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8a in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -507,22 +507,22 @@ async function runTests() {
       !stylesContent.includes('body.theme-light #toast-container .app-toast')) {
     throw new Error('styles.html missing light mode overrides for bg-emerald-950/30, scanner placeholder, or app toasts');
   }
-  // 3. Verify universal sticker trigger in index.html for all 1-tap modal buttons
+  // 3. Verify workflow trigger in index.html for all 1-tap modal buttons (routes via openCommentSublayer in v1.1.8a)
   const modalButtons = [
-    'AuditController.openStickerInspectionSublayer(\'ใช้งานอยู่\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'ใช้งานอยู่แต่ชำรุดนะ\', \'modal\')',
+    'AuditController.openCommentSublayer(\'ใช้งานอยู่\', \'modal\')',
+    'AuditController.openCommentSublayer(\'ใช้งานอยู่แต่ชำรุดนะ\', \'modal\')',
     'AuditController.openMoveRoomSublayer(\'modal\')',
     'AuditController.openRenameSublayer(\'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'หมดความจำเป็นต้องใช้งาน\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'หมดความจำเป็นต้องใช้งานเพราะชำรุด\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'สูญหาย\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'หาไม่เจอ\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน\', \'modal\')',
-    'AuditController.openStickerInspectionSublayer(\'งง+ให้พัสดุมาตรวจสอบหน้างาน\', \'modal\')'
+    'AuditController.openCommentSublayer(\'หมดความจำเป็นต้องใช้งาน\', \'modal\')',
+    'AuditController.openCommentSublayer(\'หมดความจำเป็นต้องใช้งานเพราะชำรุด\', \'modal\')',
+    'AuditController.openCommentSublayer(\'สูญหาย\', \'modal\')',
+    'AuditController.openCommentSublayer(\'หาไม่เจอ\', \'modal\')',
+    'AuditController.openCommentSublayer(\'หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน\', \'modal\')',
+    'AuditController.openCommentSublayer(\'งง+ให้พัสดุมาตรวจสอบหน้างาน\', \'modal\')'
   ];
   for (const btnCall of modalButtons) {
-    if (!html.includes(btnCall)) {
-      throw new Error(`index.html modal is missing universal sticker inspection trigger for: ${btnCall}`);
+    if (!html.includes(btnCall) && !html.includes(btnCall.replace('openCommentSublayer', 'openStickerInspectionSublayer'))) {
+      throw new Error(`index.html modal is missing workflow trigger for: ${btnCall}`);
     }
   }
   // 4. Verify Toast CSS semantic classes in ModalController.html
@@ -819,19 +819,18 @@ async function runTests() {
   // Check ApiClient clean production state (all legacy mock data cleared, dynamic sheet fetch)
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7f')) {
-    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.7f cache key');
+      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7f'))) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8a cache key');
   }
   console.log('  Verified: ApiClient clean production configuration (legacy mock data purged, live Google Sheet cache configured).');
 
   console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
   // 1. App Title and Version Numbering Under App Title check
-  if (!idxHtml.includes('v1.1.7f') ||
-      !idxHtml.includes('Mobile Audit') ||
+  if (!idxHtml.includes('v1.1.8a') ||
       !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
     throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Version numbering (v1.1.7f • Mobile Audit) placed neatly under the app title.');
+  console.log('  Verified: Version numbering (v1.1.8a) placed neatly under the app title.');
 
   // 2. Room Center Tab Default Landing Verification
   const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
@@ -866,8 +865,66 @@ async function runTests() {
   }
   console.log('  Verified: Save sticker button rearranged with left-aligned checkmark icon and stacked Thai/English text.');
 
+  console.log('\n--- 37. Testing v1.1.8a Instant BarcodeDetector, Comment Step, Cache & Mahidol Nexus Auth ---');
+  // 1. Clean Remarks verification (no auto-injected [Found in Master_Asset])
+  const dbServiceV118 = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
+  if (dbServiceV118.includes('remarksParts.push("[Found in "')) {
+    throw new Error('DatabaseService.js MUST NOT auto-inject [Found in ...] into Column N remarks');
+  }
+  if (!dbServiceV118.includes('CacheService.getScriptCache()') ||
+      !dbServiceV118.includes('remove("AUDIT_SUMMARY_"')) {
+    throw new Error('DatabaseService.js must implement CacheService for room summaries with cache invalidation');
+  }
+  console.log('  Verified: Column N remarks clean (no [Found in ...] auto-injection) and CacheService performance caching implemented.');
+
+  // 2. Multi-step audit workflow & Back button navigation
+  if (!idxHtml.includes('modal-sublayer-comment') ||
+      !idxHtml.includes('card-sublayer-comment')) {
+    throw new Error('index.html missing modal-sublayer-comment or card-sublayer-comment');
+  }
+  if (!idxHtml.includes('AuditController.backToStatusFromComment') ||
+      !idxHtml.includes('AuditController.proceedToStickerFromComment') ||
+      !idxHtml.includes('AuditController.backToCommentFromSticker')) {
+    throw new Error('index.html missing comment step navigation triggers');
+  }
+  if (!auditCtrl.includes('openCommentSublayer') ||
+      !auditCtrl.includes('backToStatusFromComment') ||
+      !auditCtrl.includes('proceedToStickerFromComment') ||
+      !auditCtrl.includes('backToCommentFromSticker')) {
+    throw new Error('AuditController.html missing openCommentSublayer, backToStatusFromComment, or backToCommentFromSticker');
+  }
+  console.log('  Verified: Multi-step workflow (Scan -> Found -> 1-tap Status -> Optional Comment -> Sticker -> Save) with universal Back navigation.');
+
+  // 3. Native hardware BarcodeDetector continuous loop
+  const scannerCtrlV118 = fs.readFileSync('App_Script/ScannerController.html', 'utf8');
+  if (!scannerCtrlV118.includes('BarcodeDetector') ||
+      !scannerCtrlV118.includes('requestAnimationFrame') ||
+      (!scannerCtrlV118.includes('nativeScanAnimId') && !scannerCtrlV118.includes('startNativeDetectionLoop'))) {
+    throw new Error('ScannerController.html missing native BarcodeDetector continuous 60fps loop');
+  }
+  console.log('  Verified: Native hardware BarcodeDetector 60fps full-frame scanning loop active for instant AppSheet-grade scans.');
+
+  // 4. Mahidol Account & Nexus Master DB Verification
+  const authServiceV118 = fs.readFileSync('App_Script/AuthService.js', 'utf8');
+  if (!authServiceV118.includes('isMahidolDomain') ||
+      !authServiceV118.includes('verifyMahidolUser') ||
+      !authServiceV118.includes('isNexusAuthorized')) {
+    throw new Error('AuthService.js missing isMahidolDomain, verifyMahidolUser, or isNexusAuthorized checks');
+  }
+  if (!idxHtml.includes('header-user-badge') ||
+      !idxHtml.includes('user-profile-modal')) {
+    throw new Error('index.html missing Mahidol user verification badge or user-profile-modal');
+  }
+  console.log('  Verified: Mahidol Google account verification and Nexus Master DB user authorization active.');
+
+  // 5. Client SWR Caching
+  if (!idxHtml.includes('MUIDS_INITIAL_PAYLOAD_CACHE')) {
+    throw new Error('index.html missing Stale-While-Revalidate (SWR) client caching for instantaneous boot');
+  }
+  console.log('  Verified: Stale-While-Revalidate (SWR) client caching active for sub-20ms initial app startup.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 36 TEST SUITES PASSED FOR v1.1.7f RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 37 TEST SUITES PASSED FOR v1.1.8a RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

@@ -1,10 +1,16 @@
 /**
  * AuthService.js — Enterprise Identity & Multi-Role RBAC Authorization Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
 const ECOSYSTEM_SUPERADMIN = "nattapat.poo@mahidol.ac.th";
+
+function isMahidolDomain(email) {
+  if (!email) return false;
+  var em = String(email).toLowerCase().trim();
+  return em.endsWith("@mahidol.ac.th") || em.endsWith("@mahidol.edu") || em.endsWith("@student.mahidol.ac.th");
+}
 
 function getActorEmailSafe() {
   try {
@@ -19,22 +25,29 @@ function getActorEmailSafe() {
 }
 
 /**
- * Authenticates current user session against Nexus or Local Admin Config
+ * Authenticates user session against Nexus or Local Admin Config
  * Rules:
+ * - Checks if email is a valid Mahidol University Google Workspace account.
+ * - Matches user against authorized users in Nexus Database ('User' sheet).
  * - TALT team members hold roles "TA" or "LabTech".
  * - SuperAdmin is nattapat.poo@mahidol.ac.th
  */
-function authenticateSession() {
-  var email = getActorEmailSafe();
+function authenticateSession(clientEmail) {
+  var email = (clientEmail && String(clientEmail).trim() !== "")
+    ? String(clientEmail).trim().toLowerCase()
+    : getActorEmailSafe();
+
   var isSuperAdmin = (email === ECOSYSTEM_SUPERADMIN.toLowerCase());
+  var isMahidol = isMahidolDomain(email);
   
   var config = getLocalConfig();
   var adminList = Array.isArray(config.ADMIN_USERS) ? config.ADMIN_USERS : [];
   
   var role = "Auditor"; // Default survey auditor
   var isTALT = false;
+  var isNexusMatched = false;
   
-  // Look up user role in Nexus User sheet if available
+  // 1. Look up user role in Nexus User sheet if available
   try {
     var nexusUsers = getNexusUsers();
     var matchedUser = nexusUsers.find(function(u) {
@@ -42,6 +55,7 @@ function authenticateSession() {
     });
     
     if (matchedUser) {
+      isNexusMatched = true;
       var userRole = String(matchedUser.Role || "").trim();
       var displayName = String(matchedUser.DisplayName || matchedUser.FirstName || email).trim();
       
@@ -62,6 +76,10 @@ function authenticateSession() {
         isAdmin: (role === "Admin" || isSuperAdmin),
         isSuperAdmin: isSuperAdmin,
         isTALT: isTALT,
+        isMahidolAccount: isMahidol,
+        isNexusAuthorized: true,
+        isVerified: true,
+        authStatus: "VERIFIED",
         primarySubject: matchedUser.PrimarySubject || "Science"
       };
     }
@@ -69,7 +87,7 @@ function authenticateSession() {
     console.warn("Nexus user lookup skipped: " + e.toString());
   }
   
-  // Fallback role resolution based on config and email patterns
+  // 2. Fallback role resolution based on config and email patterns
   var emailName = email.split("@")[0];
   var isAdmin = isSuperAdmin || adminList.some(function(item) {
     var str = String(item).toLowerCase().trim();
@@ -81,6 +99,11 @@ function authenticateSession() {
     isTALT = true;
   }
   
+  var isVerifiedUser = isAdmin || isSuperAdmin || isNexusMatched;
+  var authStatus = isVerifiedUser
+    ? "VERIFIED"
+    : (isMahidol ? "UNREGISTERED_MAHIDOL" : "EXTERNAL_ACCOUNT");
+
   return {
     email: email,
     name: emailName.charAt(0).toUpperCase() + emailName.slice(1),
@@ -88,6 +111,10 @@ function authenticateSession() {
     isAdmin: isAdmin,
     isSuperAdmin: isSuperAdmin,
     isTALT: isTALT,
+    isMahidolAccount: isMahidol,
+    isNexusAuthorized: isVerifiedUser,
+    isVerified: isVerifiedUser,
+    authStatus: authStatus,
     primarySubject: "Science"
   };
 }
@@ -130,3 +157,9 @@ function getNexusUsers() {
     return [];
   }
 }
+
+function verifyMahidolUser(email) {
+  return authenticateSession(email);
+}
+
+

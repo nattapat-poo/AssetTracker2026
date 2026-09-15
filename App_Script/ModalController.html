@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -607,6 +607,33 @@ window.ModalController = (function() {
     }
   }
 
+  function openUserProfileModal() {
+    var modal = document.getElementById("user-profile-modal");
+    if (!modal) return;
+    var user = AppState.get("user") || {};
+    var emailElem = document.getElementById("profile-user-email");
+    var nameElem = document.getElementById("profile-user-name");
+    var roleElem = document.getElementById("profile-user-role");
+    var statusElem = document.getElementById("profile-user-status");
+
+    if (emailElem) emailElem.innerText = user.email || "Unknown";
+    if (nameElem) nameElem.innerText = user.name || "Auditor";
+    if (roleElem) roleElem.innerText = user.role || "Auditor";
+    if (statusElem) {
+      if (user.isVerified) {
+        statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold"><i class="fa-solid fa-circle-check text-xs"></i> <span>บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว</span></span>';
+      } else {
+        statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation text-xs"></i> <span>บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อแอดมิน</span></span>';
+      }
+    }
+    modal.classList.remove("hidden");
+  }
+
+  function closeUserProfileModal() {
+    var modal = document.getElementById("user-profile-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
   // Keyboard shortcut listener for Ctrl + Shift + Q
   window.addEventListener("keydown", function(e) {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Q" || e.key === "q")) {
@@ -617,6 +644,8 @@ window.ModalController = (function() {
 
   return {
     showToast: showToast,
+    openUserProfileModal: openUserProfileModal,
+    closeUserProfileModal: closeUserProfileModal,
     openManualLookupModal: openManualLookupModal,
     closeManualLookupModal: closeManualLookupModal,
     submitManualLookup: submitManualLookup,

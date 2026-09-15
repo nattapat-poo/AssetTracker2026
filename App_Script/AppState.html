@@ -1,13 +1,13 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.7f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
   var state = {
-    user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true },
+    user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true, isSuperAdmin: true, isMahidolAccount: true, isNexusAuthorized: true, isVerified: true, authStatus: "VERIFIED" },
     config: {},
     rooms: [],
     currentRoom: "Master_Asset",
