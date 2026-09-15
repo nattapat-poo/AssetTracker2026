@@ -1,7 +1,7 @@
 <script>
 /**
  * AuditController.html — Asset Inventory & Audit Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
  * MUIDS Lab Oops OS — Science Department
  * Technical Architecture: Single-tap verification, dynamic room rosters & responsive audit
  */
@@ -483,6 +483,9 @@ window.AuditController = (function() {
     var notes = extraData.notes || (modalNoteInput && modalNoteInput.value ? modalNoteInput.value.trim() : (cardNoteInput ? cardNoteInput.value.trim() : ""));
     var currentRoom = AppState.get("currentRoom");
 
+    var currentUser = (window.AppState && typeof AppState.get === "function") ? (AppState.get("user") || {}) : {};
+    var auditorNickname = currentUser.nickname || (currentUser.name ? currentUser.name.split(" ")[0] : "Mek");
+
     var payload = {
       assetId: targetAsset.assetId,
       sheetName: targetAsset.sheetName || targetAsset.registeredLocation,
@@ -493,7 +496,8 @@ window.AuditController = (function() {
       notes: notes,
       destinationRoom: extraData.destinationRoom || null,
       renameText: extraData.renameText || null,
-      currentRoom: (currentRoom === "ALL" ? targetAsset.registeredLocation : currentRoom)
+      currentRoom: (currentRoom === "ALL" ? targetAsset.registeredLocation : currentRoom),
+      auditor: auditorNickname
     };
 
     // Close sublayers & modal immediately for seamless 1-tap UX

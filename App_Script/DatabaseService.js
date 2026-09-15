@@ -1,6 +1,6 @@
 /**
  * DatabaseService.js — Multi-Sheet Asset Data Access Object (DAO) Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -930,7 +930,9 @@ function updateAssetStatus(payload) {
         if (schema.result69Col !== -1) roomSheet.getRange(foundRow, schema.result69Col).setValue(finalRemarks);
         if (schema.stickerCol !== -1) roomSheet.getRange(foundRow, schema.stickerCol).setValue(sticker);
         if (schema.auditorCol !== -1) {
-          var auditorName = (authUser && (authUser.name || authUser.displayName)) ? (authUser.name || authUser.displayName) : (payload.auditor || "Nattapat Poolyam (Mek)");
+          var auditorName = (payload.auditor && String(payload.auditor).trim() !== "")
+            ? String(payload.auditor).trim()
+            : ((authUser && (authUser.nickname || authUser.name || authUser.displayName)) ? (authUser.nickname || authUser.name || authUser.displayName) : "Mek");
           roomSheet.getRange(foundRow, schema.auditorCol).setValue(auditorName);
         }
         if (renameText && schema.colMap.description1) {
@@ -1040,7 +1042,9 @@ function addNewUnlistedAsset(payload) {
       if (schema.result69Col !== -1) newRowValues[schema.result69Col - 1] = notes;
       if (schema.stickerCol !== -1) newRowValues[schema.stickerCol - 1] = sticker;
       if (schema.auditorCol !== -1) {
-        var unlistedAuditor = (authUser && (authUser.name || authUser.displayName)) ? (authUser.name || authUser.displayName) : (payload.auditor || "Nattapat Poolyam (Mek)");
+        var unlistedAuditor = (payload.auditor && String(payload.auditor).trim() !== "")
+          ? String(payload.auditor).trim()
+          : ((authUser && (authUser.nickname || authUser.name || authUser.displayName)) ? (authUser.nickname || authUser.name || authUser.displayName) : "Mek");
         newRowValues[schema.auditorCol - 1] = unlistedAuditor;
       }
 

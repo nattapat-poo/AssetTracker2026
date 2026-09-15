@@ -1,12 +1,12 @@
 /**
  * Config.js — Application Constants & 3-Tier Cache Snapshot Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
  * Config.js — Architectural Constants, Master Registry & Runtime Settings
  * Lab Oops OS Ecosystem | Mahidol University International Demonstration School
  */
 
 var APP_CONFIG = {
-  VERSION: "v1.1.8f",
+  VERSION: "v1.1.8g",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };

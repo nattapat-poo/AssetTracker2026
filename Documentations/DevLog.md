@@ -1,5 +1,31 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-16 — Release v1.1.8g: Master DB Verification, Auditor Nickname, Header Display & Full Purge Engine
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8g`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Key Implementations & Features**:
+  - **Master DB Google Sheet Verification as Primary Authority**:
+    - Re-architected `AuthService.getAuthorizedUsers()` and `authenticateSession()` to strictly query the Master Google Sheet's `User` tab (`getSpreadsheet().getSheetByName("User")`) and `NEXUS_SPREADSHEET_ID` first.
+    - Verified user roles against the allowed Master DB roles: **`Admin`**, **`LabTech`**, and **`TA`** (plus `SuperAdmin`).
+    - The 5-member science team baseline registry (`MASTER_USER_REGISTRY`) now operates strictly as a resilient offline fallback when the Google Sheet is unreachable or network is offline.
+  - **User Display Mounted under App Title / Version Badge**:
+    - Added user identity pill directly below the app title and version badge in `index.html` displaying the logged-in technician's nickname and role (e.g. `👤 Mek (SuperAdmin)`).
+    - Integrated with `AppState.applyUserDisplay()` to automatically react to session changes, SWR re-validations, and cache updates.
+  - **Auditor Nickname Recording into Google Sheet**:
+    - Updated `DatabaseService.js` and `AuditController.html` to record the technician's displaying nickname (`Mek`, `Mai`, `Fern`, `Win`, `Kris`) into the `Auditor` column (Col P / 16) in the room sheet when saving audit records.
+  - **Complete Purge & Fresh App Restart Engine**:
+    - Added `#btn-full-purge-restart` in the Stat tab (`#view-summary`) and Developer Gateway:
+      1. Clears all client `localStorage` (`localStorage.clear()`) and `sessionStorage.clear()`.
+      2. Calls `ApiClient.clearLocalCache()` to clear memory stores.
+      3. Invokes `ApiClient.flushCache()` to clear server `CacheService` and `PropertiesService`.
+      4. Executes a hard page reload (`window.location.reload(true)`), booting the web app completely fresh from zero.
+  - **Architecture Analysis: Micrologging to Google Sheets vs Local Telemetry**:
+    - Evaluated why synchronous micro-logging (camera start, toasts, frame clicks) to Google Sheets creates severe latency (~300ms–1500ms per write), exhausts daily Google quotas (100 reqs/100s), and causes cell locking.
+    - Confirmed that client-side LocalStorage logging (`AppState.activityLogs`) in <1ms without network calls is the optimal architecture, while only saving audit business mutations to Google Sheets.
+  - **Automated Verification**:
+    - Added Test Suite 42 to `Tools/test_core.js`. All 42 test suites pass 100%.
+
 ## 2026-09-15 — Release v1.1.8f: Master Google Sheet User Tab Inspection & 5-Member Team Registry
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8f`.

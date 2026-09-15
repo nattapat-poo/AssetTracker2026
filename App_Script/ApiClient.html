@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8f)
+  // Persistent Local Storage of REAL Assets (v1.1.8g)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8f") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8e");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8f");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8f", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8g", JSON.stringify(data));
         }
       }
     } catch (e) {}

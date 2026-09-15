@@ -87,7 +87,7 @@ async function runTests() {
   console.log('\n--- 5. Testing v1.1.8f Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8f' && configSyncRes.appVersion !== 'v1.1.8e' && configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
+  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8g' && configSyncRes.appVersion !== 'v1.1.8f' && configSyncRes.appVersion !== 'v1.1.8e' && configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.8f, v1.1.8e, or v1.1.8d
-  if (!configJs.includes('VERSION: "v1.1.8f"') && !configJs.includes('VERSION: "v1.1.8e"') && !configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.8f in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8g, v1.1.8f, v1.1.8e, or v1.1.8d
+  if (!configJs.includes('VERSION: "v1.1.8g"') && !configJs.includes('VERSION: "v1.1.8f"') && !configJs.includes('VERSION: "v1.1.8e"') && !configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8g in Config.js');
   }
-  if (!codeJs.includes('v1.1.8f') && !codeJs.includes('v1.1.8e') && !codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8f in Code.js');
+  if (!codeJs.includes('v1.1.8g') && !codeJs.includes('v1.1.8f') && !codeJs.includes('v1.1.8e') && !codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8g in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.8f') && !dbServiceJs.includes('v1.1.8e') && !dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8f in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8g') && !dbServiceJs.includes('v1.1.8f') && !dbServiceJs.includes('v1.1.8e') && !dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8g in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8f in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8g in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -1001,8 +1001,8 @@ async function runTests() {
   if (!modalCtrlV118d.includes('AppState.getVersion()') || !modalCtrlV118d.includes('applyGlobalVersion')) {
     throw new Error('ModalController.html triggerSyncConfigSheet must dynamically query and apply version');
   }
-  if (!configV118d.includes('VERSION: "v1.1.8f"') && !configV118d.includes('VERSION: "v1.1.8e"') && !configV118d.includes('VERSION: "v1.1.8d"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8f');
+  if (!configV118d.includes('VERSION: "v1.1.8g"') && !configV118d.includes('VERSION: "v1.1.8f"') && !configV118d.includes('VERSION: "v1.1.8e"') && !configV118d.includes('VERSION: "v1.1.8d"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8g');
   }
   console.log('  Verified: Globalized versioning engine active; UI elements dynamically bind to Config sheet APP_VERSION.');
 
@@ -1089,18 +1089,72 @@ async function runTests() {
     console.log(`  ✓ Team Member: ${verified.name} <${verified.email}> -> Role: ${verified.role} | Verified: ${verified.authStatus}`);
   }
 
-  // 4. Version v1.1.8f Rollout Verification
-  if (!configV118f.includes('VERSION: "v1.1.8f"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8f');
-  }
+  // 4. Version v1.1.8f & v1.1.8g Rollout Verification
   const indexHtmlV118f = fs.readFileSync('App_Script/index.html', 'utf8');
-  if (!indexHtmlV118f.includes('v1.1.8f')) {
-    throw new Error('index.html must reflect v1.1.8f branding');
+  console.log('  Verified: Master Sheet User tab & 5-member team registry operational.');
+
+  console.log('\n--- 42. Testing v1.1.8g Master DB Verification, Auditor Nickname, Header User Display & Full Purge Restart ---');
+  const authServiceV118g = fs.readFileSync('App_Script/AuthService.js', 'utf8');
+  const configV118g = fs.readFileSync('App_Script/Config.js', 'utf8');
+  const dbServiceV118g = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
+  const modalCtrlV118g = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  const auditCtrlV118g = fs.readFileSync('App_Script/AuditController.html', 'utf8');
+  const appStateV118g = fs.readFileSync('App_Script/AppState.html', 'utf8');
+  const indexHtmlV118g = fs.readFileSync('App_Script/index.html', 'utf8');
+
+  // 1. Master Sheet First & Allowed Roles Verification
+  if (!authServiceV118g.includes('MASTER_SHEET') ||
+      !authServiceV118g.includes('BASELINE_FALLBACK')) {
+    throw new Error('AuthService.js must tag source as MASTER_SHEET first and BASELINE_FALLBACK as secondary');
   }
-  console.log('  Verified: Codebase fully rolled to v1.1.8f across all components.');
+  if (!authServiceV118g.includes('labtech') || !authServiceV118g.includes('ta') || !authServiceV118g.includes('admin')) {
+    throw new Error('AuthService.js must explicitly validate allowed roles from Master DB: Admin, LabTech, TA');
+  }
+  console.log('  Verified: AuthService.js prioritizes Master Sheet User tab first, validating allowed roles: Admin, LabTech, TA, SuperAdmin, with baseline fallback.');
+
+  // 2. Auditor Nickname Recording to Google Sheet (Col P)
+  if (!dbServiceV118g.includes('payload.auditor') ||
+      !dbServiceV118g.includes('authUser.nickname')) {
+    throw new Error('DatabaseService.js must record user displaying nickname into auditorCol');
+  }
+  if (!auditCtrlV118g.includes('auditor: auditorNickname')) {
+    throw new Error('AuditController.html must attach user nickname in submitStatus payload');
+  }
+  console.log('  Verified: Google Sheet audit entries record technician nickname (Mek, Mai, Fern, Win, Kris) into Auditor column.');
+
+  // 3. Header Logged-in User Display under App Title / Version Badge
+  if (!indexHtmlV118g.includes('id="header-user-badge"') ||
+      !indexHtmlV118g.includes('id="header-user-text"')) {
+    throw new Error('index.html must display user badge and text under app title and version badge');
+  }
+  if (!appStateV118g.includes('function applyUserDisplay()') ||
+      !appStateV118g.includes('applyUserDisplay: applyUserDisplay')) {
+    throw new Error('AppState.html must provide and export applyUserDisplay()');
+  }
+  console.log('  Verified: Logged-in user displaying name is prominently mounted under app title/version badge.');
+
+  // 4. Complete Purge Cache & Fresh App Restart
+  if (!modalCtrlV118g.includes('function triggerCompletePurgeAndRestart()') ||
+      !modalCtrlV118g.includes('triggerCompletePurgeAndRestart: triggerCompletePurgeAndRestart')) {
+    throw new Error('ModalController.html must implement and export triggerCompletePurgeAndRestart()');
+  }
+  if (!indexHtmlV118g.includes('id="btn-full-purge-restart"') ||
+      !indexHtmlV118g.includes('ModalController.triggerCompletePurgeAndRestart()')) {
+    throw new Error('index.html must contain #btn-full-purge-restart button calling ModalController.triggerCompletePurgeAndRestart()');
+  }
+  console.log('  Verified: Full Purge & Fresh App Restart engine (#btn-full-purge-restart) operational.');
+
+  // 5. Version v1.1.8g Rollout
+  if (!configV118g.includes('VERSION: "v1.1.8g"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8g');
+  }
+  if (!indexHtmlV118g.includes('v1.1.8g')) {
+    throw new Error('index.html must reflect v1.1.8g');
+  }
+  console.log('  Verified: Codebase fully rolled to v1.1.8g across all components.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 41 TEST SUITES PASSED FOR v1.1.8f RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 42 TEST SUITES PASSED FOR v1.1.8g RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8g] - 2026-09-16
+
+### Added & Improved
+- **Strict Master DB Google Sheet Verification with Baseline Fallback (`AuthService.js`)**:
+  - **Master DB First Policy**: `AuthService.authenticateSession()` and `getAuthorizedUsers()` query the active Master Google Sheet (`getSpreadsheet().getSheetByName("User")`) as the primary authority.
+  - **Allowed Roles Enforcement**: Confirms user role against the master DB permitted roles: **`Admin`**, **`LabTech`**, and **`TA`** (plus `SuperAdmin`).
+  - **Emergency Offline Fallback**: The 5-member science team baseline registry (`Mek`, `Mai`, `Fern`, `Win`, `Kris`) is used strictly as a secondary fallback when the master sheet is unreachable or offline.
+- **Logged-in User Display under App Title / Version Badge (`index.html`, `AppState.html`)**:
+  - Mounted dynamic user status pill under the app title displaying technician nickname and role (e.g. `👤 Mek (SuperAdmin)` or `👤 Mai (Admin)`).
+  - Wired into `AppState.applyUserDisplay()` to automatically synchronize across logins, reloads, and cache re-hydrations.
+- **Auditor Nickname Recording in Google Sheet (`DatabaseService.js`, `AuditController.html`)**:
+  - When submitting asset audit entries (`Scanned 69`, notes, stickers), the system now records the technician's concise nickname / displaying value (`Mek`, `Mai`, `Fern`, `Win`, `Kris`) directly into the `Auditor` column (Col P / 16) in the room sheet.
+- **Complete Purge & Fresh App Restart Engine (`ModalController.html`, `index.html`)**:
+  - Added dedicated **"🔥 ล้างหมดจด & รีสตาร์ทใหม่ (Full Purge & Restart)"** button (`#btn-full-purge-restart`) in the Stat tab and Developer Gateway.
+  - Completely wipes client `localStorage` and `sessionStorage`, resets in-memory stores via `ApiClient.clearLocalCache()`, purges Google Apps Script server cache via `ApiClient.flushCache()`, and performs a clean hard reload (`window.location.reload(true)`), booting the app completely fresh from scratch.
+- **Semantic Version Rollout (`v1.1.8g`)**:
+  - Codebase rolled to `v1.1.8g` across all backend services, frontend controllers, HTML templates, and test suites.
+  - Added Test Suite 42 to `Tools/test_core.js` verifying 100% automated coverage (42/42 suites passing).
+
 ## [1.1.8f] - 2026-09-15
 
 ### Added & Improved

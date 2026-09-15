@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Dialog, Drawer & UI Interactivity Layer
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8f)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -519,8 +519,48 @@ window.ModalController = (function() {
       });
   }
 
+  function triggerCompletePurgeAndRestart() {
+    if (!confirm("⚠️ ต้องการล้างข้อมูลทั้งหมดในเครื่องและรีสตาร์ทแอปใหม่ใช่หรือไม่?\n\n(ระบบจะล้างแคช, ประวัติกิจกรรม, และข้อมูลที่บันทึกไว้ในเบราว์เซอร์ทั้งหมด พร้อมดึงข้อมูลสดจาก Master Sheet ใหม่)")) {
+      return;
+    }
+
+    showToast("🔥 กำลังล้างระบบทั้งหมดและรีสตาร์ท...", "warning", 6000);
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.clear();
+      }
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.clear();
+      }
+    } catch (e) {
+      console.warn("[PURGE] Storage clear warning:", e);
+    }
+
+    if (window.ApiClient && typeof window.ApiClient.clearLocalCache === "function") {
+      window.ApiClient.clearLocalCache();
+    }
+
+    ApiClient.flushCache()
+      .then(function() {
+        showToast("🚀 ล้างระบบสำเร็จ! กำลังรีสตาร์ทแอป...", "success", 2000);
+        setTimeout(function() {
+          try {
+            window.location.reload(true);
+          } catch (e) {
+            window.location.reload();
+          }
+        }, 800);
+      })
+      .catch(function() {
+        setTimeout(function() {
+          window.location.reload();
+        }, 1000);
+      });
+  }
+
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8g";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {
@@ -777,6 +817,7 @@ window.ModalController = (function() {
     closeDeveloperModal: closeDeveloperModal,
     triggerFlushCache: triggerFlushCache,
     triggerTotalFlushCache: triggerTotalFlushCache,
+    triggerCompletePurgeAndRestart: triggerCompletePurgeAndRestart,
     triggerSyncConfigSheet: triggerSyncConfigSheet,
     triggerSetupRow5Headers: triggerSetupRow5Headers,
     triggerBuildMasterTable: triggerBuildMasterTable,

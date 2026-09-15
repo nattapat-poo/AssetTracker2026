@@ -1,4 +1,4 @@
-# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8f)
+# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8g)
 ### MUIDS Lab Oops OS — Science Department
 
 ---
