@@ -6,7 +6,7 @@
  */
 
 var APP_CONFIG = {
-  VERSION: "v1.1.8i",
+  VERSION: "v1.1.8j",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };
@@ -521,6 +521,7 @@ function Nexus_FlushCache() {
   cache.remove("DYNAMIC_ROOM_TYPES_CACHE");
   cache.remove("MASTER_ASSET_CACHE");
   cache.remove("AUTHORIZED_USERS_CACHE");
+  cache.remove("AUTHORIZED_USERS_CACHE_v1.1.8j");
   cache.remove("AUTHORIZED_USERS_CACHE_v1.1.8i");
   cache.remove("NEXUS_USERS_CACHE");
   
@@ -533,6 +534,7 @@ function Nexus_FlushCache() {
   props.deleteProperty("DYNAMIC_ROOM_TYPES_CACHE");
   props.deleteProperty("MASTER_ASSET_CACHE");
   props.deleteProperty("AUTHORIZED_USERS_CACHE");
+  props.deleteProperty("AUTHORIZED_USERS_CACHE_v1.1.8j");
   props.deleteProperty("AUTHORIZED_USERS_CACHE_v1.1.8i");
   props.deleteProperty("NEXUS_USERS_CACHE");
   

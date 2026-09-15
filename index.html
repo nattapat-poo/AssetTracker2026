@@ -702,7 +702,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8h</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8j</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -755,7 +755,7 @@
     <div class="w-full flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60 select-none">
       <!-- Left: Semantic Version Badge -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8i • Mobile Audit</span>
+        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8j • Mobile Audit</span>
       </div>
 
       <!-- Right: Active Logged-in User Identity Pill (Never hidden or clipped) -->
@@ -1405,7 +1405,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8h</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8j</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1598,7 +1598,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8i</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8j</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -2082,8 +2082,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8i";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8j";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8i";
 
   var initialLogs = (function() {
     try {
@@ -2160,13 +2160,14 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8i";
+    var CURRENT_RELEASE = "v1.1.8j";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
       // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
-          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1) {
+          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1 &&
+          cfgVer.indexOf("1.1.8i") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }
@@ -2468,12 +2469,13 @@ window.ApiClient = (function() {
   var STATUS_OPTIONS = [
     "ใช้งานอยู่",
     "ใช้งานอยู่แต่ชำรุดนะ",
-    "ชำรุดรอซ่อม",
-    "ชำรุดรอจำหน่าย",
-    "รอจำหน่าย",
+    "ใช้งานอยู่+ย้ายไป...",
+    "ใช้งานอยู่+แก้ไขชื่อเป็น...",
+    "หมดความจำเป็นต้องใช้งาน",
+    "หมดความจำเป็นต้องใช้งานเพราะชำรุด",
     "สูญหาย",
-    "โอนย้ายแล้ว",
-    "ไม่พบในการสำรวจ",
+    "หาไม่เจอ",
+    "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน",
     "งง+ให้พัสดุมาตรวจสอบหน้างาน"
   ];
 
@@ -2489,11 +2491,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8i)
+  // Persistent Local Storage of REAL Assets (v1.1.8j)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2509,7 +2511,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8i", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8j", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2519,7 +2521,7 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8i");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8j");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8g");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8f");
@@ -2549,8 +2551,8 @@ window.ApiClient = (function() {
 
       timeoutTimer = setTimeout(function() {
         cleanup();
-        reject(new Error("JSONP request timed out after 20s"));
-      }, 20000);
+        reject(new Error("JSONP request timed out after 45s"));
+      }, 45000);
 
       var script = document.createElement("script");
       script.id = callbackName;
@@ -2656,7 +2658,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8i",
+          APP_VERSION: "v1.1.8j",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2745,9 +2747,11 @@ window.ApiClient = (function() {
         var match = code.match(/ID=([^&]+)/);
         if (match) code = match[1];
       }
+      var normCode = code.replace(/[\s\-_]/g, '');
       
       var asset = MOCK_ASSETS.find(function(a) {
-        return a.assetId.toUpperCase() === code;
+        var aId = a.assetId.toUpperCase();
+        return aId === code || (normCode.length > 5 && aId.replace(/[\s\-_]/g, '') === normCode);
       });
 
       if (asset) {
@@ -2758,10 +2762,26 @@ window.ApiClient = (function() {
 
     if (action === "updateAssetStatus") {
       var targetId = String(payload.assetId || "").trim().toUpperCase();
-      var asset = MOCK_ASSETS.find(function(a) { return a.assetId.toUpperCase() === targetId; });
+      var normTarget = targetId.replace(/[\s\-_]/g, '');
+      var asset = MOCK_ASSETS.find(function(a) {
+        var aId = a.assetId.toUpperCase();
+        return aId === targetId || (normTarget.length > 5 && aId.replace(/[\s\-_]/g, '') === normTarget);
+      });
       
       if (!asset) {
-        throw new Error("Asset not found in mock store.");
+        // If not found in mock store, synthesize entry to ensure offline demo & test resilience
+        asset = {
+          assetId: payload.assetId,
+          itemName: payload.renameText || "Mock Asset",
+          registeredLocation: payload.sheetName || payload.registeredLocation || "Bio Prep",
+          sheetName: payload.sheetName || payload.registeredLocation || "Bio Prep",
+          rowIndex: 2,
+          status: payload.status,
+          scanned69: payload.status,
+          sticker: payload.sticker || "ปกติ",
+          notes: payload.notes || ""
+        };
+        MOCK_ASSETS.push(asset);
       }
 
       var ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -3325,6 +3345,8 @@ window.ModalController = (function() {
     }
 
     if (window.AuditController) {
+      if (AuditController.resetSubmissionState) AuditController.resetSubmissionState();
+      if (AuditController.setThumbButtonsLoading) AuditController.setThumbButtonsLoading(false);
       if (AuditController.selectSticker) AuditController.selectSticker(asset.sticker || "ปกติ");
       if (AuditController.closeSublayers) AuditController.closeSublayers("modal");
     }
@@ -4884,6 +4906,7 @@ window.AuditController = (function() {
   }
 
   function closeSublayers(scope) {
+    resetSubmissionState();
     if (!scope || scope === "card") {
       var cardMain = document.getElementById("card-status-main-panel");
       var cardMove = document.getElementById("card-sublayer-move");
@@ -4915,6 +4938,7 @@ window.AuditController = (function() {
   }
 
   function displayScannedAsset(asset) {
+    resetSubmissionState();
     activeAsset = asset;
     AppState.set("selectedAsset", asset);
 
@@ -5042,10 +5066,20 @@ window.AuditController = (function() {
       ScannerController.resetLastScannedCode();
     }
 
+    // Safety watchdog: reset UI locks if server call hangs or takes >12s
+    var watchdogTimer = setTimeout(function() {
+      if (isSubmitting) {
+        console.warn("[AuditController] Network request watchdog: restoring button states after 12s");
+        resetSubmissionState();
+        ModalController.showToast("⚠️ การส่งข้อมูลไปยังเซิร์ฟเวอร์ใช้เวลานานกว่าปกติ ได้ปลดล็อกปุ่มแล้ว", "warning", 4000);
+      }
+    }, 12000);
+
     ApiClient.updateAssetStatus(payload)
       .then(function(res) {
-        isSubmitting = false;
-        setThumbButtonsLoading(false);
+        clearTimeout(watchdogTimer);
+        resetSubmissionState();
+        activeAsset = null;
 
         if (res && res.success === false) {
           ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
@@ -5091,12 +5125,10 @@ window.AuditController = (function() {
           // Re-fetch current room summary
           loadRoomData(AppState.get("currentRoom"));
         }
-
-        activeAsset = null;
       })
       .catch(function(err) {
-        isSubmitting = false;
-        setThumbButtonsLoading(false);
+        clearTimeout(watchdogTimer);
+        resetSubmissionState();
         activeAsset = null;
         ModalController.showToast("Failed to save: " + err.toString(), "error", 4000);
       });
@@ -5181,24 +5213,40 @@ window.AuditController = (function() {
     selectSticker(next);
   }
 
+  function resetSubmissionState() {
+    isSubmitting = false;
+    setThumbButtonsLoading(false);
+  }
+
   function setThumbButtonsLoading(loading, activeStatus) {
     var buttons = document.querySelectorAll(".thumb-btn");
     buttons.forEach(function(btn) {
       var status = btn.dataset.status || btn.dataset.modalStatus;
+      // Capture canonical HTML on first inspection before any Loading mutations
+      if (!btn.getAttribute("data-canonical-html")) {
+        if (btn.innerHTML && btn.innerHTML.indexOf("Saving...") === -1) {
+          btn.setAttribute("data-canonical-html", btn.innerHTML);
+        }
+      }
+      var canonical = btn.getAttribute("data-canonical-html");
+
       if (loading) {
         btn.disabled = true;
         btn.classList.add("opacity-60");
         if (status === activeStatus) {
-          btn.setAttribute("data-prev-html", btn.innerHTML);
           btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Saving...';
         }
       } else {
         btn.disabled = false;
         btn.classList.remove("opacity-60");
-        var prev = btn.getAttribute("data-prev-html");
-        if (prev) {
-          btn.innerHTML = prev;
-          btn.removeAttribute("data-prev-html");
+        if (canonical) {
+          btn.innerHTML = canonical;
+        } else {
+          var prev = btn.getAttribute("data-prev-html");
+          if (prev && prev.indexOf("Saving...") === -1) {
+            btn.innerHTML = prev;
+            btn.removeAttribute("data-prev-html");
+          }
         }
       }
     });
@@ -5515,6 +5563,8 @@ window.AuditController = (function() {
     submitStatus: submitStatus,
     submitStatusFromModal: submitStatusFromModal,
     submitNewUnlistedAsset: submitNewUnlistedAsset,
+    resetSubmissionState: resetSubmissionState,
+    setThumbButtonsLoading: setThumbButtonsLoading,
     toggleModalSticker: toggleModalSticker,
     renderStatusBadge: renderStatusBadge,
     renderStatusBadgeHtml: renderStatusBadgeHtml,

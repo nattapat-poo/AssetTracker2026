@@ -1,5 +1,32 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-16 — Release v1.1.8j: Auto-Reset Button State & Audit Sync Resilience
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8j`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, redeploy @20 / new deployment @21) and Git (`git push origin main`).
+* **Root Cause Analyses & Resolutions**:
+  1. **RCA: Action Buttons Stuck on "Saving..." & Disabled State**:
+     - *Issue Reported*: User completed the audit workflow `Scan > Found > Audit Status > Leave blank comment > Audit sticker`. But when opening another asset entry or inspecting the modal, the button previously selected (e.g. `หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน` under Group 3) remained permanently stuck displaying `[🔄 Saving...]` with all action buttons disabled (`btn.disabled = true; isSubmitting = true`), completely locking out further audits.
+     - *Root Cause 1 (Modal and Card Open Missing State Reset)*: In `AuditController.html`, `setThumbButtonsLoading(true, newStatus)` mutated the button DOM to `Saving...` and set `isSubmitting = true`. Neither `displayScannedAsset(asset)` nor `ModalController.openAssetDetailsModal(asset)` ever called `setThumbButtonsLoading(false)` or `resetSubmissionState()`, so any subsequent modal opened with the previous `Saving...` state.
+     - *Root Cause 2 (Recursive Corruption of `data-prev-html`)*: If `setThumbButtonsLoading(true)` was executed while a button already showed `Saving...`, `data-prev-html` captured `Saving...`. When restored, it permanently remained `Saving...`.
+     - *Root Cause 3 (Missing Watchdog Timer)*: If a network call hung or took longer than expected, `isSubmitting` stayed `true` indefinitely, blocking any future clicks with `if (isSubmitting || !activeAsset) return;`.
+     - *Resolution 1 (`AuditController.html`)*: Added `data-canonical-html` caching: each button captures its pristine label/icon before any mutation and restores it faithfully on `loading === false`.
+     - *Resolution 2 (`AuditController.html` & `ModalController.html`)*: Added `resetSubmissionState()` which is unconditionally invoked on `displayScannedAsset()`, `openAssetDetailsModal()`, `closeSublayers()`, and promise resolution/rejection.
+     - *Resolution 3 (`AuditController.html`)*: Added a 12-second safety watchdog timer in `submitStatus()` that automatically unlocks buttons and clears `isSubmitting` if the network call stalls.
+  2. **RCA: Audit Record Not Saving to Google Sheets**:
+     - *Issue Reported*: User performed the audit, but the record was not persisted to Google Sheets.
+     - *Root Cause 1 (Unconditional Expensive Room Scan in `updateAssetStatus`)*: Line 837 of `DatabaseService.js` called `lookupAsset(rawAssetId)` unconditionally on every update, even when `payload.sheetName` was already provided (`"Bio Prep"`). When cache missed, `lookupAsset()` scanned all 15+ room sheets synchronously in GAS (15–25s), exceeding the client's 20s timeout.
+     - *Root Cause 2 (Premature JSONP Timeout)*: `invokeJsonp()` in `ApiClient.html` rejected after 20s (`setTimeout(..., 20000)`), aborting in-flight writes that were completing `SpreadsheetApp.flush()`.
+     - *Root Cause 3 (Obsolete STATUS_OPTIONS in ApiClient.html)*: `STATUS_OPTIONS` in `ApiClient.html` had only 9 legacy options and was missing `"หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"`, `"หมดความจำเป็นต้องใช้งาน"`, `"หมดความจำเป็นต้องใช้งานเพราะชำรุด"`.
+     - *Root Cause 4 (Hyphen/Underscore Inconsistencies in Inventory Numbers)*: Strict equality comparisons failed if QR codes or spreadsheet cells differed by formatting hyphens.
+     - *Resolution 1 (`DatabaseService.js`)*: Implemented lazy lookup: only invoke `lookupAsset()` if `targetSheetName` is missing or `MASTER_SHEET_NAME`.
+     - *Resolution 2 (`ApiClient.html`)*: Increased JSONP timeout from 20s to 45s (`45000` ms).
+     - *Resolution 3 (`ApiClient.html` & `index.html`)*: Aligned all 10 status options with `Config.js`.
+     - *Resolution 4 (`DatabaseService.js` & `ApiClient.html`)*: Added normalized asset code matching (`norm = code.toUpperCase().replace(/[\s\-_]/g, '')`).
+* **Automated Verification**:
+  - Added Suite 45 to `Tools/test_core.js`.
+  - 100% test pass rate across all 45 test suites.
+
 ## 2026-09-16 — Release v1.1.8i: Flexible Role RBAC & Bi-Sync Resilience
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8i`.

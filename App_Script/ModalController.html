@@ -230,6 +230,8 @@ window.ModalController = (function() {
     }
 
     if (window.AuditController) {
+      if (AuditController.resetSubmissionState) AuditController.resetSubmissionState();
+      if (AuditController.setThumbButtonsLoading) AuditController.setThumbButtonsLoading(false);
       if (AuditController.selectSticker) AuditController.selectSticker(asset.sticker || "ปกติ");
       if (AuditController.closeSublayers) AuditController.closeSublayers("modal");
     }

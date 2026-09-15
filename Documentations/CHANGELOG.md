@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8j] - 2026-09-16
+
+### Added & Improved
+- **Button State Recovery & Submission Deadlock Prevention (`AuditController.html`, `ModalController.html`)**:
+  - **Root Cause Identified**: 
+    1. In `AuditController.html`, `setThumbButtonsLoading(true, newStatus)` mutated the button DOM to `Saving...` and set `isSubmitting = true`. If the network call hung or failed, `isSubmitting` stayed `true` and the modal was permanently disabled.
+    2. Furthermore, when `ModalController.openAssetDetailsModal(asset)` or `displayScannedAsset(asset)` opened an asset, it never called `setThumbButtonsLoading(false)` or `resetSubmissionState()`, inheriting any previous `Saving...` state and locked buttons.
+    3. If `setThumbButtonsLoading(true)` was invoked while a button already displayed `Saving...`, `data-prev-html` captured `Saving...`, permanently destroying the button's original label.
+  - **Canonical HTML Caching (`data-canonical-html`)**: Every `.thumb-btn` stores its pristine initial HTML in `data-canonical-html` on first pass before any mutation, guaranteeing 100% faithful label/icon restoration.
+  - **Auto-Reset Submission State (`resetSubmissionState()`)**: Unconditionally called whenever an asset details modal opens, an asset is scanned, sublayers close, or a network mutation completes/fails.
+  - **Safety Watchdog Timer**: Added a 12-second safety timeout in `submitStatus()` that automatically unlocks buttons and clears `isSubmitting` if a network bridge or spreadsheet lock is stalled.
+- **Bi-Sync Latency & Reliability Optimization (`DatabaseService.js`, `ApiClient.html`)**:
+  - **Root Cause of Unsynced Records**:
+    1. In `DatabaseService.js`, `updateAssetStatus()` unconditionally invoked `lookupAsset(rawAssetId)` even when the asset's room sheet (`payload.sheetName = "Bio Prep"`) was already known. This forced `lookupAsset()` to scan across all 15+ room sheets when cache missed, taking 15–25s in GAS and triggering the client's 20s JSONP timeout.
+    2. `invokeJsonp()` had an aggressive 20s timeout (`setTimeout(..., 20000)`), causing network aborts while Google Apps Script was executing `SpreadsheetApp.flush()`.
+    3. `STATUS_OPTIONS` in `ApiClient.html` was missing `"หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"`, causing client validation failures.
+  - **Lazy Lookup Execution**: `DatabaseService.js` now uses `targetSheetName` directly and only performs global lookup when `targetSheetName` is missing or `MASTER_SHEET_NAME`.
+  - **Extended JSONP Timeout**: Increased client JSONP request timeout from 20s to 45s (`45000` ms).
+  - **Normalized Asset Code Comparison**: Matching in `Master_Asset` and room sheets now tests normalized strings (`code.toUpperCase().replace(/[\s\-_]/g, '')`), seamlessly supporting variations with dashes, underscores, and spaces.
+  - **Complete 10-Item `STATUS_OPTIONS` Alignment**: Synchronized all 10 status options across `Config.js`, `ApiClient.html`, and `index.html`.
+- **Automated Verification (`Tools/test_core.js`)**:
+  - Added Test Suite 45 for `v1.1.8j` validating button state recovery, canonical HTML caching, 10-status alignment, 45s bridge timeout, and lazy bi-sync matching (45/45 suites passing).
+
 ## [1.1.8i] - 2026-09-16
 
 ### Added & Improved

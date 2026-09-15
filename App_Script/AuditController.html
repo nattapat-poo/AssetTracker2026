@@ -371,6 +371,7 @@ window.AuditController = (function() {
   }
 
   function closeSublayers(scope) {
+    resetSubmissionState();
     if (!scope || scope === "card") {
       var cardMain = document.getElementById("card-status-main-panel");
       var cardMove = document.getElementById("card-sublayer-move");
@@ -402,6 +403,7 @@ window.AuditController = (function() {
   }
 
   function displayScannedAsset(asset) {
+    resetSubmissionState();
     activeAsset = asset;
     AppState.set("selectedAsset", asset);
 
@@ -529,10 +531,20 @@ window.AuditController = (function() {
       ScannerController.resetLastScannedCode();
     }
 
+    // Safety watchdog: reset UI locks if server call hangs or takes >12s
+    var watchdogTimer = setTimeout(function() {
+      if (isSubmitting) {
+        console.warn("[AuditController] Network request watchdog: restoring button states after 12s");
+        resetSubmissionState();
+        ModalController.showToast("⚠️ การส่งข้อมูลไปยังเซิร์ฟเวอร์ใช้เวลานานกว่าปกติ ได้ปลดล็อกปุ่มแล้ว", "warning", 4000);
+      }
+    }, 12000);
+
     ApiClient.updateAssetStatus(payload)
       .then(function(res) {
-        isSubmitting = false;
-        setThumbButtonsLoading(false);
+        clearTimeout(watchdogTimer);
+        resetSubmissionState();
+        activeAsset = null;
 
         if (res && res.success === false) {
           ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
@@ -578,12 +590,10 @@ window.AuditController = (function() {
           // Re-fetch current room summary
           loadRoomData(AppState.get("currentRoom"));
         }
-
-        activeAsset = null;
       })
       .catch(function(err) {
-        isSubmitting = false;
-        setThumbButtonsLoading(false);
+        clearTimeout(watchdogTimer);
+        resetSubmissionState();
         activeAsset = null;
         ModalController.showToast("Failed to save: " + err.toString(), "error", 4000);
       });
@@ -668,24 +678,40 @@ window.AuditController = (function() {
     selectSticker(next);
   }
 
+  function resetSubmissionState() {
+    isSubmitting = false;
+    setThumbButtonsLoading(false);
+  }
+
   function setThumbButtonsLoading(loading, activeStatus) {
     var buttons = document.querySelectorAll(".thumb-btn");
     buttons.forEach(function(btn) {
       var status = btn.dataset.status || btn.dataset.modalStatus;
+      // Capture canonical HTML on first inspection before any Loading mutations
+      if (!btn.getAttribute("data-canonical-html")) {
+        if (btn.innerHTML && btn.innerHTML.indexOf("Saving...") === -1) {
+          btn.setAttribute("data-canonical-html", btn.innerHTML);
+        }
+      }
+      var canonical = btn.getAttribute("data-canonical-html");
+
       if (loading) {
         btn.disabled = true;
         btn.classList.add("opacity-60");
         if (status === activeStatus) {
-          btn.setAttribute("data-prev-html", btn.innerHTML);
           btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Saving...';
         }
       } else {
         btn.disabled = false;
         btn.classList.remove("opacity-60");
-        var prev = btn.getAttribute("data-prev-html");
-        if (prev) {
-          btn.innerHTML = prev;
-          btn.removeAttribute("data-prev-html");
+        if (canonical) {
+          btn.innerHTML = canonical;
+        } else {
+          var prev = btn.getAttribute("data-prev-html");
+          if (prev && prev.indexOf("Saving...") === -1) {
+            btn.innerHTML = prev;
+            btn.removeAttribute("data-prev-html");
+          }
         }
       }
     });
@@ -1002,6 +1028,8 @@ window.AuditController = (function() {
     submitStatus: submitStatus,
     submitStatusFromModal: submitStatusFromModal,
     submitNewUnlistedAsset: submitNewUnlistedAsset,
+    resetSubmissionState: resetSubmissionState,
+    setThumbButtonsLoading: setThumbButtonsLoading,
     toggleModalSticker: toggleModalSticker,
     renderStatusBadge: renderStatusBadge,
     renderStatusBadgeHtml: renderStatusBadgeHtml,

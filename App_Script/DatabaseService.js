@@ -814,7 +814,7 @@ function updateAssetStatus(payload) {
     var renameText = String(payload.renameText || "").trim();
     var sticker = String(payload.sticker || "ปกติ").trim();
     var currentRoom = String(payload.currentRoom || "").trim();
-    var authUser = authenticateSession();
+    var authUser = authenticateSession(payload ? payload.clientEmail : null);
     
     if (!rawAssetId) {
       throw new Error("Missing asset inventory number.");
@@ -834,14 +834,17 @@ function updateAssetStatus(payload) {
     var targetSheetName = payload.sheetName;
     var targetRowIndex = payload.rowIndex;
     
-    var lookup = lookupAsset(rawAssetId);
+    // Lazy lookup: only search across room sheets if targetSheetName is missing or Master Table
     if (!targetSheetName || targetSheetName === MASTER_SHEET_NAME) {
       if (payload.registeredLocation && payload.registeredLocation !== MASTER_SHEET_NAME) {
         targetSheetName = payload.registeredLocation;
       } else if (payload.room && payload.room !== MASTER_SHEET_NAME) {
         targetSheetName = payload.room;
-      } else if (lookup.found) {
-        targetSheetName = lookup.asset.sheetName || lookup.asset.registeredLocation;
+      } else {
+        var lookup = lookupAsset(rawAssetId);
+        if (lookup && lookup.found) {
+          targetSheetName = lookup.asset.sheetName || lookup.asset.registeredLocation;
+        }
       }
     }
     
@@ -878,9 +881,11 @@ function updateAssetStatus(payload) {
       var mLastUpdIdx = mHeaders.indexOf("LastUpdated");
       
       if (mAssetIdIdx !== -1) {
+        var normTargetId = rawAssetId.toUpperCase().replace(/[\s\-_]/g, '');
         for (var m = 1; m < mData.length; m++) {
           var rowMId = cleanAssetCode(String(mData[m][mAssetIdIdx] || ""));
-          if (rowMId.toUpperCase() === rawAssetId.toUpperCase()) {
+          var normRowId = rowMId.toUpperCase().replace(/[\s\-_]/g, '');
+          if (rowMId.toUpperCase() === rawAssetId.toUpperCase() || (normTargetId.length > 5 && normRowId === normTargetId)) {
             var mRow = m + 1;
             if (mScanned69Idx !== -1) masterSheet.getRange(mRow, mScanned69Idx + 1).setValue(newStatus);
             if (mResult69Idx !== -1) masterSheet.getRange(mRow, mResult69Idx + 1).setValue(finalRemarks);
@@ -911,9 +916,11 @@ function updateAssetStatus(payload) {
       var rLastRow = roomSheet.getLastRow();
       
       var foundRow = -1;
+      var normTargetId2 = rawAssetId.toUpperCase().replace(/[\s\-_]/g, '');
       if (targetRowIndex && targetRowIndex >= schema.dataStartRow && targetRowIndex <= rLastRow) {
         var chkId = cleanAssetCode(String(roomSheet.getRange(targetRowIndex, assetIdCol).getValue() || ""));
-        if (chkId.toUpperCase() === rawAssetId.toUpperCase()) {
+        var normChkId = chkId.toUpperCase().replace(/[\s\-_]/g, '');
+        if (chkId.toUpperCase() === rawAssetId.toUpperCase() || (normTargetId2.length > 5 && normChkId === normTargetId2)) {
           foundRow = targetRowIndex;
         }
       }
@@ -922,7 +929,8 @@ function updateAssetStatus(payload) {
         var valRange = roomSheet.getRange(schema.dataStartRow, assetIdCol, rLastRow - schema.dataStartRow + 1, 1).getValues();
         for (var vr = 0; vr < valRange.length; vr++) {
           var curCellId = cleanAssetCode(String(valRange[vr][0] || ""));
-          if (curCellId.toUpperCase() === rawAssetId.toUpperCase()) {
+          var normCurId = curCellId.toUpperCase().replace(/[\s\-_]/g, '');
+          if (curCellId.toUpperCase() === rawAssetId.toUpperCase() || (normTargetId2.length > 5 && normCurId === normTargetId2)) {
             foundRow = schema.dataStartRow + vr;
             break;
           }
