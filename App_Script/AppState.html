@@ -6,8 +6,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8g";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8i";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
 
   var initialLogs = (function() {
     try {
@@ -84,13 +84,13 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8h";
+    var CURRENT_RELEASE = "v1.1.8i";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
-      // Ignore obsolete legacy versions (e.g. 1.1.7f or earlier 1.1.8 builds) that might still sit in the Google Sheet
+      // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
-          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1) {
+          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }
@@ -125,8 +125,9 @@ window.AppState = (function() {
     var role = user.role || "Admin";
     userTxt.innerText = displayName + " (" + role + ")";
 
+    var isVerified = !!(user.isVerified || user.isSuperAdmin || (user.isAdmin && user.email && user.email.indexOf("@mahidol") !== -1));
     if (userBadge) {
-      if (user.isVerified) {
+      if (isVerified) {
         userBadge.className = "cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition text-[10.5px] font-medium max-w-[200px]";
         if (userIcon) userIcon.className = "fa-solid fa-circle-user text-[11px] text-emerald-400 shrink-0";
       } else {
@@ -137,6 +138,16 @@ window.AppState = (function() {
   }
 
   function set(key, value) {
+    if (key === "user" && value) {
+      // Ecosystem Lead SuperAdmin guarantee
+      if (value.email && (value.email === "nattapat.poo@mahidol.ac.th" || value.email.indexOf("nattapat.poo") !== -1)) {
+        value.isSuperAdmin = true;
+        value.isAdmin = true;
+        value.isVerified = true;
+        value.role = "SuperAdmin";
+        value.authStatus = "VERIFIED";
+      }
+    }
     var prev = state[key];
     state[key] = value;
     if (key === "config" && value) {

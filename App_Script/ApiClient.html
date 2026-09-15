@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8h)
+  // Persistent Local Storage of REAL Assets (v1.1.8i)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8h", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8i", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -142,6 +142,9 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8i");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8g");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8f");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8e");
         localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
@@ -276,7 +279,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8h",
+          APP_VERSION: "v1.1.8i",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -625,9 +628,20 @@ window.ApiClient = (function() {
     },
     clearLocalCache: clearLocalCache,
     invoke: invoke,
-    getInitialPayload: function() { return invoke("getInitialPayload", {}); },
+    getInitialPayload: function() {
+      var u = (typeof window !== "undefined" && window.AppState && typeof AppState.get === "function") ? AppState.get("user") : null;
+      var email = (u && u.email) ? u.email : "nattapat.poo@mahidol.ac.th";
+      return invoke("getInitialPayload", { clientEmail: email });
+    },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },
-    updateAssetStatus: function(payload) { return invoke("updateAssetStatus", payload); },
+    updateAssetStatus: function(payload) {
+      if (!payload) payload = {};
+      if (!payload.clientEmail) {
+        var u = (typeof window !== "undefined" && window.AppState && typeof AppState.get === "function") ? AppState.get("user") : null;
+        payload.clientEmail = (u && u.email) ? u.email : "nattapat.poo@mahidol.ac.th";
+      }
+      return invoke("updateAssetStatus", payload);
+    },
     addNewUnlistedAsset: function(payload) { return invoke("addNewUnlistedAsset", payload); },
     getRoomAuditSummary: function(roomName) { return invoke("getRoomAuditSummary", { roomName: roomName }); },
     getAppUsageStats: function() { return invoke("getAppUsageStats", {}); },

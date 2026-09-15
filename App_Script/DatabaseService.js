@@ -835,11 +835,13 @@ function updateAssetStatus(payload) {
     var targetRowIndex = payload.rowIndex;
     
     var lookup = lookupAsset(rawAssetId);
-    if (!targetSheetName) {
-      if (lookup.found) {
+    if (!targetSheetName || targetSheetName === MASTER_SHEET_NAME) {
+      if (payload.registeredLocation && payload.registeredLocation !== MASTER_SHEET_NAME) {
+        targetSheetName = payload.registeredLocation;
+      } else if (payload.room && payload.room !== MASTER_SHEET_NAME) {
+        targetSheetName = payload.room;
+      } else if (lookup.found) {
         targetSheetName = lookup.asset.sheetName || lookup.asset.registeredLocation;
-      } else {
-        throw new Error("Cannot update: Asset '" + rawAssetId + "' not found.");
       }
     }
     
@@ -877,7 +879,8 @@ function updateAssetStatus(payload) {
       
       if (mAssetIdIdx !== -1) {
         for (var m = 1; m < mData.length; m++) {
-          if (String(mData[m][mAssetIdIdx] || "").trim().toUpperCase() === rawAssetId.toUpperCase()) {
+          var rowMId = cleanAssetCode(String(mData[m][mAssetIdIdx] || ""));
+          if (rowMId.toUpperCase() === rawAssetId.toUpperCase()) {
             var mRow = m + 1;
             if (mScanned69Idx !== -1) masterSheet.getRange(mRow, mScanned69Idx + 1).setValue(newStatus);
             if (mResult69Idx !== -1) masterSheet.getRange(mRow, mResult69Idx + 1).setValue(finalRemarks);
@@ -893,14 +896,14 @@ function updateAssetStatus(payload) {
     }
 
     // 2. BI-SYNC: UPDATE TARGET ROOM WORKSHEET
-    var roomSheet = targetSheetName ? getRoomSheetByName(ss, targetSheetName) : null;
+    var roomSheet = (targetSheetName && targetSheetName !== MASTER_SHEET_NAME) ? getRoomSheetByName(ss, targetSheetName) : null;
     var roomUpdated = false;
     if (roomSheet) {
       var schema = detectSheetHeaderAndColumns(roomSheet);
       
-      // Auto repair or insert Row 5 headers if missing
+      // Auto repair or insert Row 5 headers if missing on this specific sheet
       if (schema.scanned69Col === -1 || schema.result69Col === -1 || schema.stickerCol === -1) {
-        setupRow5AuditHeaders(ss);
+        setupRow5AuditHeaders(ss, [roomSheet.getName()]);
         schema = detectSheetHeaderAndColumns(roomSheet);
       }
       
@@ -909,7 +912,7 @@ function updateAssetStatus(payload) {
       
       var foundRow = -1;
       if (targetRowIndex && targetRowIndex >= schema.dataStartRow && targetRowIndex <= rLastRow) {
-        var chkId = String(roomSheet.getRange(targetRowIndex, assetIdCol).getValue() || "").trim();
+        var chkId = cleanAssetCode(String(roomSheet.getRange(targetRowIndex, assetIdCol).getValue() || ""));
         if (chkId.toUpperCase() === rawAssetId.toUpperCase()) {
           foundRow = targetRowIndex;
         }
@@ -918,7 +921,8 @@ function updateAssetStatus(payload) {
       if (foundRow === -1 && rLastRow >= schema.dataStartRow) {
         var valRange = roomSheet.getRange(schema.dataStartRow, assetIdCol, rLastRow - schema.dataStartRow + 1, 1).getValues();
         for (var vr = 0; vr < valRange.length; vr++) {
-          if (String(valRange[vr][0] || "").trim().toUpperCase() === rawAssetId.toUpperCase()) {
+          var curCellId = cleanAssetCode(String(valRange[vr][0] || ""));
+          if (curCellId.toUpperCase() === rawAssetId.toUpperCase()) {
             foundRow = schema.dataStartRow + vr;
             break;
           }
@@ -943,6 +947,10 @@ function updateAssetStatus(payload) {
         }
         roomUpdated = true;
       }
+    }
+    
+    if (!masterUpdated && !roomUpdated) {
+      throw new Error("Cannot save: Asset '" + rawAssetId + "' was not found in Master Table or Room Sheet (" + (targetSheetName || "Unknown") + ").");
     }
     
     // Immediate flush to guarantee real-time persistence across sheets
@@ -1369,9 +1377,9 @@ function getRoomAuditSummary(roomName) {
 /**
  * Returns initial payload for web app startup
  */
-function getInitialPayload() {
+function getInitialPayload(clientEmail) {
   var ss = getSpreadsheet();
-  var authUser = authenticateSession();
+  var authUser = authenticateSession(clientEmail);
   var config = getLocalConfig();
   if (typeof APP_CONFIG !== "undefined" && APP_CONFIG.VERSION) {
     config.APP_VERSION = APP_CONFIG.VERSION;

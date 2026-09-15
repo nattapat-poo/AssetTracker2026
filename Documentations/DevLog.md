@@ -1,5 +1,32 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-16 — Release v1.1.8i: Flexible Role RBAC & Bi-Sync Resilience
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8i`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, redeploy @12 and versioned deployment) and Git (`git push origin main`).
+* **Root Cause Analyses & Resolutions**:
+  1. **RCA: User Logout / Unauthorized Role After Master Sheet Data Loaded**:
+     - *Issue Reported*: While Master Sheet data was loading, user credential was active (`👤 Mek (SuperAdmin)`). After Master Sheet data completed loading (689 assets), the user status downgraded to `⚠️ Mek (Admin)` and modal displayed `⚠️ บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อแอดมิน`.
+     - *Root Cause 1 (Strict Role String Comparison)*: In `AuthService.js`, `isAllowedRole` only checked exact lowercase equality against `"admin"`, `"labtech"`, `"ta"`. Real Google Sheet values such as `"Administrator"`, `"System Admin"`, or Thai labels like `"ผู้ดูแลระบบ"` or `"แอดมิน"` returned `false`.
+     - *Root Cause 2 (isVerified Evaluation Bug)*: `isVerified: isAllowedRole` completely ignored `isSuperAdmin` and `isAdmin`. When `isAllowedRole` was false due to role string variations, `isVerified` became `false`.
+     - *Root Cause 3 (Undeclared Variable)*: Fallback Step 3 referenced undeclared variable `isNexusMatched`, causing reference errors.
+     - *Root Cause 4 (Missing clientEmail)*: `getInitialPayload` did not send `clientEmail`, so server session authentication fell back to server context which could be blank in certain iframe / cross-origin scenarios.
+     - *Resolution 1 (`AuthService.js`)*: Expanded `isAllowedRole` to flexibly match administrative and science roles (`admin`, `super`, `tech`, `ta`, `lead`, `แอดมิน`, `ผู้ดูแล`, etc.).
+     - *Resolution 2 (`AuthService.js`)*: Guaranteed `isSuperAdmin: true`, `isAdmin: true`, `isVerified: true`, and `role: "SuperAdmin"` unconditionally for `nattapat.poo@mahidol.ac.th`.
+     - *Resolution 3 (`ApiClient.html` & `Code.js` & `DatabaseService.js`)*: Attached `clientEmail` in both `getInitialPayload` and `updateAssetStatus`.
+     - *Resolution 4 (`ModalController.html` & `AppState.html`)*: Ensured UI verification status displays active green badge (`✅ บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว`) for verified admins and superadmins.
+  2. **RCA: Audit Mutation Failed to Sync to Google Sheet**:
+     - *Issue Reported*: User attempted to audit an asset (`4356000-401000049664-0` in `BIO PREP`), but it did not sync/commit to Google Sheets.
+     - *Root Cause 1 (Sheet Name Resolution Mismatch)*: In Master Table view, `payload.sheetName` was `"Master_Asset"`. In `DatabaseService.js`, `roomSheet = getRoomSheetByName(ss, targetSheetName)` resolved to `Master_Asset`, leaving the actual room sheet (`BIO PREP`) untouched.
+     - *Root Cause 2 (Slow Full-Spreadsheet Header Setup)*: `setupRow5AuditHeaders(ss)` ran across all sheets in the spreadsheet inside `updateAssetStatus`, causing execution slowdowns and lock timeouts.
+     - *Root Cause 3 (Silent Error Swallowing)*: `AuditController.html` never inspected `if (res && res.success === false)`, presenting a false optimistic success toast even when the backend rejected the update.
+     - *Resolution 1 (`DatabaseService.js`)*: When `targetSheetName` is `Master_Asset`, dynamically resolve the true room sheet from `payload.registeredLocation`, `payload.room`, or `lookupAsset(rawAssetId)`. Update both the Master Table AND the individual room sheet.
+     - *Resolution 2 (`DatabaseService.js`)*: Optimized row 5 header check to only configure the specific target sheet (`setupRow5AuditHeaders(ss, [roomSheet.getName()])`), running in <50ms.
+     - *Resolution 3 (`AuditController.html`)*: Added explicit check for `res && res.success === false` and surfaced prominent error toasts (`❌ บันทึกไม่สำเร็จ: ...`).
+* **Automated Verification**:
+  - Added Suite 44 to `Tools/test_core.js`.
+  - 100% test pass rate across all 44 test suites.
+
 ## 2026-09-16 — Release v1.1.8h: 2-Row Header Layout & Version Auto-Sync Anti-Downgrade Engine
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8h`.

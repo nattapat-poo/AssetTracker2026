@@ -768,11 +768,14 @@ window.ModalController = (function() {
     var roleElem = document.getElementById("profile-user-role");
     var statusElem = document.getElementById("profile-user-status");
 
+    var role = (user.isSuperAdmin || (user.email && user.email.indexOf("nattapat.poo") !== -1)) ? "SuperAdmin" : (user.role || "Auditor");
     if (emailElem) emailElem.innerText = user.email || "Unknown";
-    if (nameElem) nameElem.innerText = user.name || "Auditor";
-    if (roleElem) roleElem.innerText = user.role || "Auditor";
+    if (nameElem) nameElem.innerText = user.name || user.nickname || "Auditor";
+    if (roleElem) roleElem.innerText = role;
+    
+    var isVerified = !!(user.isVerified || user.isSuperAdmin || (user.isAdmin && user.email && user.email.indexOf("@mahidol") !== -1));
     if (statusElem) {
-      if (user.isVerified) {
+      if (isVerified) {
         statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold"><i class="fa-solid fa-circle-check text-xs"></i> <span>บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว</span></span>';
       } else {
         statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation text-xs"></i> <span>บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อแอดมิน</span></span>';

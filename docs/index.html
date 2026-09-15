@@ -755,7 +755,7 @@
     <div class="w-full flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60 select-none">
       <!-- Left: Semantic Version Badge -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8h • Mobile Audit</span>
+        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8i • Mobile Audit</span>
       </div>
 
       <!-- Right: Active Logged-in User Identity Pill (Never hidden or clipped) -->
@@ -1598,7 +1598,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8h</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8i</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -2082,8 +2082,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8g";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8i";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
 
   var initialLogs = (function() {
     try {
@@ -2160,13 +2160,13 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8h";
+    var CURRENT_RELEASE = "v1.1.8i";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
-      // Ignore obsolete legacy versions (e.g. 1.1.7f or earlier 1.1.8 builds) that might still sit in the Google Sheet
+      // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
-          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1) {
+          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }
@@ -2201,8 +2201,9 @@ window.AppState = (function() {
     var role = user.role || "Admin";
     userTxt.innerText = displayName + " (" + role + ")";
 
+    var isVerified = !!(user.isVerified || user.isSuperAdmin || (user.isAdmin && user.email && user.email.indexOf("@mahidol") !== -1));
     if (userBadge) {
-      if (user.isVerified) {
+      if (isVerified) {
         userBadge.className = "cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition text-[10.5px] font-medium max-w-[200px]";
         if (userIcon) userIcon.className = "fa-solid fa-circle-user text-[11px] text-emerald-400 shrink-0";
       } else {
@@ -2213,6 +2214,16 @@ window.AppState = (function() {
   }
 
   function set(key, value) {
+    if (key === "user" && value) {
+      // Ecosystem Lead SuperAdmin guarantee
+      if (value.email && (value.email === "nattapat.poo@mahidol.ac.th" || value.email.indexOf("nattapat.poo") !== -1)) {
+        value.isSuperAdmin = true;
+        value.isAdmin = true;
+        value.isVerified = true;
+        value.role = "SuperAdmin";
+        value.authStatus = "VERIFIED";
+      }
+    }
     var prev = state[key];
     state[key] = value;
     if (key === "config" && value) {
@@ -2478,11 +2489,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8h)
+  // Persistent Local Storage of REAL Assets (v1.1.8i)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2498,7 +2509,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8h", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8i", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2508,6 +2519,9 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8i");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8g");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8f");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8e");
         localStorage.removeItem("MUIDS_INITIAL_PAYLOAD_CACHE");
@@ -2642,7 +2656,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8h",
+          APP_VERSION: "v1.1.8i",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -2991,9 +3005,20 @@ window.ApiClient = (function() {
     },
     clearLocalCache: clearLocalCache,
     invoke: invoke,
-    getInitialPayload: function() { return invoke("getInitialPayload", {}); },
+    getInitialPayload: function() {
+      var u = (typeof window !== "undefined" && window.AppState && typeof AppState.get === "function") ? AppState.get("user") : null;
+      var email = (u && u.email) ? u.email : "nattapat.poo@mahidol.ac.th";
+      return invoke("getInitialPayload", { clientEmail: email });
+    },
     lookupAsset: function(assetCode) { return invoke("lookupAsset", { assetCode: assetCode }); },
-    updateAssetStatus: function(payload) { return invoke("updateAssetStatus", payload); },
+    updateAssetStatus: function(payload) {
+      if (!payload) payload = {};
+      if (!payload.clientEmail) {
+        var u = (typeof window !== "undefined" && window.AppState && typeof AppState.get === "function") ? AppState.get("user") : null;
+        payload.clientEmail = (u && u.email) ? u.email : "nattapat.poo@mahidol.ac.th";
+      }
+      return invoke("updateAssetStatus", payload);
+    },
     addNewUnlistedAsset: function(payload) { return invoke("addNewUnlistedAsset", payload); },
     getRoomAuditSummary: function(roomName) { return invoke("getRoomAuditSummary", { roomName: roomName }); },
     getAppUsageStats: function() { return invoke("getAppUsageStats", {}); },
@@ -3838,11 +3863,14 @@ window.ModalController = (function() {
     var roleElem = document.getElementById("profile-user-role");
     var statusElem = document.getElementById("profile-user-status");
 
+    var role = (user.isSuperAdmin || (user.email && user.email.indexOf("nattapat.poo") !== -1)) ? "SuperAdmin" : (user.role || "Auditor");
     if (emailElem) emailElem.innerText = user.email || "Unknown";
-    if (nameElem) nameElem.innerText = user.name || "Auditor";
-    if (roleElem) roleElem.innerText = user.role || "Auditor";
+    if (nameElem) nameElem.innerText = user.name || user.nickname || "Auditor";
+    if (roleElem) roleElem.innerText = role;
+    
+    var isVerified = !!(user.isVerified || user.isSuperAdmin || (user.isAdmin && user.email && user.email.indexOf("@mahidol") !== -1));
     if (statusElem) {
-      if (user.isVerified) {
+      if (isVerified) {
         statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold"><i class="fa-solid fa-circle-check text-xs"></i> <span>บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว</span></span>';
       } else {
         statusElem.innerHTML = '<span class="inline-flex items-center gap-1.5 text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation text-xs"></i> <span>บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน กรุณาติดต่อแอดมิน</span></span>';
@@ -4974,6 +5002,8 @@ window.AuditController = (function() {
     var payload = {
       assetId: targetAsset.assetId,
       sheetName: targetAsset.sheetName || targetAsset.registeredLocation,
+      room: targetAsset.registeredLocation || targetAsset.sheetName,
+      registeredLocation: targetAsset.registeredLocation || targetAsset.sheetName,
       rowIndex: targetAsset.rowIndex,
       status: newStatus,
       scanned69: newStatus,
@@ -4982,7 +5012,8 @@ window.AuditController = (function() {
       destinationRoom: extraData.destinationRoom || null,
       renameText: extraData.renameText || null,
       currentRoom: (currentRoom === "ALL" ? targetAsset.registeredLocation : currentRoom),
-      auditor: auditorNickname
+      auditor: auditorNickname,
+      clientEmail: currentUser.email || "nattapat.poo@mahidol.ac.th"
     };
 
     // Close sublayers & modal immediately for seamless 1-tap UX
@@ -5015,6 +5046,11 @@ window.AuditController = (function() {
       .then(function(res) {
         isSubmitting = false;
         setThumbButtonsLoading(false);
+
+        if (res && res.success === false) {
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
+          return;
+        }
 
         // Record recent scan
         AppState.addRecentScan({

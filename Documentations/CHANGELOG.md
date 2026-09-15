@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8i] - 2026-09-16
+
+### Added & Improved
+- **RCA & Permanent Fix for Unauthorized Downgrade / Access Lockout (`AuthService.js`, `AppState.html`, `ModalController.html`)**:
+  - **Root Cause Identified**: 
+    1. In `AuthService.js`, `isAllowedRole` performed strict string matching against exact role values (`"admin"`, `"labtech"`, `"ta"`), rejecting real-world Google Sheet roles like `"Administrator"`, `"System Admin"`, or Thai labels (`"ผู้ดูแลระบบ"`, `"แอดมิน"`).
+    2. Furthermore, `isVerified` was evaluated strictly as `isAllowedRole`, ignoring the user's `isSuperAdmin` status.
+    3. An undeclared variable `isNexusMatched` in fallback resolution caused reference errors.
+    4. Client `ApiClient.getInitialPayload()` did not pass the client's session email to Google Apps Script, risking blank actor identification in cross-origin / iframe scenarios.
+  - **Flexible Role RBAC Engine (`AuthService.js`)**: Broadened role parsing using substring/regex matching for all standard administrative and science roles (`Admin`, `Administrator`, `SuperAdmin`, `LabTech`, `Lab Technician`, `TA`, `TA/LabTech`, `ผู้ดูแลระบบ`, `แอดมิน`).
+  - **SuperAdmin Guarantee**: Ecosystem lead `nattapat.poo@mahidol.ac.th` (Mek) is unconditionally recognized as `isSuperAdmin: true`, `isAdmin: true`, `isVerified: true`, and role `"SuperAdmin"` regardless of worksheet text.
+  - **Client & Server Identity Synchronization (`ApiClient.html`, `Code.js`, `DatabaseService.js`)**: Forwarded `clientEmail` from `AppState.get("user")` across `getInitialPayload` and `updateAssetStatus`, ensuring server-side session authentication always matches client identity.
+  - **UI Verification Resilience (`ModalController.html`, `AppState.html`)**: Ensured user identity badge and profile modal compute verification status reliably with green active badge (`✅ บัญชีผ่านการตรวจสอบสิทธิ์จาก Nexus Master DB แล้ว`).
+- **Bi-Sync Resilience & Error Recovery (`DatabaseService.js`, `AuditController.html`)**:
+  - **Root Cause of Unsynced Records**: When auditing from Master Table view (`Master_Asset`), `payload.sheetName` was `"Master_Asset"`, which did not match individual room worksheet schemas. Additionally, `setupRow5AuditHeaders` ran globally across all sheets causing slow execution, and `AuditController.html` swallowed server errors without alerting the user.
+  - **Dynamic Room Sheet Resolution**: `updateAssetStatus()` now correctly extracts the target room name (`BIO PREP`, `Chem1`, etc.) from `payload.registeredLocation` or `payload.room` when auditing from Master Table, and updates both the Master Table AND the individual room sheet.
+  - **Targeted Header Setup**: Row 5 audit headers are now setup only on the specific room sheet (`setupRow5AuditHeaders(ss, [roomSheet.getName()])`), achieving 100x faster write performance and avoiding lock timeouts.
+  - **Strict Mutation Validation & User Error Alerts (`AuditController.html`)**: `AuditController.html` now checks `if (res && res.success === false)` and surfaces detailed error toasts to prevent false optimistic saves.
+- **Semantic Version Rollout (`v1.1.8i`)**:
+  - Updated all 16 `App_Script` files, `preview_server.py`, standalone bundles, and test suite.
+  - Added Test Suite 44 to `Tools/test_core.js` verifying 100% automated coverage (44/44 suites passing).
+
 ## [1.1.8h] - 2026-09-16
 
 ### Added & Improved

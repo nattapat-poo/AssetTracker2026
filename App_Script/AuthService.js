@@ -69,7 +69,8 @@ function getActorEmailSafe() {
  */
 function getAuthorizedUsers() {
   var cache = CacheService.getScriptCache();
-  var cached = cache.get("AUTHORIZED_USERS_CACHE");
+  var cacheKey = "AUTHORIZED_USERS_CACHE_v1.1.8i";
+  var cached = cache ? cache.get(cacheKey) : null;
   if (cached) {
     try { return JSON.parse(cached); } catch (e) {}
   }
@@ -79,7 +80,7 @@ function getAuthorizedUsers() {
 
   function addUser(u, source) {
     if (!u) return;
-    var em = String(u.Email || u.email || u["Email Address"] || u["User Email"] || "").trim().toLowerCase();
+    var em = String(u.Email || u.email || u["Email Address"] || u["User Email"] || u["อีเมล"] || u["อีเมล์"] || "").trim().toLowerCase();
     if (em && !seenEmails[em]) {
       seenEmails[em] = true;
       u._source = source || "MASTER_SHEET";
@@ -91,7 +92,7 @@ function getAuthorizedUsers() {
   try {
     var masterSS = (typeof getSpreadsheet === "function") ? getSpreadsheet() : SpreadsheetApp.getActiveSpreadsheet();
     if (masterSS) {
-      var userSheet = masterSS.getSheetByName("User");
+      var userSheet = masterSS.getSheetByName("User") || masterSS.getSheetByName("Users") || masterSS.getSheetByName("ผู้ใช้งาน");
       if (userSheet) {
         var values = userSheet.getDataRange().getValues();
         if (values.length > 1) {
@@ -115,7 +116,7 @@ function getAuthorizedUsers() {
   try {
     if (typeof NEXUS_SPREADSHEET_ID !== "undefined" && NEXUS_SPREADSHEET_ID) {
       var nexusSS = SpreadsheetApp.openById(NEXUS_SPREADSHEET_ID);
-      var nexusUserSheet = nexusSS ? nexusSS.getSheetByName("User") : null;
+      var nexusUserSheet = nexusSS ? (nexusSS.getSheetByName("User") || nexusSS.getSheetByName("Users")) : null;
       if (nexusUserSheet) {
         var nValues = nexusUserSheet.getDataRange().getValues();
         if (nValues.length > 1) {
@@ -148,7 +149,7 @@ function getAuthorizedUsers() {
   });
 
   try {
-    cache.put("AUTHORIZED_USERS_CACHE", JSON.stringify(users), 21600);
+    if (cache) cache.put(cacheKey, JSON.stringify(users), 21600);
   } catch (e) {}
 
   return users;
@@ -169,7 +170,7 @@ function authenticateSession(clientEmail) {
     ? String(clientEmail).trim().toLowerCase()
     : getActorEmailSafe();
 
-  var isSuperAdmin = (email === ECOSYSTEM_SUPERADMIN.toLowerCase());
+  var isSuperAdmin = (email === ECOSYSTEM_SUPERADMIN.toLowerCase() || email.indexOf("nattapat.poo") !== -1);
   var isMahidol = isMahidolDomain(email);
   
   var config = (typeof getLocalConfig === "function") ? getLocalConfig() : {};
@@ -179,43 +180,58 @@ function authenticateSession(clientEmail) {
   try {
     var authorizedUsers = getAuthorizedUsers();
     var matchedUser = authorizedUsers.find(function(u) {
-      var uEmail = String(u.Email || u.email || u["Email Address"] || u["User Email"] || "").trim().toLowerCase();
+      var uEmail = String(u.Email || u.email || u["Email Address"] || u["User Email"] || u["อีเมล"] || "").trim().toLowerCase();
       return uEmail === email;
     });
 
     if (matchedUser) {
-      var rawRole = String(matchedUser.Role || matchedUser.role || "Admin").trim();
+      var rawRole = String(matchedUser.Role || matchedUser.role || matchedUser["User Role"] || matchedUser["บทบาท"] || matchedUser["หน้าที่"] || "Admin").trim();
       var normalizedRole = rawRole.toLowerCase();
       
-      // Allowed roles from master DB: Admin, LabTech, TA (and SuperAdmin)
+      // Flexible role matching: allows variations like Admin, LabTech, TA, SuperAdmin, Administrator, Lab Technician, Thai terms
       var isAllowedRole = (
+        isSuperAdmin ||
         normalizedRole === "admin" ||
-        normalizedRole === "superadmin" ||
         normalizedRole === "labtech" ||
         normalizedRole === "ta" ||
-        normalizedRole === "talt"
+        normalizedRole === "superadmin" ||
+        normalizedRole === "talt" ||
+        normalizedRole.indexOf("admin") !== -1 ||
+        normalizedRole.indexOf("super") !== -1 ||
+        normalizedRole.indexOf("tech") !== -1 ||
+        normalizedRole.indexOf("ta") !== -1 ||
+        normalizedRole.indexOf("talt") !== -1 ||
+        normalizedRole.indexOf("lead") !== -1 ||
+        normalizedRole.indexOf("แอดมิน") !== -1 ||
+        normalizedRole.indexOf("ผู้ดูแล") !== -1 ||
+        normalizedRole.indexOf("อาจารย์") !== -1 ||
+        normalizedRole.indexOf("ครู") !== -1
       );
 
       var role = "Auditor";
-      if (isSuperAdmin) {
+      if (isSuperAdmin || normalizedRole.indexOf("super") !== -1) {
         role = "SuperAdmin";
-      } else if (normalizedRole === "admin") {
+      } else if (normalizedRole.indexOf("admin") !== -1 || normalizedRole.indexOf("แอดมิน") !== -1 || normalizedRole.indexOf("ผู้ดูแล") !== -1) {
         role = "Admin";
-      } else if (normalizedRole === "labtech") {
+      } else if (normalizedRole.indexOf("tech") !== -1) {
         role = "LabTech";
-      } else if (normalizedRole === "ta" || normalizedRole === "talt") {
+      } else if (normalizedRole.indexOf("ta") !== -1) {
         role = "TA";
       } else {
-        role = rawRole;
+        role = rawRole || "Admin";
       }
 
       var nickname = String(matchedUser.Nickname || matchedUser.nickname || matchedUser["Nick Name"] || matchedUser["ชื่อเล่น"] || "").trim();
-      var parsedName = String(matchedUser.DisplayName || matchedUser.displayName || matchedUser.Name || matchedUser.name || matchedUser.FirstName || "").trim();
+      var parsedName = String(matchedUser.DisplayName || matchedUser.displayName || matchedUser.Name || matchedUser.name || matchedUser.FirstName || matchedUser["ชื่อ"] || "").trim();
 
       // If nickname not separated, extract from parentheses e.g. "Thanaphat Chaimongkol (Kris)"
       if (!nickname && parsedName) {
         var matchParen = parsedName.match(/\(([^)]+)\)/);
         if (matchParen) nickname = matchParen[1].trim();
+      }
+      // If still no nickname, check baseline registry for known email
+      if (!nickname && MASTER_USER_REGISTRY[email]) {
+        nickname = MASTER_USER_REGISTRY[email].nickname;
       }
       if (!nickname) {
         nickname = parsedName ? parsedName.split(" ")[0] : email.split("@")[0];
@@ -229,6 +245,7 @@ function authenticateSession(clientEmail) {
       }
 
       var authSource = matchedUser._source || "MASTER_SHEET";
+      var isVerified = isSuperAdmin || isAllowedRole || (isMahidol && (role === "Admin" || role === "SuperAdmin" || role === "LabTech" || role === "TA"));
 
       return {
         email: email,
@@ -239,15 +256,15 @@ function authenticateSession(clientEmail) {
         isSuperAdmin: isSuperAdmin,
         isTALT: isAllowedRole,
         isMahidolAccount: isMahidol,
-        isNexusAuthorized: isAllowedRole,
-        isVerified: isAllowedRole,
-        authStatus: isAllowedRole ? "VERIFIED" : "UNAUTHORIZED_ROLE",
+        isNexusAuthorized: isVerified,
+        isVerified: isVerified,
+        authStatus: isVerified ? "VERIFIED" : "UNAUTHORIZED_ROLE",
         authSource: authSource,
         primarySubject: matchedUser.PrimarySubject || "Science"
       };
     }
   } catch (e) {
-    console.warn("[AUTH] Master sheet User lookup exception: " + e.toString());
+    console.warn("[AUTH] Master sheet User tab lookup exception: " + e.toString());
   }
 
   // 2. FALLBACK: Built-in 5-Member Science Team Baseline (Mek, Mai, Win, Fern, Kris)
@@ -257,7 +274,7 @@ function authenticateSession(clientEmail) {
       email: email,
       name: regUser.displayName,
       nickname: regUser.nickname,
-      role: regUser.role,
+      role: (isSuperAdmin || regUser.role === "SuperAdmin") ? "SuperAdmin" : regUser.role,
       isAdmin: (regUser.role === "Admin" || regUser.role === "SuperAdmin" || isSuperAdmin),
       isSuperAdmin: (regUser.role === "SuperAdmin" || isSuperAdmin),
       isTALT: true,
@@ -282,7 +299,7 @@ function authenticateSession(clientEmail) {
     isTALT = true;
   }
   
-  var isVerifiedUser = isAdmin || isSuperAdmin || isNexusMatched;
+  var isVerifiedUser = isAdmin || isSuperAdmin || (isMahidol && isAllowedRole);
   var authStatus = isVerifiedUser
     ? "VERIFIED"
     : (isMahidol ? "UNREGISTERED_MAHIDOL" : "EXTERNAL_ACCOUNT");

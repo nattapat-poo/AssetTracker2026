@@ -274,7 +274,7 @@ function executeApiAction(action, payload) {
   
   try {
     if (action === "getInitialPayload") {
-      responseData = getInitialPayload();
+      responseData = getInitialPayload(payload ? payload.clientEmail : null);
     } else if (action === "verifyMahidolUser") {
       responseData = verifyMahidolUser(payload.email || payload.clientEmail);
     } else if (action === "lookupAsset") {

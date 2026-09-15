@@ -489,6 +489,8 @@ window.AuditController = (function() {
     var payload = {
       assetId: targetAsset.assetId,
       sheetName: targetAsset.sheetName || targetAsset.registeredLocation,
+      room: targetAsset.registeredLocation || targetAsset.sheetName,
+      registeredLocation: targetAsset.registeredLocation || targetAsset.sheetName,
       rowIndex: targetAsset.rowIndex,
       status: newStatus,
       scanned69: newStatus,
@@ -497,7 +499,8 @@ window.AuditController = (function() {
       destinationRoom: extraData.destinationRoom || null,
       renameText: extraData.renameText || null,
       currentRoom: (currentRoom === "ALL" ? targetAsset.registeredLocation : currentRoom),
-      auditor: auditorNickname
+      auditor: auditorNickname,
+      clientEmail: currentUser.email || "nattapat.poo@mahidol.ac.th"
     };
 
     // Close sublayers & modal immediately for seamless 1-tap UX
@@ -530,6 +533,11 @@ window.AuditController = (function() {
       .then(function(res) {
         isSubmitting = false;
         setThumbButtonsLoading(false);
+
+        if (res && res.success === false) {
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
+          return;
+        }
 
         // Record recent scan
         AppState.addRecentScan({
