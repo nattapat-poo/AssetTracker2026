@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8a)
+  // Persistent Local Storage of REAL Assets (v1.1.8b)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8a");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8b");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8a", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8b", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -265,7 +265,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8a",
+          APP_VERSION: "v1.1.8b",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -459,8 +459,8 @@ window.ApiClient = (function() {
     if (action === "syncConfigSheet") {
       return {
         success: true,
-        message: "Config sheet synchronized (v1.1.8a). Local mock simulation mode.",
-        appVersion: "v1.1.8a",
+        message: "Config sheet synchronized (v1.1.8b). Local mock simulation mode.",
+        appVersion: "v1.1.8b",
         timestamp: new Date().toISOString(),
         keysAdded: 0,
         keysUpdated: 1

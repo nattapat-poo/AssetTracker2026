@@ -1,11 +1,24 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
+  var initialLogs = (function() {
+    try {
+      if (typeof localStorage !== "undefined") {
+        var saved = localStorage.getItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      }
+    } catch (e) {}
+    return [];
+  })();
+
   var state = {
     user: { email: "nattapat.poo@mahidol.ac.th", name: "Mek", role: "SuperAdmin", isAdmin: true, isSuperAdmin: true, isMahidolAccount: true, isNexusAuthorized: true, isVerified: true, authStatus: "VERIFIED" },
     config: {},
@@ -31,6 +44,7 @@ window.AppState = (function() {
     hapticEnabled: true,
     theme: "dark",
     recentScans: [],
+    activityLogs: initialLogs,
     pendingSync: false,
     activeTab: "roster", // "roster" (default landing tab), "scanner", "summary"
     isScanning: false,
@@ -144,6 +158,49 @@ window.AppState = (function() {
     notify("change:recentScans", state.recentScans);
   }
 
+  function logActivity(type, title, details) {
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    var dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    var entry = {
+      id: "log_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+      timestamp: timeStr,
+      date: dateStr,
+      type: type || "audit", // "audit", "move", "rename", "unlisted", "scan", "sync"
+      title: title || "Asset Updated",
+      assetId: (details && details.assetId) || "",
+      itemName: (details && details.itemName) || "",
+      status: (details && details.status) || "",
+      sticker: (details && details.sticker) || "",
+      room: (details && details.room) || "",
+      notes: (details && details.notes) || "",
+      user: (state.user && state.user.email) || ""
+    };
+
+    state.activityLogs.unshift(entry);
+    if (state.activityLogs.length > 80) {
+      state.activityLogs.pop();
+    }
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("MUIDS_ACTIVITY_LOGS_v1.1.8b", JSON.stringify(state.activityLogs));
+      }
+    } catch (e) {}
+
+    notify("change:activityLogs", state.activityLogs);
+    return entry;
+  }
+
+  function clearActivityLogs() {
+    state.activityLogs = [];
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ACTIVITY_LOGS_v1.1.8b");
+      }
+    } catch (e) {}
+    notify("change:activityLogs", []);
+  }
+
   return {
     get: get,
     set: set,
@@ -151,7 +208,10 @@ window.AppState = (function() {
     subscribe: subscribe,
     notify: notify,
     getFilteredItems: getFilteredItems,
-    addRecentScan: addRecentScan
+    addRecentScan: addRecentScan,
+    logActivity: logActivity,
+    clearActivityLogs: clearActivityLogs,
+    getActivityLogs: function() { return state.activityLogs.slice(); }
   };
 })();
 </script>

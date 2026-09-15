@@ -1,7 +1,7 @@
 <script>
 /**
- * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8a)
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
+ * ScannerController.html — Multi-Modal QR Camera Scanner Engine (v1.1.8b)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
  * MUIDS Lab Oops OS — Science Department
  *
  * Supports:
@@ -16,13 +16,13 @@
 window.ScannerController = (function() {
   var html5QrCode = null;
   var isScanning = false;
-  var currentFacingMode = "environment"; // "environment" (rear) or "user" (front)
   var lastScannedCode = null;
   var lastScanTimestamp = 0;
-  var DEBOUNCE_MS = 1500;
-  var audioCtx = null;
+  var scanCooldownMs = 1800; // 1.8s debounce to prevent duplicate popups
+  var currentFacingMode = "environment"; // "environment" (rear) or "user" (front)
   var torchActive = false;
   var isProcessingFile = false;
+  var audioCtx = null;
 
   var nativeBarcodeDetector = null;
   var nativeScanAnimId = null;
@@ -45,7 +45,7 @@ window.ScannerController = (function() {
 
     function scanFrame() {
       if (!isScanning) return;
-      if (videoElem.readyState >= 2 && !isNativeDetecting && !isProcessingFile) {
+      if (videoElem.readyState >= 2 && videoElem.videoWidth > 0 && !isNativeDetecting && !isProcessingFile) {
         isNativeDetecting = true;
         nativeBarcodeDetector.detect(videoElem)
           .then(function(barcodes) {
@@ -196,16 +196,7 @@ window.ScannerController = (function() {
 
     var qrConfig = {
       fps: 25,
-      qrbox: function(viewfinderWidth, viewfinderHeight) {
-        return { width: viewfinderWidth, height: viewfinderHeight };
-      },
       aspectRatio: 1.0,
-      videoConstraints: {
-        facingMode: { ideal: currentFacingMode },
-        focusMode: { ideal: "continuous" },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
       }
@@ -213,10 +204,10 @@ window.ScannerController = (function() {
 
     ModalController.showToast("Initializing camera stream...", "info", 1500);
 
-    // Primary constraint: Use standard facingMode directly so mobile browsers select the true autofocus rear camera
+    // Primary constraint: Use ideal facingMode so mobile browsers select the true autofocus rear camera without throwing
     var primaryConstraint = (currentFacingMode === "environment")
-      ? { facingMode: "environment" }
-      : { facingMode: "user" };
+      ? { facingMode: { ideal: "environment" } }
+      : { facingMode: { ideal: "user" } };
 
     function runStart(constraint) {
       return html5QrCode.start(
@@ -235,6 +226,9 @@ window.ScannerController = (function() {
         showScanLaser(true);
         var v = document.querySelector("#qr-reader video");
         if (v) {
+          v.setAttribute("playsinline", "true");
+          v.setAttribute("autoplay", "true");
+          v.muted = true;
           startNativeDetectionLoop(v);
         }
         ModalController.showToast("Camera active (Instant Scan).", "success", 2000);
@@ -243,7 +237,7 @@ window.ScannerController = (function() {
         console.warn("Primary facingMode failed, falling back to camera enumeration:", primaryErr);
         // Fallback for laptops/webcams without rear camera
         Html5Qrcode.getCameras().then(function(cameras) {
-          var fallbackChoice = { facingMode: "user" };
+          var fallbackChoice = { facingMode: { ideal: "user" } };
           if (cameras && cameras.length > 0) {
             fallbackChoice = cameras[0].id;
           }
@@ -255,6 +249,9 @@ window.ScannerController = (function() {
           showScanLaser(true);
           var vFallback = document.querySelector("#qr-reader video");
           if (vFallback) {
+            vFallback.setAttribute("playsinline", "true");
+            vFallback.setAttribute("autoplay", "true");
+            vFallback.muted = true;
             startNativeDetectionLoop(vFallback);
           }
         }).catch(function(finalErr) {

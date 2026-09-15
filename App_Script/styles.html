@@ -1,6 +1,6 @@
 <style>
   /* ==========================================================================
-     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8a Moderate Mobile & Desktop Fit)
+     BALANCED RESPONSIVE TYPOGRAPHY ENGINE (v1.1.8b Moderate Mobile & Desktop Fit)
      Harmonized root scale: 16.5px on mobile, 17px on desktop for crisp legibility
      and snug, perfect container fit without layout overflow.
      ========================================================================== */
@@ -580,21 +580,34 @@
     line-height: 1.35;
   }
 
-  /* Viewfinder & QR Scanner styles */
+  /* Viewfinder & QR Scanner styles (v1.1.8b: Full-frame, zero-overlay live video feed) */
   #qr-reader {
     width: 100% !important;
+    height: 100% !important;
     border: none !important;
     background: transparent !important;
   }
 
   #qr-reader__scan_region {
+    width: 100% !important;
+    height: 100% !important;
     background: transparent !important;
   }
 
   #qr-reader video {
     width: 100% !important;
+    height: 100% !important;
     border-radius: 0.75rem !important;
     object-fit: cover !important;
+    display: block !important;
+  }
+
+  /* Permanently suppress Html5Qrcode black shaded overlay border box */
+  #qr-shaded-region {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   /* Scanner Frame Overlay */

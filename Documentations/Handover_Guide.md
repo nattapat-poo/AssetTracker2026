@@ -1,12 +1,12 @@
-# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8a)
+# 🤝 Handover & Deployment Guide — Project 08: QR Asset Survey (v1.1.8b)
 ### MUIDS Lab Oops OS — Science Department
 
 ---
 
 ## 1. Quick Start for Technicians (How to Conduct the Audit)
-1. **Launch App**: Open the Web App URL on your mobile phone, tablet, or desktop browser. Instant boot (<20ms) via Stale-While-Revalidate (SWR) client caching.
+1. **Launch App**: Open the Web App URL on your mobile phone, tablet, or desktop browser. Instant boot (<20ms) via Stale-While-Revalidate (SWR) client caching. Default landing is the **Room** tab showing live sheet records.
 2. **Camera Scanning (Live Feed Primary)**:
-    - **Primary Mode (Live Continuous Scanner)**: Tap **📹 START LIVE SCANNER** to stream live video at 60 FPS. Powered by native hardware-accelerated `BarcodeDetector` continuous loop on the raw video stream, achieving sub-5ms instant detection matching AppSheet's scanning speed.
+    - **Primary Mode (Live Continuous Scanner)**: Tap **Scan** tab $\rightarrow$ **📹 START LIVE SCANNER** to stream live video at 60 FPS. Powered by native hardware-accelerated `BarcodeDetector` continuous loop on the raw video stream, achieving sub-5ms instant detection matching AppSheet's scanning speed. The black square issue is eliminated with full-screen uncropped video.
     - **Secondary Mode (Native Camera Snapshot)**: Tap **📸 Snap Photo with Camera** to open your phone's native camera hardware. This operates via direct file capture and 100% bypasses any sandbox permission restrictions across all embedded GAS iframes, iOS Safari, and in-app browsers.
     - **Gallery Upload**: Tap **🖼️ Gallery** to scan an asset photo directly from device storage.
     - **Manual Search**: Type an inventory number into the search bar for instant keyboard-based retrieval.
@@ -17,6 +17,9 @@
    - **Step 4: Comment Box (Optional)** $\rightarrow$ Add optional remarks for `หมายเหตุปี 69` (Column N remains completely blank if omitted; no auto-injected `[Found in ...]` text). User can tap `[◀ ย้อนกลับ]` to change status or `[ถัดไป: ตรวจสติกเกอร์ ➔]` to proceed.
    - **Step 5: Sticker Modal** $\rightarrow$ Select sticker condition (`ปกติ`, `ปริ้นใหม่`, `ปริ้นใหม่+แก้ข้อมูล`). User can tap `[◀ ย้อนกลับ]` to return to the comment box.
    - **Step 6: Save Record** $\rightarrow$ Tap **ยืนยันและบันทึก (Save & Scan Next)**. Data is committed directly to Google Sheets with real-time CacheService invalidation. Camera automatically re-arms!
+4. **Toast Alerts & Activity Logs**:
+   - Toasts stay active for 8.5s and expand upon tap for 15s so technicians can read full details without dismissal.
+   - Switch to the **Stat** tab to review real-time audit history in the **Activity Logs** panel.
 
 ---
 

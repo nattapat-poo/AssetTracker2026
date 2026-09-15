@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Manual Entry, Asset Detail Modal & Workflow Controller
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8a)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8b)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -10,9 +10,9 @@ window.ModalController = (function() {
   function showToast(message, type, duration) {
     if (!message) return;
     if (!type) type = "info";
-    // Extended toast timer for mobile readability (v1.1.7e: 6.0s default, minimum 5.0s)
-    if (typeof duration === "undefined" || !duration) duration = 6000;
-    if (duration < 5000) duration = 5000;
+    // Extended toast timer for mobile readability (v1.1.8b: 8.5s default, minimum 6.5s)
+    if (typeof duration === "undefined" || !duration) duration = 8500;
+    if (duration < 6500) duration = 6500;
 
     var container = document.getElementById("toast-container");
     if (!container) return;
@@ -36,7 +36,7 @@ window.ModalController = (function() {
 
     // Floating, interactive, expand-on-hover/tap notification pill
     toast.className = "app-toast flex items-start gap-2.5 px-4 py-2.5 rounded-full border " + borderClass + " shadow-2xl backdrop-blur-md text-sm font-semibold transition-all transform -translate-y-2 opacity-0 max-w-sm sm:max-w-md pointer-events-auto cursor-pointer select-text";
-    toast.title = "Tap to view full text / dismiss";
+    toast.title = "Tap to read full message / hold";
     
     var textSpan = document.createElement("span");
     textSpan.className = "toast-message-text truncate flex-1 leading-snug";
@@ -69,6 +69,15 @@ window.ModalController = (function() {
       }, ms);
     }
 
+    function dismissToastNow() {
+      if (dismissTimer) clearTimeout(dismissTimer);
+      toast.classList.add("opacity-0", "-translate-y-2");
+      setTimeout(function() {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    }
+    var collapseOrDismiss = dismissToastNow;
+
     function expandToast() {
       if (!isExpanded) {
         isExpanded = true;
@@ -76,22 +85,18 @@ window.ModalController = (function() {
         textSpan.classList.add("break-words", "whitespace-normal");
         toast.classList.remove("rounded-full", "max-w-sm", "sm:max-w-md");
         toast.classList.add("rounded-2xl", "max-w-lg", "w-full", "sm:w-auto");
-        expandIndicator.className = "fa-solid fa-xmark text-xs opacity-60 shrink-0 mt-0.5 hover:opacity-100";
+        expandIndicator.className = "fa-solid fa-xmark text-xs opacity-70 shrink-0 mt-0.5 hover:opacity-100 p-1 cursor-pointer";
+        expandIndicator.title = "ปิดการแจ้งเตือน (Dismiss)";
       }
-      if (dismissTimer) clearTimeout(dismissTimer);
+      // v1.1.8b: Tapping expands and stays for 15 seconds so technician can read comfortably
+      startDismissTimer(15000);
     }
 
-    function collapseOrDismiss() {
-      if (isExpanded) {
-        // Dismiss when tapped again while expanded
-        toast.classList.add("opacity-0", "-translate-y-2");
-        setTimeout(function() {
-          if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 300);
-      } else {
-        expandToast();
-      }
-    }
+    // Explicit dismiss button
+    expandIndicator.addEventListener("click", function(e) {
+      e.stopPropagation();
+      dismissToastNow();
+    });
 
     // Hover interactions (desktop)
     toast.addEventListener("mouseenter", function() {
@@ -99,13 +104,13 @@ window.ModalController = (function() {
     });
 
     toast.addEventListener("mouseleave", function() {
-      startDismissTimer(2500); // Grace period after mouse leaves
+      startDismissTimer(6000); // 6s grace period after mouse leaves
     });
 
-    // Tap/Click interactions (mobile & desktop)
+    // Tap/Click interactions: Expands and prolongs timer (never disappears suddenly)
     toast.addEventListener("click", function(e) {
       e.stopPropagation();
-      collapseOrDismiss();
+      expandToast();
     });
 
     // Start initial dismiss countdown

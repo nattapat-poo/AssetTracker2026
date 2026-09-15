@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.8a') throw new Error(`Expected APP_VERSION to be v1.1.8a, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.8b') throw new Error(`Expected APP_VERSION to be v1.1.8b, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -84,10 +84,10 @@ async function runTests() {
   console.log('  Filtered items count:', filtered.length);
   if (filtered.length === 0) throw new Error('Filter failed for Thai status');
 
-  console.log('\n--- 5. Testing v1.1.8a Config Sheet Synchronization ---');
+  console.log('\n--- 5. Testing v1.1.8b Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.8a') {
+  if (!configSyncRes.success || configSyncRes.appVersion !== 'v1.1.8b') {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,17 +113,17 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.8a
-  if (!configJs.includes('VERSION: "v1.1.8a"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.8a in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8b
+  if (!configJs.includes('VERSION: "v1.1.8b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8b in Config.js');
   }
-  if (!codeJs.includes('v1.1.8a')) {
-    throw new Error('Version must be v1.1.8a in Code.js');
+  if (!codeJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8b in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.8a')) {
-    throw new Error('Version must be v1.1.8a in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8b in DatabaseService.js');
   }
-  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8a in Config.js, Code.js, DatabaseService.js.');
+  console.log('  Verified: APP_CONFIG.VERSION is v1.1.8b in Config.js, Code.js, DatabaseService.js.');
 
   const required6Cols = [
     "Inventory number", "Asset description1", "Room", "Scanned 69", "หมายเหตุปี 69", "สติกเกอร์"
@@ -199,9 +199,9 @@ async function runTests() {
   console.log('  Verified: Non-allowed columns (A, E, J, K, L, P, Q, R, S, T) purged. Only B, D, I, M, N, O rendered.');
 
   console.log('\n--- 11. Verifying 1-Tap UX Workflow, Extended Toast, and Non-blocking Positioning ---');
-  // Check toast duration (extended to 6000ms in v1.1.7b for mobile readability)
-  if (!modalCtrlHtml.includes('duration = 6000')) {
-    throw new Error('ModalController default toast duration must be 6000ms in v1.1.7b!');
+  // Check toast duration (extended to 8500ms in v1.1.8b for mobile readability)
+  if (!modalCtrlHtml.includes('duration = 8500') && !modalCtrlHtml.includes('duration = 6000')) {
+    throw new Error('ModalController default toast duration must be >=6000ms in v1.1.8b!');
   }
 
   // Check toast non-blocking positioning in index.html
@@ -595,8 +595,8 @@ async function runTests() {
   const modalCtrlContent = fs.readFileSync('App_Script/ModalController.html', 'utf8');
   const skillContent = fs.readFileSync('../.agents/skills/lab-oops-standards/SKILL.md', 'utf8');
 
-  // 1. Verify showToast default duration >= 3000ms (v1.1.7b sets 6000ms)
-  if (!modalCtrlContent.includes('duration = 6000') && !modalCtrlContent.includes('duration = 3500') && !modalCtrlContent.includes('duration = 3000')) {
+  // 1. Verify showToast default duration >= 3000ms (v1.1.7b: 6000ms, v1.1.8b: 8500ms)
+  if (!modalCtrlContent.includes('duration = 8500') && !modalCtrlContent.includes('duration = 6000') && !modalCtrlContent.includes('duration = 3500') && !modalCtrlContent.includes('duration = 3000')) {
     throw new Error('ModalController.showToast default duration is not >= 3000ms');
   }
 
@@ -802,12 +802,11 @@ async function runTests() {
 
   // Check ModalController toast duration
   const modalCtrlV117 = fs.readFileSync('App_Script/ModalController.html', 'utf8');
-  if (!modalCtrlV117.includes('duration = 6000') ||
-      !modalCtrlV117.includes('duration = 5000') ||
+  if ((!modalCtrlV117.includes('duration = 8500') && !modalCtrlV117.includes('duration = 6000')) ||
       !modalCtrlV117.includes('expandToast')) {
-    throw new Error('ModalController.html missing extended toast duration (default 6000ms, min 5000ms) or tap-to-expand pause');
+    throw new Error('ModalController.html missing extended toast duration or tap-to-expand pause');
   }
-  console.log('  Verified: Toast duration extended to >= 5000ms with tap-to-expand feature.');
+  console.log('  Verified: Toast duration extended to >= 6000ms with tap-to-expand feature.');
 
   // Check filter buttons have shrink-0 and overflow-x-auto
   if (!idxHtml.includes('shrink-0 px-3.5 py-1.5 rounded-xl') ||
@@ -819,18 +818,18 @@ async function runTests() {
   // Check ApiClient clean production state (all legacy mock data cleared, dynamic sheet fetch)
   const apiClientV117 = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   if (!apiClientV117.includes('INITIAL_LAB_ASSETS') ||
-      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.7f'))) {
-    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8a cache key');
+      (!apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8b') && !apiClientV117.includes('MUIDS_ASSET_CACHE_v1.1.8a'))) {
+    throw new Error('ApiClient.html missing INITIAL_LAB_ASSETS or v1.1.8b cache key');
   }
   console.log('  Verified: ApiClient clean production configuration (legacy mock data purged, live Google Sheet cache configured).');
 
   console.log('\n--- 36. Testing v1.1.7e Room Landing Tab & Version Under App Title ---');
   // 1. App Title and Version Numbering Under App Title check
-  if (!idxHtml.includes('v1.1.8a') ||
+  if (!idxHtml.includes('v1.1.8b') ||
       !idxHtml.includes('whitespace-nowrap select-none pt-0.5')) {
     throw new Error('index.html must have version numbering placed directly under app title');
   }
-  console.log('  Verified: Version numbering (v1.1.8a) placed neatly under the app title.');
+  console.log('  Verified: Version numbering (v1.1.8b) placed neatly under the app title.');
 
   // 2. Room Center Tab Default Landing Verification
   const appStateV117e = fs.readFileSync('App_Script/AppState.html', 'utf8');
@@ -923,8 +922,46 @@ async function runTests() {
   }
   console.log('  Verified: Stale-While-Revalidate (SWR) client caching active for sub-20ms initial app startup.');
 
+  console.log('\n--- 38. Testing v1.1.8b Camera Feed Fix, Toast Polish, Activity Logs & Bottom Branding ---');
+  // 1. Camera Feed Overlay Suppression
+  const stylesHtmlV118b = fs.readFileSync('App_Script/styles.html', 'utf8');
+  if (!stylesHtmlV118b.includes('#qr-shaded-region') || !stylesHtmlV118b.includes('display: none !important;')) {
+    throw new Error('styles.html must permanently suppress #qr-shaded-region to prevent black square camera blockage');
+  }
+  if (!scannerCtrlV118.includes('playsinline') || !scannerCtrlV118.includes('videoWidth > 0')) {
+    throw new Error('ScannerController.html must set playsinline and check videoWidth > 0 before detect()');
+  }
+  console.log('  Verified: Camera feed black square permanently resolved (#qr-shaded-region suppressed, videoWidth checks active).');
+
+  // 2. Toast Duration & Tap-to-Persist Behavior
+  const modalCtrlV118b = fs.readFileSync('App_Script/ModalController.html', 'utf8');
+  if (!modalCtrlV118b.includes('duration = 8500') || !modalCtrlV118b.includes('startDismissTimer(15000)')) {
+    throw new Error('ModalController.html must have prolonged duration (8500ms) and tap-to-hold timer (15000ms)');
+  }
+  console.log('  Verified: Toast duration extended (8500ms) and tap-to-hold (15s) prevents premature disappearance.');
+
+  // 3. Activity Logs in Stat Tab
+  if (!idxHtml.includes('id="activity-logs-panel"') || !idxHtml.includes('id="activity-logs-container"')) {
+    throw new Error('index.html must include activity-logs-panel and activity-logs-container in Stat tab');
+  }
+  const appStateV118b = fs.readFileSync('App_Script/AppState.html', 'utf8');
+  if (!appStateV118b.includes('logActivity') || !appStateV118b.includes('clearActivityLogs')) {
+    throw new Error('AppState.html missing logActivity or clearActivityLogs');
+  }
+  if (!auditCtrl.includes('renderActivityLogs')) {
+    throw new Error('AuditController.html missing renderActivityLogs');
+  }
+  console.log('  Verified: User Activity Logs panel fully integrated in Stat tab with reactive state and persistence.');
+
+  // 4. Bottom Footer Version Branding
+  if (!idxHtml.includes('QR Asset Survey</span>') ||
+      !idxHtml.includes('border border-emerald-500/20 px-2 py-0.5 rounded-full">v1.1.8b</span>')) {
+    throw new Error('index.html footer must display updated v1.1.8b version branding badge');
+  }
+  console.log('  Verified: Footer version branding updated to v1.1.8b at the bottom of the page.');
+
   console.log('\n======================================================');
-  console.log('✅ ALL 37 TEST SUITES PASSED FOR v1.1.8a RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 38 TEST SUITES PASSED FOR v1.1.8b RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 

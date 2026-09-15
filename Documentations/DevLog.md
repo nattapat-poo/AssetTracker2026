@@ -1,5 +1,28 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-15 — Release v1.1.8b: Camera Feed Fix, Toast Polish, Activity Logs Panel & Branding Update
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8b`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Key Bug Fixes & Visual Implementations:**
+  - **Camera Feed Black Square Elimination**:
+    - Identified root cause of the solid black square with the scanning red laser: when the scanner tab was hidden on initial launch (`activeTab: "roster"`), `viewfinderWidth` and `viewfinderHeight` were computed as 0px, causing Html5Qrcode to generate `#qr-shaded-region` with 50% border thickness covering the entire `<video>` element.
+    - Permanently suppressed `#qr-shaded-region` via CSS (`display: none !important; opacity: 0 !important; pointer-events: none !important;`) and forced `#qr-reader video` to render `100%` width and height with `object-fit: cover`.
+    - Removed conflicting rigid landscape `videoConstraints` in `ScannerController.html` to allow portrait mobile devices to establish clean, unconstrained camera streams.
+    - Added `videoWidth > 0` and `readyState >= 2` safety checks before invoking `BarcodeDetector.detect()`.
+  - **Toast Notification Timing & Tap-to-Hold Polish**:
+    - Extended default toast dismiss timer from 3.5s to 8.5s (enforced minimum 6.5s) to ensure technicians have adequate time to read alerts on mobile devices.
+    - Fixed premature tap dismissal: previously tapping the toast triggered immediate dismissal. Now, tapping expands the notification into full-width untruncated card text and resets the dismiss timer to 15.0s.
+    - Added an explicit `x` close button on expanded toasts for deliberate dismiss actions.
+  - **User Activity Logs Panel in Stat Tab**:
+    - Added `#activity-logs-panel` inside `#view-summary` (Stat tab) with real-time audit history, action counts, and a clear logs button.
+    - Persisted activity events (audited assets, status actions, unlisted registrations) to `localStorage` (`MUIDS_ACTIVITY_LOGS_v1.1.8b`) up to 80 records.
+    - Rendered responsive badges with timestamps, inventory numbers, room tags, and notes.
+  - **Footer Version Branding**:
+    - Updated bottom footer version branding string from `v1.1.7e` to `v1.1.8b` (`QR Asset Survey • MUIDS Science Dept • v1.1.8b`).
+* **Verification**:
+  - All 38 automated verification suites passing in `Tools/test_core.js`.
+
 ## 2026-09-15 — Release v1.1.8a: Instant BarcodeDetector, Comment Step, SWR Caching & Mahidol Nexus Auth
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8a`.

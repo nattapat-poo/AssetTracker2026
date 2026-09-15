@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8b] - 2026-09-15
+
+### Fixed & Improved
+- **Camera Feed Black Square Elimination (`styles.html`, `ScannerController.html`)**:
+  - Permanently suppressed `#qr-shaded-region` (`display: none !important; opacity: 0 !important; pointer-events: none !important;`) which caused Html5Qrcode to render a solid black 50% border over the video feed when initialized with 0px dimensions while the scanner tab was hidden.
+  - Set `#qr-reader video` to unconstrained full-frame streaming (`width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important;`).
+  - Added `videoWidth > 0` and `readyState >= 2` safety checks in `startNativeDetectionLoop` to ensure the native detector only executes on active video frames.
+- **Toast Notifications Polish (`ModalController.html`)**:
+  - Extended default auto-dismiss duration from 3.5s to 8.5s (with a strict minimum threshold of 6.5s).
+  - Fixed premature tap dismissal: Clicking or tapping the toast expands the pill into readable, untruncated card text and prolongs the dismiss timer to 15.0s, preventing accidental disappearance.
+  - Provided a dedicated `x` dismiss button on the expanded toast for explicit user dismissal.
+- **Activity Logs Panel in Stat Tab (`index.html`, `AppState.html`, `AuditController.html`)**:
+  - Added `#activity-logs-panel` into the Stat tab (`#view-summary`) displaying real-time audit history and actions.
+  - Persisted user audit activity to `localStorage` (`MUIDS_ACTIVITY_LOGS_v1.1.8b`) with up to 80 recent entries.
+  - Provided clear logs button ("ล้างประวัติ") and dynamic badges showing timestamp, action status, asset code, room, and notes.
+- **Footer Version Branding (`index.html`)**:
+  - Updated footer version branding string from `v1.1.7e` to `v1.1.8b` (`QR Asset Survey • MUIDS Science Dept • v1.1.8b`).
+
 ## [1.1.8a] - 2026-09-15
 
 ### Added & Improved
