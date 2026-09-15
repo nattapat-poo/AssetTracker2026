@@ -324,7 +324,7 @@ function syncConfigSheet(ss) {
     { key: "VIBRATION_FEEDBACK_ENABLED", val: "true", type: "BOOLEAN", desc: "Haptic vibration toggle on mobile" },
     { key: "ASSET_SPREADSHEET_ID", val: DEFAULT_ASSET_SPREADSHEET_ID, type: "STRING", desc: "Target science asset inventory sheet ID" },
     { key: "NEXUS_SPREADSHEET_ID", val: NEXUS_SPREADSHEET_ID, type: "STRING", desc: "Central Nexus kernel database ID" },
-    { key: "ADMIN_USERS", val: "TALT,TA,LabTech,Mek,Fern,Kris,Mai,Turner", type: "COMMA_LIST", desc: "Authorized survey administrators" }
+    { key: "ADMIN_USERS", val: "TALT,TA,LabTech,Mek,Fern,Kris,Mai,Win,Turner", type: "COMMA_LIST", desc: "Authorized survey administrators" }
   ];
   
   var rowsToAppend = [];
@@ -490,7 +490,7 @@ function getLocalConfigDefaults() {
     "VIBRATION_FEEDBACK_ENABLED": true,
     "ASSET_SPREADSHEET_ID": DEFAULT_ASSET_SPREADSHEET_ID,
     "NEXUS_SPREADSHEET_ID": NEXUS_SPREADSHEET_ID,
-    "ADMIN_USERS": ["TALT", "TA", "LabTech", "Mek", "Fern", "Kris", "Mai", "Turner"]
+    "ADMIN_USERS": ["TALT", "TA", "LabTech", "Mek", "Fern", "Kris", "Mai", "Win", "Turner"]
   };
 }
 
