@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8k] - 2026-09-16
+
+### Added & Improved
+- **Live Save Pipeline Hardening & Sync Audit Verification (`ApiClient.html`, `DatabaseService.js`, `AuditController.html`, `AuthService.js`)**:
+  - **Root Cause Analyses (Why saving failed silently)**:
+    1. **Localhost & Local Preview Forced into Mock Mode**: In `ApiClient.html`, `isRemoteLiveMode` required `window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"`. When users previewed or tested the app via `preview_server.py` or local web server, it was silently forced into `OFFLINE_MOCK` mode, meaning audit mutations only modified client mock memory and never reached Google Sheets!
+    2. **Ghost Mock Mutation Fallback**: In `invokeJsonp()` and `invoke()`, network failures or JSONP errors fell back to `mockExecute()`, which resolved `{ success: true }`. The UI reported success, but the mutation never touched Google Sheets.
+    3. **Status String `+` Decoded as Space in Google Apps Script**: The Thai status option `"หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"` uses a `+` symbol. When transmitted in GET query parameters, Google Apps Script URL-decodes `+` into a space ` ` (`"หาไม่เจอ ให้พัสดุมาตรวจสอบหน้างาน"`). In `DatabaseService.js`, `STATUS_OPTIONS.indexOf(newStatus)` returned `-1`, throwing `Invalid status: ...` and failing silently.
+    4. **Premature Client Toast Feedback**: In `AuditController.html`, `showToast("✅ บันทึกสำเร็จ: " + newStatus, "success")` was fired optimistically before the server responded.
+    5. **ReferenceError in AuthService.js Fallback**: Fallback section 3 lacked declarations for `role = "Auditor"` and `isTALT = false`, triggering a potential runtime error on certain sessions.
+  - **Live Mode Everywhere by Default**: In `ApiClient.html`, `isRemoteLiveMode` is now enabled across all hostnames (including `localhost` and `127.0.0.1`), unless explicitly disabled with `?mock=1`.
+  - **Anti-Ghost Mutation Protection**: Mutations (`updateAssetStatus`, `addNewUnlistedAsset`) are strictly prohibited from mock-succeeding on network failure. They return explicit `{ success: false, error: ... }`.
+  - **Status String Normalization (+ vs space)**: In `DatabaseService.js`, `updateAssetStatus` normalizes candidate statuses by stripping whitespace and plus signs (`opt.replace(/[\s\+]/g, '') === newStatus.replace(/[\s\+]/g, '')`), seamlessly accepting both `"หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"` and `"หาไม่เจอ ให้พัสดุมาตรวจสอบหน้างาน"`.
+  - **In-Flight Toast Sequencing**: In `AuditController.html`, shows `⏳ กำลังบันทึก...` while in flight, and only displays `✅ บันทึกสำเร็จ: ...` after `res.success === true` is verified.
+  - **Room Summary State Preservation**: Preserves `AppState.summary` integrity during mutations by validating `res.roomSummary.roomName === activeRoom` before assignment.
+- **Automated Test Suite (46/46 Passing)**:
+  - Added Suite 46 to `Tools/test_core.js` covering live mode defaults, anti-ghost mutation protection, status string normalization, in-flight toast sequencing, and fallback variable safety.
+- **Live Google Apps Script Roundtrip Verification**:
+  - Validated live roundtrip update on asset `4356000-401000049664-0` in room `BIO PREP` via `Tools/test_remote_gas.js` against the canonical GAS web app, confirming real-time persistence in both Master Table and room worksheet.
+
 ## [1.1.8j] - 2026-09-16
 
 ### Added & Improved

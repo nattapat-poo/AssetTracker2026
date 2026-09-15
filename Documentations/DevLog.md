@@ -1,5 +1,31 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-16 — Release v1.1.8k: Live Save Pipeline & Sync Audit Hardening
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8k`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, redeploy canonical deployment @22) and Git (`git push origin main`, tag `v1.1.8k`).
+* **Root Cause Analyses & System Hardening**:
+  1. **RCA: Localhost Testing Silently Trapped in OFFLINE_MOCK Mode**:
+     - *Issue Reported*: User completed the audit workflow, buttons no longer hung on "Saving...", but records still failed to persist to Google Sheets.
+     - *Root Cause*: In `ApiClient.html`, `isRemoteLiveMode` evaluated `window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"`. Whenever testing from `localhost:8088` (the preview server) or direct file preview, `isRemoteLiveMode` evaluated to `false`, silently forcing all writes into mock local state.
+     - *Resolution*: Removed hostname exclusions. All web environments now default to live remote Google Apps Script bridge unless explicitly opted out with `?mock=1`.
+  2. **RCA: Ghost Mock Mutation Fallback**:
+     - *Root Cause*: In `invokeJsonp()` and `invoke()`, any network abort, CORS error, or JSONP timeout caught an exception and invoked `mockExecute()`, which returned `{ success: true }`. The UI reported success to the user despite zero backend persistence.
+     - *Resolution*: Mutations (`updateAssetStatus` and `addNewUnlistedAsset`) are strictly prohibited from falling back to mock successes. On failure, they return an explicit error object (`{ success: false, error: ... }`) so the UI accurately notifies the user.
+  3. **RCA: URL-Decoded Spaces Breaking Thai Status with Plus Sign (`+`)**:
+     - *Root Cause*: Status option `"หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"` uses the `+` character. When sent through GET query strings to Google Apps Script, the `+` was decoded as space (`"หาไม่เจอ ให้พัสดุมาตรวจสอบหน้างาน"`). In `DatabaseService.js`, `STATUS_OPTIONS.indexOf(newStatus)` returned `-1`, throwing `Invalid status: ...` and terminating the execution.
+     - *Resolution*: In `DatabaseService.js`, status validation normalizes strings by removing all spaces and `+` symbols (`opt.replace(/[\s\+]/g, '') === newStatus.replace(/[\s\+]/g, '')`), matching canonical options regardless of URL decoding.
+  4. **RCA: Premature UI Feedback Toast**:
+     - *Root Cause*: `showToast("✅ บันทึกสำเร็จ: " + newStatus, "success")` was called synchronously before awaiting `ApiClient.updateAssetStatus()`.
+     - *Resolution*: Sequenced UI feedback: display `⏳ กำลังบันทึก...` in-flight, and only present `✅ บันทึกสำเร็จ: ...` once the backend confirms `res.success === true`.
+  5. **RCA: Fallback ReferenceError in AuthService.js**:
+     - *Root Cause*: In `AuthService.js` step 3 fallback, variables `role = "Auditor"` and `isTALT = false` were referenced without `var` declarations, risking a `ReferenceError` in strict environments.
+     - *Resolution*: Added explicit variable declarations (`var role = "Auditor"; var isTALT = false;`).
+* **Automated Verification**:
+  - Suite 46 added to `Tools/test_core.js`.
+  - 100% pass rate across all 46 test suites.
+  - Live roundtrip verified via `Tools/test_remote_gas.js` against Google Spreadsheet ID `18LGXn6JbjFeiVuKlrh0CvJ79M3mpsKTVbc0FJx8LuOk`.
+
 ## 2026-09-16 — Release v1.1.8j: Auto-Reset Button State & Audit Sync Resilience
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8j`.

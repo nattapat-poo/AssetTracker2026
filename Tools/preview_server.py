@@ -1,6 +1,6 @@
 """
 preview_server.py — Standalone Local Preview Server & Automated Bundler
-Project 08: QR-Based Mobile Asset Survey App (v1.1.8j)
+Project 08: QR-Based Mobile Asset Survey App (v1.1.8k)
 MUIDS Lab Oops OS — Science Department
 """
 
@@ -64,7 +64,7 @@ def run_server(port=8088):
     server_address = ("", port)
     httpd = HTTPServer(server_address, PreviewHandler)
     print(f"\n=======================================================")
-    print(f">> QR Asset Survey v1.1.8j Local Preview Server Active")
+    print(f">> QR Asset Survey v1.1.8k Local Preview Server Active")
     print(f"   URL: http://localhost:{port}/")
     print(f"   Serving from: {APP_SCRIPT_DIR}")
     print(f"=======================================================\n")

@@ -69,7 +69,7 @@ function getActorEmailSafe() {
  */
 function getAuthorizedUsers() {
   var cache = CacheService.getScriptCache();
-  var cacheKey = "AUTHORIZED_USERS_CACHE_v1.1.8j";
+  var cacheKey = "AUTHORIZED_USERS_CACHE_v1.1.8k";
   var cached = cache ? cache.get(cacheKey) : null;
   if (cached) {
     try { return JSON.parse(cached); } catch (e) {}
@@ -294,19 +294,21 @@ function authenticateSession(clientEmail) {
     return str === email || email.indexOf(str) !== -1;
   });
   
+  var role = "Auditor";
+  var isTALT = false;
   if (isAdmin) {
     role = isSuperAdmin ? "SuperAdmin" : "Admin";
     isTALT = true;
   }
   
+  var isAllowedRole = isAdmin || isSuperAdmin;
   var isVerifiedUser = isAdmin || isSuperAdmin || (isMahidol && isAllowedRole);
   var authStatus = isVerifiedUser
     ? "VERIFIED"
     : (isMahidol ? "UNREGISTERED_MAHIDOL" : "EXTERNAL_ACCOUNT");
 
-  if (!displayName) {
-    displayName = nickname ? nickname : (emailName.charAt(0).toUpperCase() + emailName.slice(1));
-  }
+  var nickname = "";
+  var displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
 
   return {
     email: email,

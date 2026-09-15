@@ -702,7 +702,7 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8j</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8k</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
@@ -755,7 +755,7 @@
     <div class="w-full flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60 select-none">
       <!-- Left: Semantic Version Badge -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8j • Mobile Audit</span>
+        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8k • Mobile Audit</span>
       </div>
 
       <!-- Right: Active Logged-in User Identity Pill (Never hidden or clipped) -->
@@ -1405,7 +1405,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8j</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8k</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -1598,7 +1598,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8j</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8k</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>
@@ -2082,8 +2082,8 @@
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8j";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8i";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8k";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8j";
 
   var initialLogs = (function() {
     try {
@@ -2160,14 +2160,14 @@ window.AppState = (function() {
   }
 
   function getVersion() {
-    var CURRENT_RELEASE = "v1.1.8j";
+    var CURRENT_RELEASE = "v1.1.8k";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
       var cfgVer = String(state.config.APP_VERSION).trim();
       // Ignore obsolete legacy versions that might still sit in the Google Sheet
       if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
           cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
           cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1 && cfgVer.indexOf("1.1.8h") === -1 &&
-          cfgVer.indexOf("1.1.8i") === -1) {
+          cfgVer.indexOf("1.1.8i") === -1 && cfgVer.indexOf("1.1.8j") === -1) {
         return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
       }
     }
@@ -2388,8 +2388,7 @@ window.ApiClient = (function() {
   var isGasEnvironment = (typeof google !== "undefined" && google.script && google.script.run);
   var isRemoteLiveMode = !isGasEnvironment && (
     (typeof window !== "undefined" && window.location && (
-      window.location.search.indexOf("live=1") !== -1 ||
-      (window.location.protocol.indexOf("http") === 0 && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && window.location.search.indexOf("mock=1") === -1)
+      window.location.search.indexOf("mock=1") === -1
     ))
   );
 
@@ -2491,11 +2490,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8j)
+  // Persistent Local Storage of REAL Assets (v1.1.8k)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -2511,7 +2510,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8j", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8k", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -2521,6 +2520,7 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8k");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8j");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8g");
@@ -2615,10 +2615,20 @@ window.ApiClient = (function() {
               resolve(data);
             })
             .catch(function(postErr) {
-              console.warn("[ApiClient] All live network bridges failed. Using local real asset cache:", postErr);
+              console.warn("[ApiClient] All live network bridges failed:", postErr);
               window.__IS_LIVE_CONNECTED = false;
               window.__ACTIVE_BRIDGE_TYPE = "OFFLINE_MOCK";
               window.__LAST_CONN_ERROR = jsonpErr.message || postErr.message;
+              
+              // Critical protection: Mutations MUST NEVER silently mock-succeed when network sync fails!
+              if (action === "updateAssetStatus" || action === "addNewUnlistedAsset") {
+                resolve({
+                  success: false,
+                  error: "ไม่สามารถส่งข้อมูลไปยัง Google Sheets ได้ (" + (jsonpErr.message || postErr.message) + ") โปรดตรวจสอบอินเทอร์เน็ต"
+                });
+                return;
+              }
+              
               var res = mockExecute(action, payload);
               resolve(res);
             });
@@ -2658,7 +2668,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8j",
+          APP_VERSION: "v1.1.8k",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -4933,10 +4943,6 @@ window.AuditController = (function() {
     }
   }
 
-  function submitStatusFromModal(status) {
-    openCommentSublayer(status, "modal");
-  }
-
   function displayScannedAsset(asset) {
     resetSubmissionState();
     activeAsset = asset;
@@ -5031,7 +5037,7 @@ window.AuditController = (function() {
       rowIndex: targetAsset.rowIndex,
       status: newStatus,
       scanned69: newStatus,
-      sticker: selectedSticker,
+      sticker: extraData.sticker || selectedSticker,
       notes: notes,
       destinationRoom: extraData.destinationRoom || null,
       renameText: extraData.renameText || null,
@@ -5047,12 +5053,12 @@ window.AuditController = (function() {
     var card = document.getElementById("active-asset-card");
     if (card) card.classList.add("hidden");
 
-    // Haptic feedback & non-blocking floating 3s toast (duration = 3000ms)
+    // Haptic feedback & non-blocking saving toast
     if (window.ScannerController && ScannerController.triggerHaptic) {
       ScannerController.triggerHaptic();
     }
     var icon = (newStatus.indexOf("ใช้งานอยู่") === 0) ? "✅" : (newStatus.indexOf("หมดความจำเป็น") === 0 ? "⚠️" : "📋");
-    ModalController.showToast(icon + " " + targetAsset.assetId + " marked: " + newStatus, "success", 3000);
+    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + "...", "info", 2000);
 
     // Switch to scanner tab & resume live camera feed immediately for next scan
     if (AppState.get("activeTab") !== "scanner") {
@@ -5082,9 +5088,12 @@ window.AuditController = (function() {
         activeAsset = null;
 
         if (res && res.success === false) {
-          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 8000);
           return;
         }
+
+        // Live confirmation toast upon verified persistence
+        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 3000);
 
         // Record recent scan
         AppState.addRecentScan({
@@ -5102,7 +5111,7 @@ window.AuditController = (function() {
             assetId: targetAsset.assetId,
             itemName: extraData.renameText || targetAsset.itemName,
             status: newStatus,
-            sticker: selectedSticker,
+            sticker: extraData.sticker || selectedSticker,
             room: extraData.destinationRoom || targetAsset.registeredLocation,
             notes: notes
           });
@@ -5111,26 +5120,27 @@ window.AuditController = (function() {
         // Update active asset in state
         targetAsset.status = newStatus;
         targetAsset.scanned69 = newStatus;
-        targetAsset.sticker = selectedSticker;
+        targetAsset.sticker = extraData.sticker || selectedSticker;
         if (extraData.renameText) targetAsset.itemName = extraData.renameText;
         if (extraData.destinationRoom) targetAsset.registeredLocation = extraData.destinationRoom;
         targetAsset.notes = notes;
-        targetAsset.auditedBy = res.auditedBy || "Me";
-        targetAsset.auditDate = res.auditDate;
+        targetAsset.auditedBy = (res && res.auditedBy) || auditorNickname;
+        targetAsset.auditDate = (res && res.auditDate) || new Date().toISOString();
 
-        // If backend returned refreshed room summary, update AppState
-        if (res.roomSummary) {
+        // Update AppState room summary only if returned summary matches active view
+        var activeRoom = AppState.get("currentRoom");
+        if (res && res.roomSummary && res.roomSummary.roomName === activeRoom) {
           AppState.set("summary", res.roomSummary);
         } else {
-          // Re-fetch current room summary
-          loadRoomData(AppState.get("currentRoom"));
+          // Re-fetch active room summary so full Master_Asset checklist is preserved
+          loadRoomData(activeRoom);
         }
       })
       .catch(function(err) {
         clearTimeout(watchdogTimer);
         resetSubmissionState();
         activeAsset = null;
-        ModalController.showToast("Failed to save: " + err.toString(), "error", 4000);
+        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + err.toString(), "error", 8000);
       });
   }
 

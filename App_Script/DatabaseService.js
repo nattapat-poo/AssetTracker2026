@@ -820,9 +820,19 @@ function updateAssetStatus(payload) {
       throw new Error("Missing asset inventory number.");
     }
     
-    var validStatuses = STATUS_OPTIONS.concat(["Good", "Damaged", "Missing"]);
-    if (validStatuses.indexOf(newStatus) === -1) {
-      throw new Error("Invalid status: " + newStatus + ". Permitted values: " + STATUS_OPTIONS.join(", "));
+    // Robust status normalization: handle spaces vs plus, e.g. "หาไม่เจอ ให้พัสดุมาตรวจสอบหน้างาน" vs "หาไม่เจอ+ให้พัสดุมาตรวจสอบหน้างาน"
+    var canonicalMatchedStatus = STATUS_OPTIONS.find(function(opt) {
+      if (opt === newStatus) return true;
+      var optNorm = opt.replace(/[\s\+]/g, '');
+      var newNorm = newStatus.replace(/[\s\+]/g, '');
+      return optNorm === newNorm;
+    });
+    if (canonicalMatchedStatus) {
+      newStatus = canonicalMatchedStatus;
+    } else if (["Good", "Damaged", "Missing"].indexOf(newStatus) !== -1) {
+      // Permitted english fallback
+    } else {
+      throw new Error("Invalid status: '" + newStatus + "'. Permitted values: " + STATUS_OPTIONS.join(", "));
     }
     
     var ss = getSpreadsheet();
@@ -999,7 +1009,7 @@ function updateAssetStatus(payload) {
       sticker: sticker,
       masterUpdated: masterUpdated,
       roomUpdated: roomUpdated,
-      roomSummary: getRoomAuditSummary(targetSheetName || "ALL")
+      roomSummary: getRoomAuditSummary(currentRoom || targetSheetName || "ALL")
     };
   }, 30000);
 }

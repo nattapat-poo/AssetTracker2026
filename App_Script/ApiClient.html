@@ -10,8 +10,7 @@ window.ApiClient = (function() {
   var isGasEnvironment = (typeof google !== "undefined" && google.script && google.script.run);
   var isRemoteLiveMode = !isGasEnvironment && (
     (typeof window !== "undefined" && window.location && (
-      window.location.search.indexOf("live=1") !== -1 ||
-      (window.location.protocol.indexOf("http") === 0 && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && window.location.search.indexOf("mock=1") === -1)
+      window.location.search.indexOf("mock=1") === -1
     ))
   );
 
@@ -113,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8j)
+  // Persistent Local Storage of REAL Assets (v1.1.8k)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8k") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8j") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8i") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -133,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8j", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8k", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -143,6 +142,7 @@ window.ApiClient = (function() {
     try {
       MOCK_ASSETS = [];
       if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8k");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8j");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8h");
         localStorage.removeItem("MUIDS_ASSET_CACHE_v1.1.8g");
@@ -237,10 +237,20 @@ window.ApiClient = (function() {
               resolve(data);
             })
             .catch(function(postErr) {
-              console.warn("[ApiClient] All live network bridges failed. Using local real asset cache:", postErr);
+              console.warn("[ApiClient] All live network bridges failed:", postErr);
               window.__IS_LIVE_CONNECTED = false;
               window.__ACTIVE_BRIDGE_TYPE = "OFFLINE_MOCK";
               window.__LAST_CONN_ERROR = jsonpErr.message || postErr.message;
+              
+              // Critical protection: Mutations MUST NEVER silently mock-succeed when network sync fails!
+              if (action === "updateAssetStatus" || action === "addNewUnlistedAsset") {
+                resolve({
+                  success: false,
+                  error: "ไม่สามารถส่งข้อมูลไปยัง Google Sheets ได้ (" + (jsonpErr.message || postErr.message) + ") โปรดตรวจสอบอินเทอร์เน็ต"
+                });
+                return;
+              }
+              
               var res = mockExecute(action, payload);
               resolve(res);
             });
@@ -280,7 +290,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8j",
+          APP_VERSION: "v1.1.8k",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,

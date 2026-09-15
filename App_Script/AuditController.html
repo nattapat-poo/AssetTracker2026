@@ -398,10 +398,6 @@ window.AuditController = (function() {
     }
   }
 
-  function submitStatusFromModal(status) {
-    openCommentSublayer(status, "modal");
-  }
-
   function displayScannedAsset(asset) {
     resetSubmissionState();
     activeAsset = asset;
@@ -496,7 +492,7 @@ window.AuditController = (function() {
       rowIndex: targetAsset.rowIndex,
       status: newStatus,
       scanned69: newStatus,
-      sticker: selectedSticker,
+      sticker: extraData.sticker || selectedSticker,
       notes: notes,
       destinationRoom: extraData.destinationRoom || null,
       renameText: extraData.renameText || null,
@@ -512,12 +508,12 @@ window.AuditController = (function() {
     var card = document.getElementById("active-asset-card");
     if (card) card.classList.add("hidden");
 
-    // Haptic feedback & non-blocking floating 3s toast (duration = 3000ms)
+    // Haptic feedback & non-blocking saving toast
     if (window.ScannerController && ScannerController.triggerHaptic) {
       ScannerController.triggerHaptic();
     }
     var icon = (newStatus.indexOf("ใช้งานอยู่") === 0) ? "✅" : (newStatus.indexOf("หมดความจำเป็น") === 0 ? "⚠️" : "📋");
-    ModalController.showToast(icon + " " + targetAsset.assetId + " marked: " + newStatus, "success", 3000);
+    ModalController.showToast("⏳ กำลังบันทึก " + targetAsset.assetId + "...", "info", 2000);
 
     // Switch to scanner tab & resume live camera feed immediately for next scan
     if (AppState.get("activeTab") !== "scanner") {
@@ -547,9 +543,12 @@ window.AuditController = (function() {
         activeAsset = null;
 
         if (res && res.success === false) {
-          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 6000);
+          ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + (res.error || res.message || "เซิร์ฟเวอร์ปฏิเสธการอัปเดต"), "error", 8000);
           return;
         }
+
+        // Live confirmation toast upon verified persistence
+        ModalController.showToast(icon + " บันทึกสำเร็จ: " + targetAsset.assetId + " (" + newStatus + ")", "success", 3000);
 
         // Record recent scan
         AppState.addRecentScan({
@@ -567,7 +566,7 @@ window.AuditController = (function() {
             assetId: targetAsset.assetId,
             itemName: extraData.renameText || targetAsset.itemName,
             status: newStatus,
-            sticker: selectedSticker,
+            sticker: extraData.sticker || selectedSticker,
             room: extraData.destinationRoom || targetAsset.registeredLocation,
             notes: notes
           });
@@ -576,26 +575,27 @@ window.AuditController = (function() {
         // Update active asset in state
         targetAsset.status = newStatus;
         targetAsset.scanned69 = newStatus;
-        targetAsset.sticker = selectedSticker;
+        targetAsset.sticker = extraData.sticker || selectedSticker;
         if (extraData.renameText) targetAsset.itemName = extraData.renameText;
         if (extraData.destinationRoom) targetAsset.registeredLocation = extraData.destinationRoom;
         targetAsset.notes = notes;
-        targetAsset.auditedBy = res.auditedBy || "Me";
-        targetAsset.auditDate = res.auditDate;
+        targetAsset.auditedBy = (res && res.auditedBy) || auditorNickname;
+        targetAsset.auditDate = (res && res.auditDate) || new Date().toISOString();
 
-        // If backend returned refreshed room summary, update AppState
-        if (res.roomSummary) {
+        // Update AppState room summary only if returned summary matches active view
+        var activeRoom = AppState.get("currentRoom");
+        if (res && res.roomSummary && res.roomSummary.roomName === activeRoom) {
           AppState.set("summary", res.roomSummary);
         } else {
-          // Re-fetch current room summary
-          loadRoomData(AppState.get("currentRoom"));
+          // Re-fetch active room summary so full Master_Asset checklist is preserved
+          loadRoomData(activeRoom);
         }
       })
       .catch(function(err) {
         clearTimeout(watchdogTimer);
         resetSubmissionState();
         activeAsset = null;
-        ModalController.showToast("Failed to save: " + err.toString(), "error", 4000);
+        ModalController.showToast("❌ บันทึกไม่สำเร็จ: " + err.toString(), "error", 8000);
       });
   }
 

@@ -57,7 +57,7 @@ async function runTests() {
   const payload = await ApiClient.getInitialPayload();
   console.log('  User:', payload.user.name, '| Rooms count:', payload.rooms.length, '| Version:', payload.config.APP_VERSION);
   if (payload.rooms.length !== 15) throw new Error(`Expected 15 rooms, got ${payload.rooms.length}`);
-  if (payload.config.APP_VERSION !== 'v1.1.8j' && payload.config.APP_VERSION !== 'v1.1.8i' && payload.config.APP_VERSION !== 'v1.1.8h' && payload.config.APP_VERSION !== 'v1.1.8g') throw new Error(`Expected APP_VERSION to be v1.1.8j, got ${payload.config.APP_VERSION}`);
+  if (payload.config.APP_VERSION !== 'v1.1.8k' && payload.config.APP_VERSION !== 'v1.1.8j' && payload.config.APP_VERSION !== 'v1.1.8i' && payload.config.APP_VERSION !== 'v1.1.8h' && payload.config.APP_VERSION !== 'v1.1.8g') throw new Error(`Expected APP_VERSION to be v1.1.8k, got ${payload.config.APP_VERSION}`);
   if (payload.roomTypes !== undefined) throw new Error('roomTypes must be completely removed from payload');
   if (payload.summary.unverified === undefined) throw new Error('Summary payload must include unverified stat count');
 
@@ -87,7 +87,7 @@ async function runTests() {
   console.log('\n--- 5. Testing v1.1.8f Config Sheet Synchronization ---');
   const configSyncRes = await ApiClient.syncConfigSheet();
   console.log('  Sync result:', configSyncRes.message, '| Version:', configSyncRes.appVersion);
-  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8j' && configSyncRes.appVersion !== 'v1.1.8i' && configSyncRes.appVersion !== 'v1.1.8h' && configSyncRes.appVersion !== 'v1.1.8g' && configSyncRes.appVersion !== 'v1.1.8f' && configSyncRes.appVersion !== 'v1.1.8e' && configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
+  if (!configSyncRes.success || (configSyncRes.appVersion !== 'v1.1.8k' && configSyncRes.appVersion !== 'v1.1.8j' && configSyncRes.appVersion !== 'v1.1.8i' && configSyncRes.appVersion !== 'v1.1.8h' && configSyncRes.appVersion !== 'v1.1.8g' && configSyncRes.appVersion !== 'v1.1.8f' && configSyncRes.appVersion !== 'v1.1.8e' && configSyncRes.appVersion !== 'v1.1.8d' && configSyncRes.appVersion !== 'v1.1.8b')) {
     throw new Error('syncConfigSheet failed');
   }
 
@@ -113,15 +113,15 @@ async function runTests() {
   const dbServiceJs = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
   const codeJs = fs.readFileSync('App_Script/Code.js', 'utf8');
 
-  // Verify APP_CONFIG.VERSION is v1.1.8j, v1.1.8i, v1.1.8h, v1.1.8g, v1.1.8f, v1.1.8e, or v1.1.8d
-  if (!configJs.includes('VERSION: "v1.1.8j"') && !configJs.includes('VERSION: "v1.1.8i"') && !configJs.includes('VERSION: "v1.1.8h"') && !configJs.includes('VERSION: "v1.1.8g"') && !configJs.includes('VERSION: "v1.1.8f"') && !configJs.includes('VERSION: "v1.1.8e"') && !configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
-    throw new Error('APP_CONFIG.VERSION must be v1.1.8j in Config.js');
+  // Verify APP_CONFIG.VERSION is v1.1.8k, v1.1.8j, v1.1.8i, v1.1.8h, v1.1.8g, v1.1.8f, v1.1.8e, or v1.1.8d
+  if (!configJs.includes('VERSION: "v1.1.8k"') && !configJs.includes('VERSION: "v1.1.8j"') && !configJs.includes('VERSION: "v1.1.8i"') && !configJs.includes('VERSION: "v1.1.8h"') && !configJs.includes('VERSION: "v1.1.8g"') && !configJs.includes('VERSION: "v1.1.8f"') && !configJs.includes('VERSION: "v1.1.8e"') && !configJs.includes('VERSION: "v1.1.8d"') && !configJs.includes('VERSION: "v1.1.8b"')) {
+    throw new Error('APP_CONFIG.VERSION must be v1.1.8k in Config.js');
   }
-  if (!codeJs.includes('v1.1.8j') && !codeJs.includes('v1.1.8i') && !codeJs.includes('v1.1.8h') && !codeJs.includes('v1.1.8g') && !codeJs.includes('v1.1.8f') && !codeJs.includes('v1.1.8e') && !codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8j in Code.js');
+  if (!codeJs.includes('v1.1.8k') && !codeJs.includes('v1.1.8j') && !codeJs.includes('v1.1.8i') && !codeJs.includes('v1.1.8h') && !codeJs.includes('v1.1.8g') && !codeJs.includes('v1.1.8f') && !codeJs.includes('v1.1.8e') && !codeJs.includes('v1.1.8d') && !codeJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8k in Code.js');
   }
-  if (!dbServiceJs.includes('v1.1.8j') && !dbServiceJs.includes('v1.1.8i') && !dbServiceJs.includes('v1.1.8h') && !dbServiceJs.includes('v1.1.8g') && !dbServiceJs.includes('v1.1.8f') && !dbServiceJs.includes('v1.1.8e') && !dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
-    throw new Error('Version must be v1.1.8j in DatabaseService.js');
+  if (!dbServiceJs.includes('v1.1.8k') && !dbServiceJs.includes('v1.1.8j') && !dbServiceJs.includes('v1.1.8i') && !dbServiceJs.includes('v1.1.8h') && !dbServiceJs.includes('v1.1.8g') && !dbServiceJs.includes('v1.1.8f') && !dbServiceJs.includes('v1.1.8e') && !dbServiceJs.includes('v1.1.8d') && !dbServiceJs.includes('v1.1.8b')) {
+    throw new Error('Version must be v1.1.8k in DatabaseService.js');
   }
   console.log('  Verified: APP_CONFIG.VERSION is verified in Config.js, Code.js, DatabaseService.js.');
 
@@ -1003,8 +1003,8 @@ async function runTests() {
   if (!modalCtrlV118d.includes('AppState.getVersion()') || !modalCtrlV118d.includes('applyGlobalVersion')) {
     throw new Error('ModalController.html triggerSyncConfigSheet must dynamically query and apply version');
   }
-  if (!configV118d.includes('VERSION: "v1.1.8j"') && !configV118d.includes('VERSION: "v1.1.8i"') && !configV118d.includes('VERSION: "v1.1.8h"') && !configV118d.includes('VERSION: "v1.1.8g"') && !configV118d.includes('VERSION: "v1.1.8f"') && !configV118d.includes('VERSION: "v1.1.8e"') && !configV118d.includes('VERSION: "v1.1.8d"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8j or previous');
+  if (!configV118d.includes('VERSION: "v1.1.8k"') && !configV118d.includes('VERSION: "v1.1.8j"') && !configV118d.includes('VERSION: "v1.1.8i"') && !configV118d.includes('VERSION: "v1.1.8h"') && !configV118d.includes('VERSION: "v1.1.8g"') && !configV118d.includes('VERSION: "v1.1.8f"') && !configV118d.includes('VERSION: "v1.1.8e"') && !configV118d.includes('VERSION: "v1.1.8d"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8k or previous');
   }
   console.log('  Verified: Globalized versioning engine active; UI elements dynamically bind to Config sheet APP_VERSION.');
 
@@ -1156,9 +1156,9 @@ async function runTests() {
   const apiClientV118h = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
   const dbServiceV118h = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
 
-  // 1. Version v1.1.8h/i/j in Config.js
-  if (!configV118h.includes('VERSION: "v1.1.8j"') && !configV118h.includes('VERSION: "v1.1.8i"') && !configV118h.includes('VERSION: "v1.1.8h"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8j, v1.1.8i or v1.1.8h');
+  // 1. Version v1.1.8h/i/j/k in Config.js
+  if (!configV118h.includes('VERSION: "v1.1.8k"') && !configV118h.includes('VERSION: "v1.1.8j"') && !configV118h.includes('VERSION: "v1.1.8i"') && !configV118h.includes('VERSION: "v1.1.8h"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8k, v1.1.8j, v1.1.8i or v1.1.8h');
   }
   console.log('  Verified: Config.js APP_CONFIG.VERSION is verified.');
 
@@ -1177,7 +1177,7 @@ async function runTests() {
   console.log('  Verified: DatabaseService.js ensures getInitialPayload() provides authoritative version.');
 
   // 4. AppState.html Rejects Legacy 1.1.7* Downgrades
-  if ((!appStateV118h.includes('CURRENT_RELEASE = "v1.1.8j"') && !appStateV118h.includes('CURRENT_RELEASE = "v1.1.8i"') && !appStateV118h.includes('CURRENT_RELEASE = "v1.1.8h"')) ||
+  if ((!appStateV118h.includes('CURRENT_RELEASE = "v1.1.8k"') && !appStateV118h.includes('CURRENT_RELEASE = "v1.1.8j"') && !appStateV118h.includes('CURRENT_RELEASE = "v1.1.8i"') && !appStateV118h.includes('CURRENT_RELEASE = "v1.1.8h"')) ||
       !appStateV118h.includes('cfgVer.indexOf("1.1.7") === -1')) {
     throw new Error('AppState.html getVersion() must guard against obsolete 1.1.7* downgrades');
   }
@@ -1211,21 +1211,21 @@ async function runTests() {
   const appStateV118i = fs.readFileSync('App_Script/AppState.html', 'utf8');
   const modalCtrlV118i = fs.readFileSync('App_Script/ModalController.html', 'utf8');
 
-  // 1. Version v1.1.8i/j Alignment
-  if (!configV118i.includes('VERSION: "v1.1.8j"') && !configV118i.includes('VERSION: "v1.1.8i"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8j or v1.1.8i');
+  // 1. Version v1.1.8i/j/k Alignment
+  if (!configV118i.includes('VERSION: "v1.1.8k"') && !configV118i.includes('VERSION: "v1.1.8j"') && !configV118i.includes('VERSION: "v1.1.8i"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8k, v1.1.8j or v1.1.8i');
   }
-  if (!appStateV118i.includes('CURRENT_RELEASE = "v1.1.8j"') && !appStateV118i.includes('CURRENT_RELEASE = "v1.1.8i"')) {
-    throw new Error('AppState.html CURRENT_RELEASE must be v1.1.8j or v1.1.8i');
+  if (!appStateV118i.includes('CURRENT_RELEASE = "v1.1.8k"') && !appStateV118i.includes('CURRENT_RELEASE = "v1.1.8j"') && !appStateV118i.includes('CURRENT_RELEASE = "v1.1.8i"')) {
+    throw new Error('AppState.html CURRENT_RELEASE must be v1.1.8k, v1.1.8j or v1.1.8i');
   }
-  if (!apiClientV118i.includes('MUIDS_ASSET_CACHE_v1.1.8j') && !apiClientV118i.includes('MUIDS_ASSET_CACHE_v1.1.8i')) {
-    throw new Error('ApiClient.html must use MUIDS_ASSET_CACHE_v1.1.8j or v1.1.8i');
+  if (!apiClientV118i.includes('MUIDS_ASSET_CACHE_v1.1.8k') && !apiClientV118i.includes('MUIDS_ASSET_CACHE_v1.1.8j') && !apiClientV118i.includes('MUIDS_ASSET_CACHE_v1.1.8i')) {
+    throw new Error('ApiClient.html must use MUIDS_ASSET_CACHE_v1.1.8k, v1.1.8j or v1.1.8i');
   }
   console.log('  Verified: All modules aligned to semantic release.');
 
   // 2. AuthService Flexible Role RBAC & SuperAdmin Guarantee
-  if (!authServiceV118i.includes('AUTHORIZED_USERS_CACHE_v1.1.8j') && !authServiceV118i.includes('AUTHORIZED_USERS_CACHE_v1.1.8i')) {
-    throw new Error('AuthService.js must use cache key AUTHORIZED_USERS_CACHE_v1.1.8j or v1.1.8i');
+  if (!authServiceV118i.includes('AUTHORIZED_USERS_CACHE_v1.1.8k') && !authServiceV118i.includes('AUTHORIZED_USERS_CACHE_v1.1.8j') && !authServiceV118i.includes('AUTHORIZED_USERS_CACHE_v1.1.8i')) {
+    throw new Error('AuthService.js must use cache key AUTHORIZED_USERS_CACHE_v1.1.8k, v1.1.8j or v1.1.8i');
   }
   if (!authServiceV118i.includes('normalizedRole.indexOf("admin") !== -1') ||
       !authServiceV118i.includes('normalizedRole.indexOf("tech") !== -1') ||
@@ -1274,15 +1274,15 @@ async function runTests() {
   const configV118j = fs.readFileSync('App_Script/Config.js', 'utf8');
   const appStateV118j = fs.readFileSync('App_Script/AppState.html', 'utf8');
 
-  // 1. Semantic Version Alignment v1.1.8j
-  if (!configV118j.includes('VERSION: "v1.1.8j"')) {
-    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8j');
+  // 1. Semantic Version Alignment v1.1.8j/k
+  if (!configV118j.includes('VERSION: "v1.1.8k"') && !configV118j.includes('VERSION: "v1.1.8j"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8j or v1.1.8k');
   }
-  if (!appStateV118j.includes('CURRENT_RELEASE = "v1.1.8j"')) {
-    throw new Error('AppState.html CURRENT_RELEASE must be v1.1.8j');
+  if (!appStateV118j.includes('CURRENT_RELEASE = "v1.1.8k"') && !appStateV118j.includes('CURRENT_RELEASE = "v1.1.8j"')) {
+    throw new Error('AppState.html CURRENT_RELEASE must be v1.1.8j or v1.1.8k');
   }
-  if (!apiClientV118j.includes('MUIDS_ASSET_CACHE_v1.1.8j')) {
-    throw new Error('ApiClient.html must use MUIDS_ASSET_CACHE_v1.1.8j');
+  if (!apiClientV118j.includes('MUIDS_ASSET_CACHE_v1.1.8k') && !apiClientV118j.includes('MUIDS_ASSET_CACHE_v1.1.8j')) {
+    throw new Error('ApiClient.html must use MUIDS_ASSET_CACHE_v1.1.8j or v1.1.8k');
   }
   console.log('  Verified: All modules cleanly bumped to v1.1.8j.');
 
@@ -1332,10 +1332,70 @@ async function runTests() {
       !dbServiceV118j.includes('normRowId')) {
     throw new Error('DatabaseService.js must implement lazy lookup and normalized asset ID matching');
   }
-  console.log('  Verified: DatabaseService.js optimizes mutation latency via lazy lookup and resilient ID normalization.');
+  // ==========================================
+  // SUITE 46: v1.1.8k Live Save Pipeline & Sync Audit Hardening
+  // ==========================================
+  console.log('\n--- Running Suite 46: v1.1.8k Live Save Pipeline & Sync Audit Hardening ---');
+  const auditCtrlV118k = fs.readFileSync('App_Script/AuditController.html', 'utf8');
+  const apiClientV118k = fs.readFileSync('App_Script/ApiClient.html', 'utf8');
+  const dbServiceV118k = fs.readFileSync('App_Script/DatabaseService.js', 'utf8');
+  const configV118k = fs.readFileSync('App_Script/Config.js', 'utf8');
+  const appStateV118k = fs.readFileSync('App_Script/AppState.html', 'utf8');
+  const authServiceV118k = fs.readFileSync('App_Script/AuthService.js', 'utf8');
+
+  // 1. Semantic Version Alignment v1.1.8k
+  if (!configV118k.includes('VERSION: "v1.1.8k"')) {
+    throw new Error('Config.js must define APP_CONFIG.VERSION as v1.1.8k');
+  }
+  if (!appStateV118k.includes('CURRENT_RELEASE = "v1.1.8k"')) {
+    throw new Error('AppState.html CURRENT_RELEASE must be v1.1.8k');
+  }
+  if (!apiClientV118k.includes('MUIDS_ASSET_CACHE_v1.1.8k')) {
+    throw new Error('ApiClient.html must use MUIDS_ASSET_CACHE_v1.1.8k');
+  }
+  if (!authServiceV118k.includes('AUTHORIZED_USERS_CACHE_v1.1.8k')) {
+    throw new Error('AuthService.js must use AUTHORIZED_USERS_CACHE_v1.1.8k');
+  }
+  console.log('  Verified: All core modules cleanly bumped to v1.1.8k.');
+
+  // 2. ApiClient Live Mode Everywhere & Anti-Ghost Mutation Protection
+  if (!apiClientV118k.includes('window.location.search.indexOf("mock=1") === -1') ||
+      apiClientV118k.includes('window.location.hostname !== "localhost"')) {
+    throw new Error('ApiClient.html isRemoteLiveMode must be enabled across all hosts unless ?mock=1 is present');
+  }
+  if (!apiClientV118k.includes('Mutations MUST NEVER silently mock-succeed') ||
+      !apiClientV118k.includes('action === "updateAssetStatus" || action === "addNewUnlistedAsset"')) {
+    throw new Error('ApiClient.html must prevent mutations from mock-succeeding when network bridges fail');
+  }
+  console.log('  Verified: Live mode active by default across all hosts; ghost mock mutations prohibited.');
+
+  // 3. Status String Normalization (+ vs space) in DatabaseService.js
+  if (!dbServiceV118k.includes('opt.replace(/[\\s\\+]/g, \'') ||
+      !dbServiceV118k.includes('newStatus.replace(/[\\s\\+]/g, \'')) {
+    throw new Error('DatabaseService.js updateAssetStatus must normalize status strings removing spaces and plus signs');
+  }
+  if (!dbServiceV118k.includes('getRoomAuditSummary(currentRoom || targetSheetName || "ALL")')) {
+    throw new Error('DatabaseService.js must respect currentRoom when returning roomSummary in updateAssetStatus');
+  }
+  console.log('  Verified: DatabaseService.js tolerates URL-decoded spaces in place of + and respects currentRoom.');
+
+  // 4. AuditController Toast Sequencing & Room Summary Integrity
+  if (!auditCtrlV118k.includes('กำลังบันทึก') ||
+      !auditCtrlV118k.includes('บันทึกสำเร็จ:') ||
+      !auditCtrlV118k.includes('res.roomSummary.roomName === activeRoom')) {
+    throw new Error('AuditController.html must show in-flight toast, confirmed success toast, and guard roomSummary integrity');
+  }
+  console.log('  Verified: AuditController.html provides accurate in-flight feedback and preserves room checklist integrity.');
+
+  // 5. AuthService Variable Safety
+  if (!authServiceV118k.includes('var role = "Auditor";') ||
+      !authServiceV118k.includes('var isTALT = false;')) {
+    throw new Error('AuthService.js must safely declare role and isTALT in fallback branch');
+  }
+  console.log('  Verified: AuthService.js fallback resolution declares all local variables safely.');
 
   console.log('\n======================================================');
-  console.log('✅ ALL 45 TEST SUITES PASSED FOR v1.1.8j RELEASE AUDIT VERIFICATION!');
+  console.log('✅ ALL 46 TEST SUITES PASSED FOR v1.1.8k RELEASE AUDIT VERIFICATION!');
   console.log('======================================================\n');
 }
 
