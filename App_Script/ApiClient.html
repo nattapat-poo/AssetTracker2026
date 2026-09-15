@@ -1,7 +1,7 @@
 <script>
 /**
  * ApiClient.html — RPC Bridge & Offline Mock Simulation Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8h)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -112,11 +112,11 @@ window.ApiClient = (function() {
   // All assets dynamically fetched from the live online Google Sheets database.
   var INITIAL_LAB_ASSETS = [];
 
-  // Persistent Local Storage of REAL Assets (v1.1.8g)
+  // Persistent Local Storage of REAL Assets (v1.1.8h)
   var MOCK_ASSETS = (function() {
     try {
       if (typeof localStorage !== "undefined") {
-        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8f");
+        var cached = localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8h") || localStorage.getItem("MUIDS_ASSET_CACHE_v1.1.8g");
         if (cached) {
           var parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,7 +132,7 @@ window.ApiClient = (function() {
         var data = assetsToCache || MOCK_ASSETS;
         if (Array.isArray(data) && data.length > 0) {
           MOCK_ASSETS = data;
-          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8g", JSON.stringify(data));
+          localStorage.setItem("MUIDS_ASSET_CACHE_v1.1.8h", JSON.stringify(data));
         }
       }
     } catch (e) {}
@@ -276,7 +276,7 @@ window.ApiClient = (function() {
         },
         config: {
           APP_TITLE: "QR Asset Survey",
-          APP_VERSION: "v1.1.8f",
+          APP_VERSION: "v1.1.8h",
           AUDIT_YEAR: 2026,
           SECRET_DEVELOPER_PIN: "2026",
           AUTO_RESUME_SCANNER: true,
@@ -468,7 +468,7 @@ window.ApiClient = (function() {
     }
 
     if (action === "syncConfigSheet") {
-      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8f";
+      var syncVer = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8h";
       return {
         success: true,
         message: "Config sheet synchronized (" + syncVer + "). Local mock simulation mode.",

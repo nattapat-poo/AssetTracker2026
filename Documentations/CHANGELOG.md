@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the Lab Oops OS Versioning Standard (`v[Gen].[Feature].[Minor][ui]`).
 
+## [1.1.8h] - 2026-09-16
+
+### Added & Improved
+- **RCA & Permanent Fix for Version Blinking / Downgrading (`Config.js`, `DatabaseService.js`, `AppState.html`)**:
+  - **Root Cause Identified**: The active Google Spreadsheet's `Config` worksheet tab had a legacy cell value `APP_VERSION = "1.1.7f"`. When `getInitialPayload()` loaded data, it returned this stale sheet value to the client, which triggered `AppState.applyGlobalVersion("1.1.7f")` and overrode the UI. In addition, mock and fallback values in `ApiClient.html` still contained `1.1.8f`, causing "ล้างหมดจด" to temporarily display `1.1.8f` before re-fetching `1.1.7f`.
+  - **Auto-Sync Version Engine in `Config.js` (`getLocalConfig()`)**: `getLocalConfig()` now detects if the sheet's `APP_VERSION` differs from `APP_CONFIG.VERSION` (`v1.1.8h`). If stale, it immediately updates the Google Sheet `Config` tab cell and returns `v1.1.8h`, permanently healing old sheet values.
+  - **Payload Version Enforcement (`DatabaseService.js`)**: `getInitialPayload()` strictly enforces `config.APP_VERSION = APP_CONFIG.VERSION; config.appVersion = APP_CONFIG.VERSION;` to eliminate any chance of stale sheet versions leaking into the payload.
+  - **Client-Side Anti-Downgrade Filter (`AppState.html`)**: `AppState.getVersion()` explicitly ignores obsolete legacy versions (`1.1.7*`, earlier `1.1.8*`) from old storage or sheet values, always guaranteeing `v1.1.8h`.
+- **2-Row Header Layout & Zero-Overlap User Badge (`index.html`)**:
+  - **Root Cause of Hidden Box**: On compact mobile screens (360px–430px), placing the user identity badge inside the title column on the same horizontal flex row as the 4 utility buttons caused the right buttons to push the identity badge behind them or clip it.
+  - **Dedicated 2-Row Architecture**:
+    - **Row 1**: Ecosystem Supertitle (`LAB OOPS • MUIDS Science`) + Clean App Title (`🔍 QR Asset Survey`) on the left, and the 4 compact utility buttons (`Stats`, `Filter`, `Full`, `Theme`) on the right.
+    - **Row 2**: Dedicated full-width sub-header status strip:
+      - Left: `<span id="header-version-badge">v1.1.8h • Mobile Audit</span>`
+      - Right: `<div id="header-user-badge">...<span id="header-user-text">Mek (SuperAdmin)</span></div>`
+  - Completely eliminates overlap, clipping, or hidden boxes on all mobile viewports.
+- **Semantic Version Rollout (`v1.1.8h`)**:
+  - Full codebase rollout across all 16 backend & frontend modules, test suites, preview server, and standalone bundles.
+  - Added Test Suite 43 to `Tools/test_core.js` verifying 100% automated coverage (43/43 suites passing).
+
 ## [1.1.8g] - 2026-09-16
 
 ### Added & Improved

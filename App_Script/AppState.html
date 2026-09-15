@@ -1,13 +1,13 @@
 <script>
 /**
  * AppState.html — Reactive Client State Management Store
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8h)
  * MUIDS Lab Oops OS — Science Department
  */
 
 window.AppState = (function() {
-  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8g";
-  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8f";
+  var STORAGE_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8h";
+  var LEGACY_KEY = "MUIDS_ACTIVITY_LOGS_v1.1.8g";
 
   var initialLogs = (function() {
     try {
@@ -84,15 +84,21 @@ window.AppState = (function() {
   }
 
   function getVersion() {
+    var CURRENT_RELEASE = "v1.1.8h";
     if (state.config && state.config.APP_VERSION && String(state.config.APP_VERSION).trim() !== "") {
-      return String(state.config.APP_VERSION).trim();
+      var cfgVer = String(state.config.APP_VERSION).trim();
+      // Ignore obsolete legacy versions (e.g. 1.1.7f or earlier 1.1.8 builds) that might still sit in the Google Sheet
+      if (cfgVer.indexOf("1.1.7") === -1 && cfgVer.indexOf("1.1.8a") === -1 && cfgVer.indexOf("1.1.8b") === -1 &&
+          cfgVer.indexOf("1.1.8c") === -1 && cfgVer.indexOf("1.1.8d") === -1 && cfgVer.indexOf("1.1.8e") === -1 &&
+          cfgVer.indexOf("1.1.8f") === -1 && cfgVer.indexOf("1.1.8g") === -1) {
+        return cfgVer.indexOf("v") === 0 ? cfgVer : ("v" + cfgVer);
+      }
     }
-    return "v1.1.8g";
+    return CURRENT_RELEASE;
   }
 
   function applyGlobalVersion(ver) {
-    if (!ver) ver = getVersion();
-    var displayVer = ver.indexOf("v") === 0 ? ver : ("v" + ver);
+    var displayVer = getVersion();
     
     // Update all elements carrying version class or specific IDs across the entire DOM
     var targets = document.querySelectorAll(".app-version-label, .app-version-badge, #header-version-badge, #footer-version-text, #canvas-version-badge, #dev-modal-version");
@@ -121,11 +127,11 @@ window.AppState = (function() {
 
     if (userBadge) {
       if (user.isVerified) {
-        userBadge.className = "cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition";
-        if (userIcon) userIcon.className = "fa-solid fa-circle-user text-[10px] text-emerald-400";
+        userBadge.className = "cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition text-[10.5px] font-medium max-w-[200px]";
+        if (userIcon) userIcon.className = "fa-solid fa-circle-user text-[11px] text-emerald-400 shrink-0";
       } else {
-        userBadge.className = "cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition";
-        if (userIcon) userIcon.className = "fa-solid fa-triangle-exclamation text-[10px] text-amber-400";
+        userBadge.className = "cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition text-[10.5px] font-medium max-w-[200px]";
+        if (userIcon) userIcon.className = "fa-solid fa-triangle-exclamation text-[11px] text-amber-400 shrink-0";
       }
     }
   }

@@ -1,12 +1,12 @@
 /**
  * Config.js — Application Constants & 3-Tier Cache Snapshot Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8h)
  * Config.js — Architectural Constants, Master Registry & Runtime Settings
  * Lab Oops OS Ecosystem | Mahidol University International Demonstration School
  */
 
 var APP_CONFIG = {
-  VERSION: "v1.1.8g",
+  VERSION: "v1.1.8h",
   ICON: "🔍",
   SUBTITLE: "Mobile Camera QR Scanner & Dynamic Multi-Sheet Router"
 };
@@ -446,9 +446,19 @@ function getLocalConfig() {
       config[key] = parsedVal;
     }
     
-    // Globalized versioning: Ensure config has a valid version, defaulting to APP_CONFIG.VERSION
-    if (!config.APP_VERSION || String(config.APP_VERSION).trim() === "") {
+    // Synchronize version with active codebase release
+    if (config.APP_VERSION !== APP_CONFIG.VERSION) {
       config.APP_VERSION = APP_CONFIG.VERSION;
+      try {
+        if (configSheet && keyIdx !== -1 && valIdx !== -1) {
+          for (var r = 1; r < values.length; r++) {
+            if (String(values[r][keyIdx] || "").trim() === "APP_VERSION") {
+              configSheet.getRange(r + 1, valIdx + 1).setValue(APP_CONFIG.VERSION);
+              break;
+            }
+          }
+        }
+      } catch (e) {}
     }
     
     var defaults = getLocalConfigDefaults();

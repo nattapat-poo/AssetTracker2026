@@ -1,5 +1,30 @@
 # 📝 Developer Engineering Journal (DevLog) — Project 08
 
+## 2026-09-16 — Release v1.1.8h: 2-Row Header Layout & Version Auto-Sync Anti-Downgrade Engine
+* **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
+* **Milestone:** Project 08 release `v1.1.8h`.
+* **Deployment Scope:** Dual release deployed to Google Apps Script (`clasp push --force`, versioned deployment) and Git (`git push origin main`).
+* **Root Cause Analyses & Resolutions**:
+  1. **RCA: Version Number Blinking & Reverting to 1.1.7f / 1.1.8f**:
+     - *Issue Reported*: During loading master sheet data it showed `v1.1.8g`, after completion it turned into `1.1.7f`. After hitting "ล้างหมดจด" it turned into `v1.1.8f` (and after master sheet loaded turned back to `1.1.7f`).
+     - *Root Cause 1 (Google Sheet Config Cell)*: The active Google Spreadsheet's `Config` worksheet tab has a cell `APP_VERSION = "1.1.7f"`. When `DatabaseService.getInitialPayload()` ran, it read `config.APP_VERSION = "1.1.7f"` and returned it to the client. The client called `AppState.applyGlobalVersion("1.1.7f")`, which overwrote the UI.
+     - *Root Cause 2 (ApiClient Mock Fallback)*: In `ApiClient.html` line 279, the mock payload was hardcoded to `APP_VERSION: "v1.1.8f"`. When "ล้างหมดจด" purged storage and was briefly in mock mode, it displayed `1.1.8f`.
+     - *Root Cause 3 (Passive Config Reading)*: In `Config.js`, `getLocalConfig()` only checked `if (!config.APP_VERSION)`, so it never auto-updated an existing stale `1.1.7f` cell.
+     - *Resolution 1 (`Config.js`)*: Added auto-healing logic in `getLocalConfig()`: if `config.APP_VERSION !== APP_CONFIG.VERSION`, it immediately updates the Google Sheet cell with `APP_CONFIG.VERSION` (`v1.1.8h`) and sets `config.APP_VERSION = APP_CONFIG.VERSION`.
+     - *Resolution 2 (`DatabaseService.js`)*: In `getInitialPayload()`, strictly enforced `config.APP_VERSION = APP_CONFIG.VERSION; config.appVersion = APP_CONFIG.VERSION;` to eliminate any chance of stale sheet versions leaking into the payload.
+     - *Resolution 3 (`AppState.html`)*: Updated `AppState.getVersion()` with an anti-downgrade filter that rejects obsolete versions (`1.1.7*`, earlier `1.1.8*`) and falls back to `CURRENT_RELEASE = "v1.1.8h"`.
+  2. **RCA: User Identity Box Hidden / Overlapped Behind Buttons**:
+     - *Issue Reported*: A box was hidden behind the utility buttons on mobile viewports (red arrow in screenshot).
+     - *Root Cause*: The user identity badge was nested inside the left flex column along with the app title on the same horizontal row as the 4 utility buttons. On compact mobile viewports (360px–430px), the 4 utility buttons (taking ~140px) caused the user pill to overflow and get covered or clipped behind the buttons.
+     - *Resolution (`index.html` 2-Row Header Layout)*:
+       - **Row 1**: Dedicated solely to the Ecosystem Supertitle + App Title on the left, and the 4 compact utility buttons on the right.
+       - **Row 2**: A dedicated full-width sub-header status strip below Row 1:
+         - Left: Semantic Version Badge (`v1.1.8h • Mobile Audit`).
+         - Right: User Identity Pill (`[👤 Mek (SuperAdmin)]`) with `max-w-[200px]` and truncate protection.
+       - Zero overlap, zero clipping across all screen sizes.
+* **Automated Verification**:
+  - Added Test Suite 43 to `Tools/test_core.js`. All 43 test suites pass 100%.
+
 ## 2026-09-16 — Release v1.1.8g: Master DB Verification, Auditor Nickname, Header Display & Full Purge Engine
 * **Lead Architect:** Nattapat Poolyam (Mek) (`nattapat.poo@mahidol.ac.th`)
 * **Milestone:** Project 08 release `v1.1.8g`.

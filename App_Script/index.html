@@ -28,17 +28,17 @@
       <i class="fa-solid fa-mobile-screen-button text-xs"></i>
       <span>Mobile Native Simulator</span>
     </span>
-    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8g</span></span>
+    <span id="canvas-version-badge" class="text-slate-500">430px Canvas • <span class="app-version-label">v1.1.8h</span></span>
   </aside>
 
   <!-- Mobile App Native Viewport Root (Unified Native Mobile Shell: max-w-[430px] on desktop, 100% on mobile) -->
   <div id="mobile-app-root" class="w-full max-w-[430px] min-h-screen sm:min-h-[88vh] sm:max-h-[92vh] sm:border-x sm:border-b sm:border-slate-800 sm:rounded-b-2xl sm:shadow-2xl sm:shadow-emerald-950/20 bg-slate-950 flex flex-col relative overflow-x-hidden overflow-y-auto">
 
   <!-- ==================== HEADER (Lab Oops OS Standard) ==================== -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2">
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800/80 px-3 py-2 space-y-1.5">
+    <!-- Row 1: App Title & Header Utility Buttons -->
     <div class="w-full flex items-center justify-between gap-2">
-      
-      <!-- Left: Supertitle, App Title & Version Numbering Underneath (v1.1.8f) -->
+      <!-- Left: Supertitle & Application Title -->
       <div class="flex flex-col min-w-0 flex-1">
         <!-- Mandatory Ecosystem Supertitle (concise, never truncated) -->
         <div class="flex items-center space-x-1 text-[9.5px] font-mono tracking-wider whitespace-nowrap">
@@ -51,15 +51,6 @@
         <h1 class="text-[15px] sm:text-base font-extrabold text-white tracking-tight leading-tight whitespace-nowrap select-none">
           <span>🔍 QR Asset Survey</span>
         </h1>
-
-        <!-- Version numbering & Logged-in User Display under the app title -->
-        <div class="flex items-center gap-1.5 text-[9.5px] font-mono font-bold text-emerald-400 whitespace-nowrap select-none pt-0.5">
-          <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">v1.1.8g</span>
-          <span id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-1.5 py-0.2 rounded-full flex items-center gap-1 transition" title="User Profile & Verification">
-            <i id="header-user-icon" class="fa-solid fa-circle-user text-[9px] text-emerald-400"></i>
-            <span id="header-user-text" class="text-[9px] font-semibold text-slate-200">Mek (SuperAdmin)</span>
-          </span>
-        </div>
       </div>
 
       <!-- Header Right Utilities (compact w-8 h-8 buttons with gap-1) -->
@@ -84,7 +75,20 @@
           <i id="theme-toggle-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
         </button>
       </div>
+    </div>
 
+    <!-- Row 2: Sub-Header Status Strip (Dedicated Version & Full-Width User Display) -->
+    <div class="w-full flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60 select-none">
+      <!-- Left: Semantic Version Badge -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span id="header-version-badge" class="app-version-badge bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">v1.1.8h • Mobile Audit</span>
+      </div>
+
+      <!-- Right: Active Logged-in User Identity Pill (Never hidden or clipped) -->
+      <div id="header-user-badge" onclick="ModalController.openUserProfileModal()" class="cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 transition text-[10.5px] font-medium max-w-[200px]" title="User Profile & Verification">
+        <i id="header-user-icon" class="fa-solid fa-circle-user text-[11px] text-emerald-400 shrink-0"></i>
+        <span id="header-user-text" class="font-bold text-slate-100 truncate">Mek (SuperAdmin)</span>
+      </div>
     </div>
   </header>
 
@@ -679,7 +683,7 @@
             <i class="fa-solid fa-screwdriver-wrench text-amber-400"></i>
             <span>System &amp; Sync Utilities</span>
           </h4>
-          <span class="text-[10px] text-slate-500 font-mono app-version-label">v1.1.8g</span>
+          <span class="text-[10px] text-slate-500 font-mono app-version-label">v1.1.8h</span>
         </div>
 
         <!-- Total Flush & Complete Purge Action Banner -->
@@ -727,7 +731,7 @@
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
           <span class="text-emerald-400 font-bold tracking-wide text-sm">QR Asset Survey</span>
-          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8g</span>
+          <span id="footer-version-text" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full app-version-badge">v1.1.8h</span>
         </div>
         <p class="text-slate-400 text-[11px]">
           <span class="text-slate-300 font-semibold">Lab Oops OS Ecosystem</span> • 
@@ -920,7 +924,7 @@
 
       <div class="text-xs space-y-3 text-slate-300 overflow-y-auto flex-1 pr-1 font-mono">
         <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8f</span></div>
+          <div><strong class="text-emerald-400">Active Version:</strong> <span id="dev-modal-version" class="app-version-label font-bold text-white">v1.1.8h</span></div>
           <div><strong class="text-emerald-400">Ecosystem Lead:</strong> Nattapat Poolyam (Mek)</div>
           <div><strong class="text-emerald-400">Timezone:</strong> Asia/Bangkok (GMT+7)</div>
           <div><strong class="text-emerald-400">Environment:</strong> <span id="dev-env-status">Detecting...</span></div>

@@ -1,7 +1,7 @@
 <script>
 /**
  * ModalController.html — Dialog, Drawer & UI Interactivity Layer
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8h)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -560,7 +560,7 @@ window.ModalController = (function() {
   }
 
   function triggerSyncConfigSheet() {
-    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8g";
+    var ver = (window.AppState && typeof window.AppState.getVersion === "function") ? window.AppState.getVersion() : "v1.1.8h";
     showToast("Synchronizing Config sheet tab (" + ver + ")...", "info");
     ApiClient.syncConfigSheet()
       .then(function(res) {

@@ -1,6 +1,6 @@
 /**
  * DatabaseService.js — Multi-Sheet Asset Data Access Object (DAO) Engine
- * Project 08: QR-Based Mobile Asset Survey App (v1.1.8g)
+ * Project 08: QR-Based Mobile Asset Survey App (v1.1.8h)
  * MUIDS Lab Oops OS — Science Department
  */
 
@@ -1373,6 +1373,10 @@ function getInitialPayload() {
   var ss = getSpreadsheet();
   var authUser = authenticateSession();
   var config = getLocalConfig();
+  if (typeof APP_CONFIG !== "undefined" && APP_CONFIG.VERSION) {
+    config.APP_VERSION = APP_CONFIG.VERSION;
+    config.appVersion = APP_CONFIG.VERSION;
+  }
   var roomSheets = ss ? getRoomSheets(ss) : [];
   var rooms = roomSheets.map(function(r) { return r.name; });
   if (!rooms || rooms.length === 0) {
